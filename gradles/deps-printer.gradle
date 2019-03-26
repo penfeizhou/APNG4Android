@@ -1,0 +1,90 @@
+/** 导出所有依赖包*/
+gradle.addListener new BuildListener() {
+    @Override
+    void buildStarted(Gradle gradle) {
+
+    }
+
+    @Override
+    void settingsEvaluated(Settings settings) {
+
+    }
+
+    @Override
+    void projectsLoaded(Gradle gradle) {
+
+    }
+
+    @Override
+    void projectsEvaluated(Gradle gradle) {
+    }
+
+    @Override
+    void buildFinished(BuildResult result) {
+        if (result.failure == null) {
+            println "输出依赖项开始"
+            Configuration configuration = project.configurations.debugCompileClasspath //innerDebugAndroidTestCompileClasspath
+//            configuration.canBeResolved = true
+            ResolutionResult resolutionResult = configuration.incoming.resolutionResult
+            new File(project.rootDir, 'deps.txt').delete()
+            File depsFile = new File(project.rootDir, 'deps.txt')
+            def tmpList = []
+            resolutionResult.allComponents.sort().each {
+                tmpList += it.toString()
+            }
+            tmpList.sort()
+            tmpList.each {
+                depsFile << "${it}\n\n"
+            }
+            println "输出依赖项结束"
+        }
+    }
+}
+/** 输出最全依赖关系树*/
+task printDependencyList(type: DependencyGraphWalk)
+
+class DependencyGraphWalk extends DefaultTask {
+
+    def outFile = new File(project.rootDir, 'depsTree.txt')
+
+    @TaskAction
+    void walk() {
+        if (outFile.exists()) {
+            outFile.delete()
+            outFile.createNewFile()
+        }
+        Configuration configuration = project.configurations.debugCompileClasspath //innerDebugAndroidTestCompileClasspath
+        configuration.canBeResolved = true
+        configuration.incoming.afterResolve {
+            logger.quiet 'afterResolve'
+        }
+        ResolutionResult resolutionResult = configuration.incoming.resolutionResult
+        ResolvedComponentResult root = resolutionResult.root
+        traverseDependencies(0, root.dependencies)
+        logger.quiet 'walk out'
+    }
+
+    private void traverseDependencies(int level, Set<? extends DependencyResult> results) {
+        for (DependencyResult result : results) {
+            if (result instanceof ResolvedDependencyResult) {
+                ResolvedComponentResult componentResult = result.selected
+                ComponentIdentifier componentIdentifier = componentResult.id
+                String node = calculateIndentation(level, componentResult.dependencies.size() > 0) + "$componentIdentifier.displayName ($componentResult.selectionReason)"
+                logger.quiet node
+                outFile << node + '\n\n'
+                if (!componentIdentifier.displayName.startsWith("com.android.support")) {
+                    traverseDependencies(level + 1, componentResult.dependencies)
+                }
+            } else if (result instanceof UnresolvedDependencyResult) {
+                ComponentSelector componentSelector = result.attempted
+                String node = calculateIndentation(level) + "$componentSelector.displayName (failed)"
+                logger.quiet node
+                outFile << node + '\n\n'
+            }
+        }
+    }
+
+    private static String calculateIndentation(int level, boolean haveDeps) {
+        return '|   ' * (level > 0 ? (level - 1) : 0) + (haveDeps ? "+---" : "|   ")
+    }
+}

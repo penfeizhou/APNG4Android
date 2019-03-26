@@ -1,0 +1,56 @@
+/** 导入本地模块*/
+
+def localModuleFile = new File(rootDir, "module.local")
+def externalDeps = [:]
+def externalDepModule = []
+
+if (!hasProperty('project')) {
+    if (localModuleFile.exists()) {
+        println "开始读取本地模块列表"
+        localModuleFile.each {
+            if ("" == it || it.startsWith("//") || it.startsWith("#")) {
+                // skip
+            } else {
+                String[] names = it.split("=>").collect { it.trim() }
+                if (names.length >= 2) {
+                    String moduleName = names[0]
+                    String path = names[1]
+                    println "找到模块:$moduleName,路径:$path"
+                    String projectName = path.find("[\\w]*\$")
+                    println "projectName:$projectName"
+                    include ":${projectName}"
+                    project(":${projectName}").projectDir = new File(path)
+                }
+            }
+        }
+    }
+} else {
+    if (localModuleFile.exists()) {
+        localModuleFile.each {
+            if ("" == it || it.startsWith("//") || it.startsWith("#")) {
+                // skip
+            } else {
+                String[] names = it.split("=>").collect { it.trim() }
+                if (names.length >= 2) {
+                    String moduleName = names[0]
+                    String path = names[1]
+                    String projectName = path.find("[\\w]*\$")
+                    externalDeps.put(moduleName, projectName)
+                    externalDepModule.add(moduleName)
+                }
+            }
+        }
+    }
+    allprojects {
+        configurations.all {
+            resolutionStrategy {
+                dependencySubstitution {
+                    externalDeps.each {
+                        println "${it.key} 替换为本地项目"
+                        substitute module(it.key) with project(":${it.value}")
+                    }
+                }
+            }
+        }
+    }
+}
