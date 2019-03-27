@@ -82,6 +82,9 @@ public class ChainInputStream extends InputStream {
             }
         } else {
             curOffset += r;
+            if (r < len) {
+                return r + read(b, off + r, len - r);
+            }
             return r;
         }
     }

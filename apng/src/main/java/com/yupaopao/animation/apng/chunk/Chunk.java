@@ -49,6 +49,7 @@ class Chunk {
                 break;
             case PLTEChunk.ID:
                 chunk = new PLTEChunk();
+                break;
             case IDATChunk.ID:
                 chunk = new IDATChunk();
                 break;
@@ -129,5 +130,68 @@ class Chunk {
                 (b[2] & 0xFF) << 8 |
                 (b[1] & 0xFF) << 16 |
                 (b[0] & 0xFF) << 24;
+    }
+
+    int getRawDataLength() {
+        return length + 12;
+    }
+
+    int peekData(int i) {
+        return data[i];
+    }
+
+    InputStream toInputStream() {
+        return new ChunkInputStream(this);
+    }
+
+    void copy(byte[] dst, int offset) {
+        copyLength(dst, offset);
+        offset += 4;
+        copyTypeCode(dst, offset);
+        offset += 4;
+        if (data != null && data.length > 0) {
+            copyData(dst, offset);
+            offset += length;
+        }
+        copyCrc(dst, offset);
+    }
+
+    void copyLength(byte[] dst, int offset) {
+        dst[offset] = readIntByByte(length, 0);
+        dst[offset + 1] = readIntByByte(length, 1);
+        dst[offset + 2] = readIntByByte(length, 2);
+        dst[offset + 3] = readIntByByte(length, 3);
+    }
+
+    void copyTypeCode(byte[] dst, int offset) {
+        byte[] typeCodeBytes = typeCode.getBytes();
+        dst[offset] = typeCodeBytes[0];
+        dst[offset + 1] = typeCodeBytes[1];
+        dst[offset + 2] = typeCodeBytes[2];
+        dst[offset + 3] = typeCodeBytes[3];
+    }
+
+    void copyData(byte[] dst, int offset) {
+        System.arraycopy(data, 0, dst, offset, length);
+    }
+
+    void copyCrc(byte[] dst, int offset) {
+        dst[offset] = readIntByByte(crc, 0);
+        dst[offset + 1] = readIntByByte(crc, 1);
+        dst[offset + 2] = readIntByByte(crc, 2);
+        dst[offset + 3] = readIntByByte(crc, 3);
+    }
+
+
+    private byte readIntByByte(int val, int index) {
+        if (index == 0) {
+            return (byte) ((val >> 24) & 0xff);
+        } else if (index == 1) {
+            return (byte) ((val >> 16) & 0xff);
+        } else if (index == 2) {
+            return (byte) ((val >> 8) & 0xff);
+        } else {
+            return (byte) (val & 0xff);
+        }
     }
 }
