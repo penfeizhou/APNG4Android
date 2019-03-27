@@ -70,20 +70,24 @@ public class ChainInputStream extends InputStream {
 
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
+        return readInline(b, off, len);
+    }
+
+    private int readInline(byte[] b, int off, int len) throws IOException {
         InputStream s = streams[curs];
         int r = s.read(b, off, len);
         if (r < 0) {
             if (curs < streams.length - 1) {
                 curs++;
                 curOffset = 0;
-                return read(b, off, len);
+                return readInline(b, off, len);
             } else {
                 return r;
             }
         } else {
             curOffset += r;
             if (r < len) {
-                return r + read(b, off + r, len - r);
+                return r + readInline(b, off + r, len - r);
             }
             return r;
         }

@@ -39,17 +39,20 @@ class ChunkInputStream extends InputStream {
 
     @Override
     public int read() throws IOException {
+        int ret;
         if (curOffset >= 0 && curOffset <= 3) {
-            return readIntByByte(mChunk.length, curOffset++);
+            ret = readIntByByte(mChunk.length, curOffset);
         } else if (curOffset >= 4 && curOffset <= 7) {
-            return mChunk.typeCode.getBytes()[curOffset++ - 4];
+            ret = mChunk.typeCode.getBytes()[curOffset - 4];
         } else if (curOffset >= mChunk.getRawDataLength()) {
             return -1;
         } else if (curOffset >= mChunk.getRawDataLength() - 4) {
-            return readIntByByte(mChunk.crc, curOffset++ + 4 - mChunk.getRawDataLength());
+            ret = readIntByByte(mChunk.crc, curOffset + 4 - mChunk.getRawDataLength());
         } else {
-            return mChunk.peekData(curOffset++ - 8);
+            ret = mChunk.peekData(curOffset - 8);
         }
+        curOffset++;
+        return ret;
     }
 
     private int readIntByByte(int val, int index) {
@@ -66,7 +69,43 @@ class ChunkInputStream extends InputStream {
 
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
-        return super.read(b, off, len);
+        if (b == null) {
+            throw new NullPointerException();
+        } else if (off < 0 || len < 0 || len > b.length - off) {
+            throw new IndexOutOfBoundsException();
+        } else if (len == 0) {
+            return 0;
+        }
+        if (mChunk.getRawDataLength() <= curOffset) {
+            return -1;
+        }
+        int left = len;
+        if (curOffset < 8) {
+            int consumed = Math.min(8 - curOffset, left);
+            for (int i = 0; i < consumed; i++) {
+                b[off + i] = (byte) read();
+            }
+            left -= consumed;
+            off += consumed;
+        }
+        if (left > 0) {
+            int startPos = curOffset - 8;
+            if (mChunk.data != null && mChunk.length > 0 && startPos < mChunk.length) {
+                int consumed = Math.min(mChunk.length - startPos, left);
+                System.arraycopy(mChunk.data, startPos, b, off, consumed);
+                left -= consumed;
+                off += consumed;
+                curOffset += consumed;
+            }
+        }
+        if (left > 0) {
+            int consumed = Math.min(4, left);
+            for (int i = 0; i < consumed; i++) {
+                b[off + i] = (byte) read();
+            }
+            left -= consumed;
+        }
+        return len - left;
     }
 
     @Override
