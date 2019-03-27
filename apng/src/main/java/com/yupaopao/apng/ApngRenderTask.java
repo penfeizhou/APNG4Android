@@ -22,10 +22,10 @@ public class ApngRenderTask implements Runnable {
 
     @Override
     public void run() {
-        int nextFrame = apngDrawable.currentFrame + 1;
+        int nextFrame = apngDrawable.currentFrame;
         if (nextFrame >= apngDecode.frameCount) {
             if (apngDrawable.needRepeat()) {
-                apngDrawable.currentFrame = -1;
+                apngDrawable.currentFrame = 0;
                 nextFrame = 0;
             } else {
                 return;

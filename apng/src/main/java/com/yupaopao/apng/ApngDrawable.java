@@ -30,7 +30,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 public class ApngDrawable extends Drawable implements Animatable {
     public static final String TAG = ApngDrawable.class.getSimpleName();
-    public static final boolean enableDebugLog = false;
+    public static final boolean enableDebugLog = true;
     private static final int INFINITE_LOOP = 0;
 
     protected final Uri sourceUri;
@@ -225,7 +225,7 @@ public class ApngDrawable extends Drawable implements Animatable {
     @Override
     public void draw(Canvas canvas) {
         if (enableDebugLog) {
-//            Log.d(TAG, "draw frame: " + currentFrame);
+            Log.d(TAG, "draw frame: " + currentFrame);
         }
 
         if (currentFrame <= 0) {

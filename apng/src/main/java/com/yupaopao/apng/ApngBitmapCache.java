@@ -17,7 +17,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * 2. 复用Bitmap. 所有使用Bitmap的地方均从bitmap复用池中获取, 不再需要的Bitmap也都放入复用池中。从目前的测试结果来看, 复用池的大小一般在1-2之间变化
  */
 
-public class ApngBitmapCache {
+class ApngBitmapCache {
 
     private final static String TAG = ApngDrawable.TAG + "_cache";
 
