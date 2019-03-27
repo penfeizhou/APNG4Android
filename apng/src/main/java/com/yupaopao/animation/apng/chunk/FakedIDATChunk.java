@@ -1,5 +1,7 @@
 package com.yupaopao.animation.apng.chunk;
 
+import java.util.zip.CRC32;
+
 /**
  * @Description: Transformed from FDATChunk
  * @Author: pengfei.zhou
@@ -7,19 +9,26 @@ package com.yupaopao.animation.apng.chunk;
  */
 class FakedIDATChunk extends IDATChunk {
     FakedIDATChunk(FDATChunk fDatChunk) {
-        this.length = fDatChunk.length - 1;
+        this.length = fDatChunk.length - 4;
         this.typeCode = IDATChunk.ID;
         this.data = fDatChunk.data;
-        this.crc = fDatChunk.crc;
+        checkCRC32();
     }
 
     @Override
     int peekData(int i) {
-        return super.peekData(i + 1);
+        return super.peekData(i + 4);
     }
 
     @Override
     void copyData(byte[] dst, int offset) {
-        System.arraycopy(data, 1, dst, offset, length);
+        System.arraycopy(data, 4, dst, offset, length);
+    }
+
+    private void checkCRC32() {
+        CRC32 crc32 = new CRC32();
+        crc32.update(this.typeCode.getBytes(), 0, 4);
+        crc32.update(this.data, 4, this.length);
+        crc = (int) crc32.getValue();
     }
 }

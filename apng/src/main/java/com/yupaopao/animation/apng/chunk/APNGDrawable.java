@@ -39,7 +39,7 @@ public class APNGDrawable extends Drawable implements Animatable {
             } else {
                 currentBitmap = frame.toBitmap();
             }
-            animationHandler.postDelayed(this, 1000);
+            animationHandler.postDelayed(this, 100);
             uiHandler.post(invalidateRunnable);
         }
     };

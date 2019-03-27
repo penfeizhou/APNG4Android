@@ -61,7 +61,8 @@ class Frame {
 
     public Bitmap toBitmap() {
         if (bitmap == null) {
-            bitmap = BitmapFactory.decodeStream(toInputStream());
+            byte[] bytes = toByteArray();
+            bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
         }
         return bitmap;
     }

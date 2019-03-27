@@ -92,7 +92,8 @@ class ChunkInputStream extends InputStream {
             int startPos = curOffset - 8;
             if (mChunk.data != null && mChunk.length > 0 && startPos < mChunk.length) {
                 int consumed = Math.min(mChunk.length - startPos, left);
-                System.arraycopy(mChunk.data, startPos, b, off, consumed);
+                int dataOffset = mChunk.data.length - mChunk.length;
+                System.arraycopy(mChunk.data, startPos + dataOffset, b, off, consumed);
                 left -= consumed;
                 off += consumed;
                 curOffset += consumed;
