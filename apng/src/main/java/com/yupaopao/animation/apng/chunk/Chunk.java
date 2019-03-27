@@ -19,6 +19,9 @@ class Chunk {
     int crc;
     private static byte[] __intBytes = new byte[4];
 
+    void parse() {
+    }
+
     static Chunk read(InputStream inputStream) {
         Chunk chunk;
         try {
@@ -30,6 +33,7 @@ class Chunk {
             chunk.data = new byte[chunk.length];
             inputStream.read(chunk.data);
             chunk.crc = readIntFromInputStream(inputStream);
+            chunk.parse();
             return chunk;
         } catch (IOException e) {
             e.printStackTrace();
