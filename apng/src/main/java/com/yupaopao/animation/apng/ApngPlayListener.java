@@ -1,4 +1,4 @@
-package com.yupaopao.apng;
+package com.yupaopao.animation.apng;
 
 /**
  * @author jiahongyu

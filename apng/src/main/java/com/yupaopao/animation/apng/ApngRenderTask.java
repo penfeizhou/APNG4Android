@@ -1,4 +1,4 @@
-package com.yupaopao.apng;
+package com.yupaopao.animation.apng;
 
 import android.graphics.Bitmap;
 import android.os.SystemClock;

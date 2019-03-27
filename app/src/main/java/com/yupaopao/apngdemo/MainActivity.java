@@ -5,8 +5,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.yupaopao.apng.ApngImageUtil;
-import com.yupaopao.apng.ApngLoader;
+import com.yupaopao.animation.apng.ApngImageUtil;
+import com.yupaopao.animation.apng.ApngLoader;
 
 public class MainActivity extends AppCompatActivity {
 

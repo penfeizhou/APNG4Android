@@ -1,4 +1,4 @@
-package com.yupaopao.apng;
+package com.yupaopao.animation.apng;
 
 import android.content.Context;
 import android.graphics.Bitmap;
