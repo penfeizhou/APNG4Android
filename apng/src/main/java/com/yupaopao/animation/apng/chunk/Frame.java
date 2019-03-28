@@ -72,9 +72,9 @@ class Frame {
             bitmap = createBitmap();
         }
         if (fctlChunk != null) {
-            srcRect = new Rect(0, 0, fctlChunk.width, fctlChunk.height);
-            dstRect = new Rect(fctlChunk.x_offset, fctlChunk.y_offset,
-                    fctlChunk.x_offset + fctlChunk.width, fctlChunk.y_offset + fctlChunk.height);
+            srcRect = new Rect(0, 0, fctlChunk.width / sampleSize, fctlChunk.height / sampleSize);
+            dstRect = new Rect(fctlChunk.x_offset / sampleSize, fctlChunk.y_offset / sampleSize,
+                    (fctlChunk.x_offset + fctlChunk.width) / sampleSize, (fctlChunk.y_offset + fctlChunk.height) / sampleSize);
             blend_op = fctlChunk.blend_op;
             dispose_op = fctlChunk.dispose_op;
             delay = fctlChunk.delay_num * 1000 / (fctlChunk.delay_den == 0 ? 100 : fctlChunk.delay_den);

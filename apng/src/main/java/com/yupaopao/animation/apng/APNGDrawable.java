@@ -8,13 +8,10 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 
 import com.yupaopao.animation.apng.chunk.APNGDecoder;
-
-import java.io.InputStream;
 
 /**
  * @Description: APNGDrawable
@@ -28,9 +25,9 @@ public class APNGDrawable extends Drawable implements Animatable, APNGDecoder.Re
     private DrawFilter drawFilter = new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
     private Bitmap bitmap;
 
-    public APNGDrawable(final InputStream inputStream) {
+    public APNGDrawable(APNGStreamProvider provider) {
         paint.setAntiAlias(true);
-        apngDecoder = new APNGDecoder(inputStream, this);
+        apngDecoder = new APNGDecoder(provider, this);
     }
 
 

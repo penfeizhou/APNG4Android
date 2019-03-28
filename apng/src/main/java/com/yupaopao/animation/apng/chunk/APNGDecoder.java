@@ -14,9 +14,10 @@ import android.support.annotation.WorkerThread;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.yupaopao.animation.apng.APNGStreamProvider;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class APNGDecoder {
     private final Handler uiHandler;
     private final RenderListener renderListener;
     private boolean running;
-
+    private final APNGStreamProvider APNGStreamProvider;
     private Runnable renderTask = new Runnable() {
         @Override
         public void run() {
@@ -60,21 +61,21 @@ public class APNGDecoder {
         }
     };
     private int sampleSize = 1;
-    private final SoftReference<InputStream> inputStreamSoftReference;
 
-    public APNGDecoder(final InputStream inputStream, RenderListener renderListener) {
+    public APNGDecoder(APNGStreamProvider provider, RenderListener renderListener) {
+        this.APNGStreamProvider = provider;
+        this.renderListener = renderListener;
+        this.uiHandler = new Handler();
+
         HandlerThread handlerThread = new HandlerThread("apng");
         handlerThread.start();
         animationHandler = new Handler(handlerThread.getLooper());
         animationHandler.post(new Runnable() {
             @Override
             public void run() {
-                decode(inputStream);
+                readInputStream();
             }
         });
-        this.uiHandler = new Handler();
-        this.renderListener = renderListener;
-        inputStreamSoftReference = new SoftReference<>(inputStream);
     }
 
     public void start() {
@@ -104,75 +105,75 @@ public class APNGDecoder {
 
     public void setSampleSize(int sampleSize) {
         if (this.sampleSize != sampleSize) {
-            final InputStream inputStream = inputStreamSoftReference.get();
-            if (inputStream == null) {
-                Log.e(TAG, "InputStream has recycled,cannot reset sampleSize.");
-                return;
-            }
-            try {
-                inputStream.reset();
-                this.sampleSize = sampleSize;
-                final boolean tempRunning = running;
-                stop();
-                animationHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        frames.clear();
-                        decode(inputStream);
-                        if (tempRunning) {
-                            start();
-                        }
+            this.sampleSize = sampleSize;
+            final boolean tempRunning = running;
+            stop();
+            animationHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    frames.clear();
+                    readInputStream();
+                    if (tempRunning) {
+                        start();
                     }
-                });
-            } catch (IOException e) {
-                Log.e(TAG, "InputStream reset error,cannot reset sampleSize." + e.getLocalizedMessage());
-            }
+                }
+            });
         }
     }
 
-    private void decode(InputStream inputStream) {
-        byte[] sigBytes = new byte[8];
+    private void readInputStream() {
+        InputStream inputStream = null;
         try {
+            inputStream = APNGStreamProvider.getInputStream();
+            byte[] sigBytes = new byte[8];
             inputStream.read(sigBytes);
             String signature = new String(sigBytes);
             Log.d(TAG, "read png signature:" + signature);
+            Chunk chunk;
+            int lastSeq = -1;
+            List<Chunk> otherChunks = new ArrayList<>();
+            ACTLChunk actlChunk;
+            while ((chunk = Chunk.read(inputStream)) != null) {
+                if (chunk instanceof IENDChunk) {
+                    break;
+                } else if (chunk instanceof ACTLChunk) {
+                    actlChunk = (ACTLChunk) chunk;
+                    this.num_frames = actlChunk.num_frames;
+                    this.num_plays = actlChunk.num_plays;
+                } else if (chunk instanceof FCTLChunk) {
+                    lastSeq++;
+                    Frame frame = new Frame();
+                    frame.otherChunks.addAll(otherChunks);
+                    frame.sampleSize = sampleSize;
+                    frames.put(lastSeq, frame);
+                    frame.sequence_number = lastSeq;
+                    frame.fctlChunk = (FCTLChunk) chunk;
+                } else if (chunk instanceof FDATChunk) {
+                    Frame frame = frames.get(lastSeq);
+                    if (frame != null) {
+                        frame.idatChunks.add(new FakedIDATChunk((FDATChunk) chunk));
+                    }
+                } else if (chunk instanceof IDATChunk) {
+                    Frame frame = frames.get(lastSeq);
+                    if (frame != null) {
+                        frame.idatChunks.add((IDATChunk) chunk);
+                    }
+                } else {
+                    if (chunk instanceof IHDRChunk) {
+                        createCanvas((IHDRChunk) chunk);
+                    }
+                    otherChunks.add(chunk);
+                }
+            }
         } catch (IOException e) {
             e.printStackTrace();
-        }
-        Chunk chunk;
-        int lastSeq = -1;
-        List<Chunk> otherChunks = new ArrayList<>();
-        ACTLChunk actlChunk;
-        while ((chunk = Chunk.read(inputStream)) != null) {
-            if (chunk instanceof IENDChunk) {
-                break;
-            } else if (chunk instanceof ACTLChunk) {
-                actlChunk = (ACTLChunk) chunk;
-                this.num_frames = actlChunk.num_frames;
-                this.num_plays = actlChunk.num_plays;
-            } else if (chunk instanceof FCTLChunk) {
-                lastSeq++;
-                Frame frame = new Frame();
-                frame.otherChunks.addAll(otherChunks);
-                frame.sampleSize = sampleSize;
-                frames.put(lastSeq, frame);
-                frame.sequence_number = lastSeq;
-                frame.fctlChunk = (FCTLChunk) chunk;
-            } else if (chunk instanceof FDATChunk) {
-                Frame frame = frames.get(lastSeq);
-                if (frame != null) {
-                    frame.idatChunks.add(new FakedIDATChunk((FDATChunk) chunk));
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            } else if (chunk instanceof IDATChunk) {
-                Frame frame = frames.get(lastSeq);
-                if (frame != null) {
-                    frame.idatChunks.add((IDATChunk) chunk);
-                }
-            } else {
-                if (chunk instanceof IHDRChunk) {
-                    createCanvas((IHDRChunk) chunk);
-                }
-                otherChunks.add(chunk);
             }
         }
     }

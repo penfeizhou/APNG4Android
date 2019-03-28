@@ -22,23 +22,17 @@ class Chunk {
     void parse() {
     }
 
-    static Chunk read(InputStream inputStream) {
-        Chunk chunk;
-        try {
-            int length = readIntFromInputStream(inputStream);
-            String typeCode = readTypeCodeFromInputStream(inputStream);
-            chunk = newInstance(typeCode);
-            chunk.typeCode = typeCode;
-            chunk.length = length;
-            chunk.data = new byte[chunk.length];
-            inputStream.read(chunk.data);
-            chunk.crc = readIntFromInputStream(inputStream);
-            chunk.parse();
-            return chunk;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+    static Chunk read(InputStream inputStream) throws IOException {
+        int length = readIntFromInputStream(inputStream);
+        String typeCode = readTypeCodeFromInputStream(inputStream);
+        Chunk chunk = newInstance(typeCode);
+        chunk.typeCode = typeCode;
+        chunk.length = length;
+        chunk.data = new byte[chunk.length];
+        inputStream.read(chunk.data);
+        chunk.crc = readIntFromInputStream(inputStream);
+        chunk.parse();
+        return chunk;
     }
 
     private static Chunk newInstance(String typeCode) {

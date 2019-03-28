@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.widget.ImageView;
 
 import com.yupaopao.animation.apng.APNGDrawable;
+import com.yupaopao.animation.apng.APNGStreamProvider;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,13 +17,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         final ImageView imageView = findViewById(R.id.imageView);
-        try {
-            InputStream inputStream = getAssets().open("wheel.png");
-            APNGDrawable apngDrawable = new APNGDrawable(inputStream);
-            imageView.setImageDrawable(apngDrawable);
-            apngDrawable.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        APNGDrawable apngDrawable = new APNGDrawable(new APNGStreamProvider() {
+            @Override
+            public InputStream getInputStream() throws IOException {
+                return getAssets().open("wheel.png");
+            }
+        });
+        imageView.setImageDrawable(apngDrawable);
+        apngDrawable.start();
     }
 }
