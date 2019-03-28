@@ -12,7 +12,10 @@ class FakedIDATChunk extends IDATChunk {
         this.length = fDatChunk.length - 4;
         this.typeCode = IDATChunk.ID;
         this.data = fDatChunk.data;
-        checkCRC32();
+        CRC32 crc32 = new CRC32();
+        crc32.update(this.typeCode.getBytes(), 0, 4);
+        crc32.update(this.data, 4, this.length);
+        crc = (int) crc32.getValue();
     }
 
     @Override
@@ -25,10 +28,4 @@ class FakedIDATChunk extends IDATChunk {
         System.arraycopy(data, 4, dst, offset, length);
     }
 
-    private void checkCRC32() {
-        CRC32 crc32 = new CRC32();
-        crc32.update(this.typeCode.getBytes(), 0, 4);
-        crc32.update(this.data, 4, this.length);
-        crc = (int) crc32.getValue();
-    }
 }

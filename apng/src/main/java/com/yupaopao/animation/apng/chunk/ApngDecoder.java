@@ -45,7 +45,9 @@ public class ApngDecoder {
         }
         Chunk chunk;
         int lastSeq = -1;
+        List<Chunk> chunks = new ArrayList<>();
         while ((chunk = Chunk.read(inputStream)) != null) {
+            chunks.add(chunk);
             if (chunk instanceof IENDChunk) {
                 break;
             } else if (chunk instanceof ACTLChunk) {
@@ -60,12 +62,12 @@ public class ApngDecoder {
             } else if (chunk instanceof FDATChunk) {
                 Frame frame = frames.get(lastSeq);
                 if (frame != null) {
-                    frame.idatChunk = new FakedIDATChunk((FDATChunk) chunk);
+                    frame.idatChunks.add(new FakedIDATChunk((FDATChunk) chunk));
                 }
             } else if (chunk instanceof IDATChunk) {
                 Frame frame = frames.get(lastSeq);
-                if (frame != null && frame.idatChunk == null) {
-                    frame.idatChunk = (IDATChunk) chunk;
+                if (frame != null) {
+                    frame.idatChunks.add((IDATChunk) chunk);
                 }
             } else {
                 if (chunk instanceof IHDRChunk) {
@@ -121,11 +123,11 @@ public class ApngDecoder {
         frame.prepare();
         switch (frame.fctlChunk.dispose_op) {
             case FCTLChunk.APNG_DISPOSE_OP_PREVIOUS:
-                canvas.clipRect(frame.frameRect, Region.Op.REPLACE);
-                canvas.drawBitmap(frame.bitmap, null, frame.frameRect, paint);
+                canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
+                canvas.drawBitmap(frame.bitmap, frame.srcRect, frame.dstRect, paint);
                 break;
             case FCTLChunk.APNG_DISPOSE_OP_BACKGROUND:
-                canvas.clipRect(frame.frameRect, Region.Op.REPLACE);
+                canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
                 canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
                 break;
             case FCTLChunk.APNG_DISPOSE_OP_NON:
@@ -137,11 +139,11 @@ public class ApngDecoder {
     public void blendOp() {
         Frame frame = getFrame(this.frameIndex);
         frame.prepare();
-        canvas.clipRect(frame.frameRect, Region.Op.REPLACE);
+        canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
         if (frame.fctlChunk.blend_op == FCTLChunk.APNG_BLEND_OP_SOURCE) {
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         }
-        canvas.drawBitmap(frame.bitmap, null, frame.frameRect, paint);
+        canvas.drawBitmap(frame.bitmap, frame.srcRect, frame.dstRect, paint);
     }
 
     public Frame getFrame(int index) {
@@ -160,7 +162,7 @@ public class ApngDecoder {
             case 0:
             case 2:
             case 3:
-                config = Bitmap.Config.RGB_565;
+                config = Bitmap.Config.ARGB_4444;
                 break;
             case 4:
             case 6:
@@ -170,6 +172,7 @@ public class ApngDecoder {
         }
         bitmap = Bitmap.createBitmap(ihdrChunk.width, ihdrChunk.height, config);
         canvas = new Canvas(bitmap);
+        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         fullRect = new Rect(0, 0, ihdrChunk.width, ihdrChunk.height);
         paint = new Paint();
         paint.setAntiAlias(true);

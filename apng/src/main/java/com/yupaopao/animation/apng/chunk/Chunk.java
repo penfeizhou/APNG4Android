@@ -2,6 +2,7 @@ package com.yupaopao.animation.apng.chunk;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.zip.CRC32;
 
 /**
  * @Description: Length (长度)	4字节	指定数据块中数据域的长度，其长度不超过(231－1)字节

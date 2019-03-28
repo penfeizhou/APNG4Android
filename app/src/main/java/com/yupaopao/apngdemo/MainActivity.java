@@ -21,7 +21,7 @@ public class MainActivity extends AppCompatActivity {
         ApngLoader.loadImage(ApngImageUtil.Scheme.ASSETS.wrap("wheel.png"), (ImageView) findViewById(R.id.imageView), null);
         final ImageView imageView = findViewById(R.id.imageView2);
         try {
-            InputStream inputStream = getAssets().open("wheel.png");
+            InputStream inputStream = getAssets().open("sample.png");
             APNGDrawable apngDrawable = new APNGDrawable(inputStream);
             imageView.setImageDrawable(apngDrawable);
             apngDrawable.start();
