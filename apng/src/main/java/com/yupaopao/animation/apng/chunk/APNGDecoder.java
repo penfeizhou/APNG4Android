@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -212,14 +213,6 @@ public class APNGDecoder {
         return frames.get(index);
     }
 
-
-    public void drawCanvas(Canvas canvas, Paint paint) {
-        Matrix matrix = new Matrix();
-        matrix.setScale(1.0f * canvas.getWidth() / bitmap.getWidth(), 1.0f * canvas.getHeight() / bitmap.getHeight());
-        canvas.drawBitmap(bitmap, matrix, paint);
-    }
-
-
     private void createCanvas(IHDRChunk ihdrChunk) {
         Bitmap.Config config;
         switch (ihdrChunk.colorType) {
@@ -237,6 +230,7 @@ public class APNGDecoder {
         bitmap = Bitmap.createBitmap(ihdrChunk.width, ihdrChunk.height, config);
         canvas = new Canvas(bitmap);
         canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+        canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));
         fullRect = new Rect(0, 0, ihdrChunk.width, ihdrChunk.height);
         paint = new Paint();
         paint.setAntiAlias(true);

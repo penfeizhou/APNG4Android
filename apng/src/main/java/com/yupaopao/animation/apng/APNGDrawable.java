@@ -53,6 +53,7 @@ public class APNGDrawable extends Drawable implements Animatable, APNGDecoder.Re
         if (bitmap == null || bitmap.isRecycled()) {
             return;
         }
+        canvas.setDrawFilter(drawFilter);
         Matrix matrix = new Matrix();
         matrix.setScale(1.0f * getBounds().width() / bitmap.getWidth(), 1.0f * getBounds().height() / bitmap.getHeight());
         canvas.drawBitmap(bitmap, matrix, paint);
