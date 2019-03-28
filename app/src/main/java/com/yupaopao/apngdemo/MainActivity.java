@@ -4,9 +4,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ImageView;
 
-import com.yupaopao.animation.apng.ApngImageUtil;
-import com.yupaopao.animation.apng.ApngLoader;
-import com.yupaopao.animation.apng.chunk.APNGDrawable;
+import com.yupaopao.animation.apng.APNGDrawable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,11 +15,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ApngLoader.init(getApplicationContext());
-        ApngLoader.loadImage(ApngImageUtil.Scheme.ASSETS.wrap("wheel.png"), (ImageView) findViewById(R.id.imageView), null);
-        final ImageView imageView = findViewById(R.id.imageView2);
+        final ImageView imageView = findViewById(R.id.imageView);
         try {
-            InputStream inputStream = getAssets().open("sample.png");
+            InputStream inputStream = getAssets().open("wheel.png");
             APNGDrawable apngDrawable = new APNGDrawable(inputStream);
             imageView.setImageDrawable(apngDrawable);
             apngDrawable.start();

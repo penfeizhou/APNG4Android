@@ -3,6 +3,7 @@ package com.yupaopao.animation.apng.chunk;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
@@ -113,7 +114,7 @@ public class ApngDecoder {
         return frame.getDelay();
     }
 
-    public void disposeOp() {
+    private void disposeOp() {
         if (this.frameIndex < 0) {
             canvas.clipRect(fullRect, Region.Op.REPLACE);
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
@@ -136,7 +137,7 @@ public class ApngDecoder {
         }
     }
 
-    public void blendOp() {
+    private void blendOp() {
         Frame frame = getFrame(this.frameIndex);
         frame.prepare();
         canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
@@ -146,13 +147,15 @@ public class ApngDecoder {
         canvas.drawBitmap(frame.bitmap, frame.srcRect, frame.dstRect, paint);
     }
 
-    public Frame getFrame(int index) {
+    private Frame getFrame(int index) {
         return frames.get(index);
     }
 
 
     public void drawCanvas(Canvas canvas, Paint paint) {
-        canvas.drawBitmap(bitmap, 0, 0, paint);
+        Matrix matrix = new Matrix();
+        matrix.setScale(1.0f * canvas.getWidth() / bitmap.getWidth(), 1.0f * canvas.getHeight() / bitmap.getHeight());
+        canvas.drawBitmap(bitmap, matrix, paint);
     }
 
 

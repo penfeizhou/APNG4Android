@@ -1,4 +1,4 @@
-package com.yupaopao.animation.apng;
+package com.yupaopao.animation.apng.chunk;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,4 +1,4 @@
-package com.yupaopao.animation.apng.chunk;
+package com.yupaopao.animation.apng;
 
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
@@ -8,6 +8,8 @@ import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.HandlerThread;
+
+import com.yupaopao.animation.apng.chunk.ApngDecoder;
 
 import java.io.IOException;
 import java.io.InputStream;
