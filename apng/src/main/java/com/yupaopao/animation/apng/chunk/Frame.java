@@ -25,37 +25,6 @@ class Frame {
     Rect dstRect;
     Rect srcRect;
 
-
-    byte[] toByteArray() {
-        updateIHDR();
-        int size = sPNGSignatures.length;
-        for (Chunk chunk : otherChunks) {
-            size += chunk.getRawDataLength();
-        }
-        for (Chunk idatChunk : idatChunks) {
-            size += idatChunk.getRawDataLength();
-        }
-        size += sPNGEndChunk.length;
-        byte[] dst = new byte[size];
-        int offset = 0;
-        System.arraycopy(sPNGSignatures, 0, dst, offset, sPNGSignatures.length);
-        offset += sPNGSignatures.length;
-        for (Chunk chunk : otherChunks) {
-            chunk.copy(dst, offset);
-            offset += chunk.getRawDataLength();
-        }
-        for (Chunk idatChunk : idatChunks) {
-            idatChunk.copy(dst, offset);
-            offset += idatChunk.getRawDataLength();
-        }
-
-        System.arraycopy(sPNGEndChunk, 0, dst, offset, sPNGEndChunk.length);
-        return dst;
-    }
-
-    /**
-     * TODO: 更节省内存
-     */
     InputStream toInputStream() {
         updateIHDR();
         List<InputStream> inputStreams = new ArrayList<>();
@@ -89,8 +58,7 @@ class Frame {
 
     void prepare() {
         if (bitmap == null) {
-            byte[] bytes = toByteArray();
-            bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+            bitmap = BitmapFactory.decodeStream(toInputStream());
         }
         if (srcRect == null) {
             srcRect = new Rect(0, 0, fctlChunk.width, fctlChunk.height);
@@ -99,6 +67,9 @@ class Frame {
             dstRect = new Rect(fctlChunk.x_offset, fctlChunk.y_offset,
                     fctlChunk.x_offset + fctlChunk.width, fctlChunk.y_offset + fctlChunk.height);
         }
+        otherChunks.clear();
+        idatChunks.clear();
+        fctlChunk = null;
     }
 
     long getDelay() {

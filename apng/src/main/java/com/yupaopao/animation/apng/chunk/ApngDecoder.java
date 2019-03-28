@@ -24,16 +24,15 @@ import java.util.List;
  */
 public class ApngDecoder {
     private static final String TAG = ApngDecoder.class.getSimpleName();
-    private ACTLChunk actlChunk;
-    private IHDRChunk ihdrChunk;
     private SparseArray<Frame> frames = new SparseArray<>();
-    private List<Chunk> otherChunks = new ArrayList<>();
     private Bitmap bitmap;
     private Canvas canvas;
     private int frameIndex = -1;
     private int playCount;
     private Rect fullRect;
     private Paint paint;
+    private int num_plays;
+    private int num_frames;
 
     public ApngDecoder(InputStream inputStream) {
         byte[] sigBytes = new byte[8];
@@ -46,13 +45,15 @@ public class ApngDecoder {
         }
         Chunk chunk;
         int lastSeq = -1;
-        List<Chunk> chunks = new ArrayList<>();
+        List<Chunk> otherChunks = new ArrayList<>();
+        ACTLChunk actlChunk = null;
         while ((chunk = Chunk.read(inputStream)) != null) {
-            chunks.add(chunk);
             if (chunk instanceof IENDChunk) {
                 break;
             } else if (chunk instanceof ACTLChunk) {
-                this.actlChunk = (ACTLChunk) chunk;
+                actlChunk = (ACTLChunk) chunk;
+                this.num_frames = actlChunk.num_frames;
+                this.num_plays = actlChunk.num_plays;
             } else if (chunk instanceof FCTLChunk) {
                 lastSeq++;
                 Frame frame = new Frame();
@@ -72,20 +73,19 @@ public class ApngDecoder {
                 }
             } else {
                 if (chunk instanceof IHDRChunk) {
-                    ihdrChunk = (IHDRChunk) chunk;
+                    createCanvas((IHDRChunk) chunk);
                 }
                 otherChunks.add(chunk);
             }
         }
-        createCanvas();
     }
 
     public void setLoopLimit(int limit) {
-        this.actlChunk.num_plays = limit;
+        this.num_plays = limit;
     }
 
     public int getNumPlays() {
-        return this.actlChunk.num_plays;
+        return this.num_plays;
     }
 
     public boolean canStep() {
@@ -94,7 +94,7 @@ public class ApngDecoder {
         }
         if (this.playCount < getNumPlays() - 1) {
             return true;
-        } else if (this.playCount == getNumPlays() - 1 && this.frameIndex < this.actlChunk.num_frames - 1) {
+        } else if (this.playCount == getNumPlays() - 1 && this.frameIndex < this.num_frames - 1) {
             return true;
         }
         return false;
@@ -104,7 +104,7 @@ public class ApngDecoder {
     public long step() {
         disposeOp();
         this.frameIndex++;
-        if (this.frameIndex >= this.actlChunk.num_frames) {
+        if (this.frameIndex >= this.num_frames) {
             this.frameIndex = 0;
             this.playCount++;
         }
@@ -159,7 +159,7 @@ public class ApngDecoder {
     }
 
 
-    private void createCanvas() {
+    private void createCanvas(IHDRChunk ihdrChunk) {
         Bitmap.Config config;
         switch (ihdrChunk.colorType) {
             case 0:
