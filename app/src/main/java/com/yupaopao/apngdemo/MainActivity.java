@@ -2,6 +2,7 @@ package com.yupaopao.apngdemo;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
 
 import com.yupaopao.animation.apng.APNGAssetLoader;
@@ -14,8 +15,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         final ImageView imageView = findViewById(R.id.imageView);
-        APNGDrawable apngDrawable = new APNGDrawable(new APNGAssetLoader(this, "wheel.png"));
-        imageView.setImageDrawable(apngDrawable);
-        apngDrawable.start();
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                APNGDrawable apngDrawable = new APNGDrawable(
+                        new APNGAssetLoader(MainActivity.this,
+                                "feeds_apng_like_red.png"));
+                imageView.setImageDrawable(apngDrawable);
+            }
+        });
     }
 }

@@ -61,6 +61,8 @@ public class APNGDecoder {
         }
     };
     private int sampleSize = 1;
+    private int desiredWidth;
+    private int desiredHeight;
 
     public APNGDecoder(APNGStreamLoader provider, RenderListener renderListener) {
         this.APNGStreamLoader = provider;
@@ -70,15 +72,18 @@ public class APNGDecoder {
         HandlerThread handlerThread = new HandlerThread("apng");
         handlerThread.start();
         animationHandler = new Handler(handlerThread.getLooper());
-        animationHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                readInputStream();
-            }
-        });
     }
 
     public void start() {
+        if (frames.size() == 0) {
+            animationHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    readInputStream();
+                }
+            });
+        }
+
         if (running) {
             Log.i(TAG, "Already started");
         } else {
@@ -103,22 +108,48 @@ public class APNGDecoder {
         this.num_plays = limit;
     }
 
-    public void setSampleSize(int sampleSize) {
-        if (this.sampleSize != sampleSize) {
-            this.sampleSize = sampleSize;
-            final boolean tempRunning = running;
-            stop();
+
+    public void setDesiredSize(int width, int height) {
+        desiredWidth = width;
+        desiredHeight = height;
+        if (fullRect == null) {
             animationHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     frames.clear();
                     readInputStream();
-                    if (tempRunning) {
-                        start();
-                    }
                 }
             });
+        } else {
+            int sample = getDesiredSample();
+            if (sample != this.sampleSize) {
+                this.sampleSize = sample;
+                final boolean tempRunning = running;
+                stop();
+                animationHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        frames.clear();
+                        readInputStream();
+                        if (tempRunning) {
+                            start();
+                        }
+                    }
+                });
+            }
         }
+    }
+
+    private int getDesiredSample() {
+        if (fullRect == null || desiredWidth == 0 || desiredHeight == 0) {
+            return 1;
+        }
+        int radio = Math.min(fullRect.width() / desiredWidth, fullRect.height() / desiredHeight);
+        int sample = 1;
+        while ((sample * 2) <= radio) {
+            sample *= 2;
+        }
+        return sample;
     }
 
     private void readInputStream() {
@@ -260,11 +291,12 @@ public class APNGDecoder {
                 config = Bitmap.Config.ARGB_8888;
                 break;
         }
+        fullRect = new Rect(0, 0, ihdrChunk.width, ihdrChunk.height);
+        sampleSize = getDesiredSample();
         bitmap = Bitmap.createBitmap(ihdrChunk.width / sampleSize, ihdrChunk.height / sampleSize, config);
         canvas = new Canvas(bitmap);
         canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));
-        fullRect = new Rect(0, 0, ihdrChunk.width, ihdrChunk.height);
         paint = new Paint();
         paint.setAntiAlias(true);
     }

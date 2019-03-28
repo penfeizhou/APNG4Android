@@ -60,8 +60,10 @@ public class APNGDrawable extends Drawable implements Animatable, APNGDecoder.Re
     @Override
     public void setBounds(int left, int top, int right, int bottom) {
         super.setBounds(left, top, right, bottom);
-        int sample = Math.min(apngDecoder.getWidth() / getBounds().width(), apngDecoder.getHeight() / getBounds().height());
-        apngDecoder.setSampleSize(Math.max(1, sample));
+        apngDecoder.setDesiredSize(getBounds().width(), getBounds().height());
+        if (!isRunning()) {
+            start();
+        }
     }
 
     @Override
