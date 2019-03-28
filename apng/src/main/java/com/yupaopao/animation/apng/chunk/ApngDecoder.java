@@ -1,5 +1,13 @@
 package com.yupaopao.animation.apng.chunk;
 
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.Rect;
+import android.graphics.Region;
+import android.support.annotation.WorkerThread;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -16,8 +24,15 @@ import java.util.List;
 public class ApngDecoder {
     private static final String TAG = ApngDecoder.class.getSimpleName();
     private ACTLChunk actlChunk;
+    private IHDRChunk ihdrChunk;
     private SparseArray<Frame> frames = new SparseArray<>();
     private List<Chunk> otherChunks = new ArrayList<>();
+    private Bitmap bitmap;
+    private Canvas canvas;
+    private int frameIndex = -1;
+    private int playCount;
+    private Rect fullRect;
+    private Paint paint;
 
     public ApngDecoder(InputStream inputStream) {
         byte[] sigBytes = new byte[8];
@@ -53,13 +68,110 @@ public class ApngDecoder {
                     frame.idatChunk = (IDATChunk) chunk;
                 }
             } else {
+                if (chunk instanceof IHDRChunk) {
+                    ihdrChunk = (IHDRChunk) chunk;
+                }
                 otherChunks.add(chunk);
             }
         }
+        createCanvas();
+    }
+
+    public void setLoopLimit(int limit) {
+        this.actlChunk.num_plays = limit;
+    }
+
+    public int getNumPlays() {
+        return this.actlChunk.num_plays;
+    }
+
+    public boolean canStep() {
+        if (getNumPlays() <= 0) {
+            return true;
+        }
+        if (this.playCount < getNumPlays() - 1) {
+            return true;
+        } else if (this.playCount == getNumPlays() - 1 && this.frameIndex < this.actlChunk.num_frames) {
+            return true;
+        }
+        return false;
+    }
+
+    @WorkerThread
+    public long step() {
+        disposeOp();
+        this.frameIndex++;
+        if (this.frameIndex >= this.actlChunk.num_frames) {
+            this.frameIndex = 0;
+            this.playCount++;
+        }
+        Frame frame = getFrame(this.frameIndex);
+        frame.prepare();
+        blendOp();
+        return frame.getDelay();
+    }
+
+    public void disposeOp() {
+        if (this.frameIndex < 0) {
+            canvas.clipRect(fullRect, Region.Op.REPLACE);
+            canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+            return;
+        }
+        Frame frame = getFrame(this.frameIndex);
+        frame.prepare();
+        switch (frame.fctlChunk.dispose_op) {
+            case FCTLChunk.APNG_DISPOSE_OP_PREVIOUS:
+                canvas.clipRect(frame.frameRect, Region.Op.REPLACE);
+                canvas.drawBitmap(frame.bitmap, null, frame.frameRect, paint);
+                break;
+            case FCTLChunk.APNG_DISPOSE_OP_BACKGROUND:
+                canvas.clipRect(frame.frameRect, Region.Op.REPLACE);
+                canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+                break;
+            case FCTLChunk.APNG_DISPOSE_OP_NON:
+            default:
+                break;
+        }
+    }
+
+    public void blendOp() {
+        Frame frame = getFrame(this.frameIndex);
+        frame.prepare();
+        canvas.clipRect(frame.frameRect, Region.Op.REPLACE);
+        if (frame.fctlChunk.blend_op == FCTLChunk.APNG_BLEND_OP_SOURCE) {
+            canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+        }
+        canvas.drawBitmap(frame.bitmap, null, frame.frameRect, paint);
     }
 
     public Frame getFrame(int index) {
         return frames.get(index);
     }
 
+
+    public void drawCanvas(Canvas canvas, Paint paint) {
+        canvas.drawBitmap(bitmap, 0, 0, paint);
+    }
+
+
+    private void createCanvas() {
+        Bitmap.Config config;
+        switch (ihdrChunk.colorType) {
+            case 0:
+            case 2:
+            case 3:
+                config = Bitmap.Config.RGB_565;
+                break;
+            case 4:
+            case 6:
+            default:
+                config = Bitmap.Config.ARGB_8888;
+                break;
+        }
+        bitmap = Bitmap.createBitmap(ihdrChunk.width, ihdrChunk.height, config);
+        canvas = new Canvas(bitmap);
+        fullRect = new Rect(0, 0, ihdrChunk.width, ihdrChunk.height);
+        paint = new Paint();
+        paint.setAntiAlias(true);
+    }
 }

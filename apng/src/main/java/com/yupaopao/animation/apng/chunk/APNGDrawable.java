@@ -1,6 +1,5 @@
 package com.yupaopao.animation.apng.chunk;
 
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
@@ -9,7 +8,6 @@ import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,23 +22,16 @@ public class APNGDrawable extends Drawable implements Animatable {
     private final Handler animationHandler;
     private final Handler uiHandler;
     private final Paint paint = new Paint();
-    private ApngDecoder apngDecoder;
-    private int frameIndex = 0;
-
+    private volatile ApngDecoder apngDecoder;
     private boolean running;
-    private Bitmap currentBitmap;
 
     private Runnable renderTask = new Runnable() {
         @Override
         public void run() {
-            Frame frame = apngDecoder.getFrame(frameIndex);
-            if (frame == null) {
-                Log.e(TAG, "Cannot find frame at index:" + frameIndex);
-            } else {
-                currentBitmap = frame.toBitmap();
+            if (apngDecoder.canStep()) {
+                animationHandler.postDelayed(this, apngDecoder.step());
+                uiHandler.post(invalidateRunnable);
             }
-            animationHandler.postDelayed(this, 100);
-            uiHandler.post(invalidateRunnable);
         }
     };
 
@@ -95,12 +86,8 @@ public class APNGDrawable extends Drawable implements Animatable {
 
     @Override
     public void draw(Canvas canvas) {
-        if (currentBitmap != null && !currentBitmap.isRecycled()) {
-            canvas.drawBitmap(currentBitmap, 0, 0, paint);
-        }
-        frameIndex++;
-        if (frameIndex > 10) {
-            frameIndex = 0;
+        if (apngDecoder != null && canvas != null) {
+            apngDecoder.drawCanvas(canvas, paint);
         }
     }
 

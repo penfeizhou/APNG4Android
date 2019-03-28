@@ -2,6 +2,11 @@ package com.yupaopao.animation.apng.chunk;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.Rect;
 
 import com.yupaopao.animation.apng.ChainInputStream;
 
@@ -22,7 +27,8 @@ class Frame {
     List<Chunk> otherChunks = new ArrayList<>();
     private static final byte[] sPNGSignatures = {(byte) 137, 80, 78, 71, 13, 10, 26, 10};
     private static final byte[] sPNGEndChunk = {0, 0, 0, 0, 0x49, 0x45, 0x4E, 0x44, (byte) 0xAE, 0x42, 0x60, (byte) 0x82};
-    private Bitmap bitmap;
+    Bitmap bitmap;
+    Rect frameRect;
 
 
     byte[] toByteArray() {
@@ -47,6 +53,9 @@ class Frame {
         return dst;
     }
 
+    /**
+     * TODO: 更节省内存
+     */
     InputStream toInputStream() {
         List<InputStream> inputStreams = new ArrayList<>();
         InputStream signatureStream = new ByteArrayInputStream(sPNGSignatures);
@@ -59,11 +68,19 @@ class Frame {
         return new ChainInputStream(inputStreams.toArray(new InputStream[0]));
     }
 
-    public Bitmap toBitmap() {
+    void prepare() {
         if (bitmap == null) {
             byte[] bytes = toByteArray();
             bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
         }
-        return bitmap;
+        if (frameRect == null) {
+            frameRect = new Rect(fctlChunk.x_offset, fctlChunk.y_offset,
+                    fctlChunk.x_offset + fctlChunk.width, fctlChunk.y_offset + fctlChunk.height);
+        }
     }
+
+    long getDelay() {
+        return fctlChunk.delay_num * 1000 / (fctlChunk.delay_den == 0 ? 100 : fctlChunk.delay_den);
+    }
+
 }
