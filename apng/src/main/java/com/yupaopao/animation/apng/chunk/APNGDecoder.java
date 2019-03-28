@@ -3,7 +3,6 @@ package com.yupaopao.animation.apng.chunk;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.PorterDuff;
@@ -17,6 +16,7 @@ import android.util.SparseArray;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,6 +59,8 @@ public class APNGDecoder {
             renderListener.onRender(bitmap);
         }
     };
+    private int sampleSize = 1;
+    private final SoftReference<InputStream> inputStreamSoftReference;
 
     public APNGDecoder(final InputStream inputStream, RenderListener renderListener) {
         HandlerThread handlerThread = new HandlerThread("apng");
@@ -72,6 +74,7 @@ public class APNGDecoder {
         });
         this.uiHandler = new Handler();
         this.renderListener = renderListener;
+        inputStreamSoftReference = new SoftReference<>(inputStream);
     }
 
     public void start() {
@@ -99,6 +102,34 @@ public class APNGDecoder {
         this.num_plays = limit;
     }
 
+    public void setSampleSize(int sampleSize) {
+        if (this.sampleSize != sampleSize) {
+            final InputStream inputStream = inputStreamSoftReference.get();
+            if (inputStream == null) {
+                Log.e(TAG, "InputStream has recycled,cannot reset sampleSize.");
+                return;
+            }
+            try {
+                inputStream.reset();
+                this.sampleSize = sampleSize;
+                final boolean tempRunning = running;
+                stop();
+                animationHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        frames.clear();
+                        decode(inputStream);
+                        if (tempRunning) {
+                            start();
+                        }
+                    }
+                });
+            } catch (IOException e) {
+                Log.e(TAG, "InputStream reset error,cannot reset sampleSize." + e.getLocalizedMessage());
+            }
+        }
+    }
+
     private void decode(InputStream inputStream) {
         byte[] sigBytes = new byte[8];
         try {
@@ -123,6 +154,7 @@ public class APNGDecoder {
                 lastSeq++;
                 Frame frame = new Frame();
                 frame.otherChunks.addAll(otherChunks);
+                frame.sampleSize = sampleSize;
                 frames.put(lastSeq, frame);
                 frame.sequence_number = lastSeq;
                 frame.fctlChunk = (FCTLChunk) chunk;
@@ -227,7 +259,7 @@ public class APNGDecoder {
                 config = Bitmap.Config.ARGB_8888;
                 break;
         }
-        bitmap = Bitmap.createBitmap(ihdrChunk.width, ihdrChunk.height, config);
+        bitmap = Bitmap.createBitmap(ihdrChunk.width / sampleSize, ihdrChunk.height / sampleSize, config);
         canvas = new Canvas(bitmap);
         canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));
@@ -238,5 +270,13 @@ public class APNGDecoder {
 
     public interface RenderListener {
         void onRender(Bitmap bitmap);
+    }
+
+    public int getWidth() {
+        return fullRect.width();
+    }
+
+    public int getHeight() {
+        return fullRect.height();
     }
 }

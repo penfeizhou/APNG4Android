@@ -8,6 +8,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 
@@ -57,6 +58,13 @@ public class APNGDrawable extends Drawable implements Animatable, APNGDecoder.Re
         Matrix matrix = new Matrix();
         matrix.setScale(1.0f * getBounds().width() / bitmap.getWidth(), 1.0f * getBounds().height() / bitmap.getHeight());
         canvas.drawBitmap(bitmap, matrix, paint);
+    }
+
+    @Override
+    public void setBounds(int left, int top, int right, int bottom) {
+        super.setBounds(left, top, right, bottom);
+        int sample = Math.min(apngDecoder.getWidth() / getBounds().width(), apngDecoder.getHeight() / getBounds().height());
+        apngDecoder.setSampleSize(Math.max(1, sample));
     }
 
     @Override

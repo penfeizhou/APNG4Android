@@ -27,8 +27,9 @@ class Frame {
     byte blend_op;
     byte dispose_op;
     int delay;
+    int sampleSize = 1;
 
-    InputStream toInputStream() {
+    private InputStream toInputStream() {
         updateIHDR();
         List<InputStream> inputStreams = new ArrayList<>();
         InputStream signatureStream = new ByteArrayInputStream(sPNGSignatures);
@@ -59,9 +60,18 @@ class Frame {
         }
     }
 
+    private Bitmap createBitmap() {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = false;
+        options.inSampleSize = sampleSize;
+        return BitmapFactory.decodeStream(toInputStream(), null, options);
+    }
+
     void prepare() {
         if (bitmap == null) {
-            bitmap = BitmapFactory.decodeStream(toInputStream());
+            bitmap = createBitmap();
+        }
+        if (fctlChunk != null) {
             srcRect = new Rect(0, 0, fctlChunk.width, fctlChunk.height);
             dstRect = new Rect(fctlChunk.x_offset, fctlChunk.y_offset,
                     fctlChunk.x_offset + fctlChunk.width, fctlChunk.y_offset + fctlChunk.height);
