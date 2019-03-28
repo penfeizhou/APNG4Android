@@ -25,7 +25,7 @@ public class APNGDrawable extends Drawable implements Animatable, APNGDecoder.Re
     private DrawFilter drawFilter = new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
     private Bitmap bitmap;
 
-    public APNGDrawable(APNGStreamProvider provider) {
+    public APNGDrawable(APNGStreamLoader provider) {
         paint.setAntiAlias(true);
         apngDecoder = new APNGDecoder(provider, this);
     }

@@ -14,7 +14,7 @@ import android.support.annotation.WorkerThread;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.yupaopao.animation.apng.APNGStreamProvider;
+import com.yupaopao.animation.apng.APNGStreamLoader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,7 +41,7 @@ public class APNGDecoder {
     private final Handler uiHandler;
     private final RenderListener renderListener;
     private boolean running;
-    private final APNGStreamProvider APNGStreamProvider;
+    private final APNGStreamLoader APNGStreamLoader;
     private Runnable renderTask = new Runnable() {
         @Override
         public void run() {
@@ -62,8 +62,8 @@ public class APNGDecoder {
     };
     private int sampleSize = 1;
 
-    public APNGDecoder(APNGStreamProvider provider, RenderListener renderListener) {
-        this.APNGStreamProvider = provider;
+    public APNGDecoder(APNGStreamLoader provider, RenderListener renderListener) {
+        this.APNGStreamLoader = provider;
         this.renderListener = renderListener;
         this.uiHandler = new Handler();
 
@@ -124,7 +124,7 @@ public class APNGDecoder {
     private void readInputStream() {
         InputStream inputStream = null;
         try {
-            inputStream = APNGStreamProvider.getInputStream();
+            inputStream = APNGStreamLoader.getInputStream();
             byte[] sigBytes = new byte[8];
             inputStream.read(sigBytes);
             String signature = new String(sigBytes);
