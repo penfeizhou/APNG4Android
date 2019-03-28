@@ -93,7 +93,7 @@ public class ApngDecoder {
         }
         if (this.playCount < getNumPlays() - 1) {
             return true;
-        } else if (this.playCount == getNumPlays() - 1 && this.frameIndex < this.actlChunk.num_frames) {
+        } else if (this.playCount == getNumPlays() - 1 && this.frameIndex < this.actlChunk.num_frames - 1) {
             return true;
         }
         return false;
