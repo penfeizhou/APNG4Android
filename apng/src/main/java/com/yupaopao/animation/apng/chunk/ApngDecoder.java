@@ -111,7 +111,7 @@ public class ApngDecoder {
         Frame frame = getFrame(this.frameIndex);
         frame.prepare();
         blendOp();
-        return frame.getDelay();
+        return frame.delay;
     }
 
     private void disposeOp() {
@@ -122,7 +122,7 @@ public class ApngDecoder {
         }
         Frame frame = getFrame(this.frameIndex);
         frame.prepare();
-        switch (frame.fctlChunk.dispose_op) {
+        switch (frame.dispose_op) {
             case FCTLChunk.APNG_DISPOSE_OP_PREVIOUS:
                 canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
                 canvas.drawBitmap(frame.bitmap, frame.srcRect, frame.dstRect, paint);
@@ -141,7 +141,7 @@ public class ApngDecoder {
         Frame frame = getFrame(this.frameIndex);
         frame.prepare();
         canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
-        if (frame.fctlChunk.blend_op == FCTLChunk.APNG_BLEND_OP_SOURCE) {
+        if (frame.blend_op == FCTLChunk.APNG_BLEND_OP_SOURCE) {
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         }
         canvas.drawBitmap(frame.bitmap, frame.srcRect, frame.dstRect, paint);

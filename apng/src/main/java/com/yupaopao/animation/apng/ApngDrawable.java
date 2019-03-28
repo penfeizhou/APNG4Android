@@ -2,7 +2,9 @@ package com.yupaopao.animation.apng;
 
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
+import android.graphics.DrawFilter;
 import android.graphics.Paint;
+import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
@@ -26,7 +28,7 @@ public class APNGDrawable extends Drawable implements Animatable {
     private final Paint paint = new Paint();
     private volatile ApngDecoder apngDecoder;
     private boolean running;
-
+    private DrawFilter drawFilter = new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
     private Runnable renderTask = new Runnable() {
         @Override
         public void run() {
@@ -89,6 +91,7 @@ public class APNGDrawable extends Drawable implements Animatable {
     @Override
     public void draw(Canvas canvas) {
         if (apngDecoder != null && canvas != null) {
+            canvas.setDrawFilter(drawFilter);
             apngDecoder.drawCanvas(canvas, paint);
         }
     }

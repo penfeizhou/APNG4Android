@@ -24,6 +24,9 @@ class Frame {
     Bitmap bitmap;
     Rect dstRect;
     Rect srcRect;
+    byte blend_op;
+    byte dispose_op;
+    int delay;
 
     InputStream toInputStream() {
         updateIHDR();
@@ -59,21 +62,16 @@ class Frame {
     void prepare() {
         if (bitmap == null) {
             bitmap = BitmapFactory.decodeStream(toInputStream());
-        }
-        if (srcRect == null) {
             srcRect = new Rect(0, 0, fctlChunk.width, fctlChunk.height);
-        }
-        if (dstRect == null) {
             dstRect = new Rect(fctlChunk.x_offset, fctlChunk.y_offset,
                     fctlChunk.x_offset + fctlChunk.width, fctlChunk.y_offset + fctlChunk.height);
+            blend_op = fctlChunk.blend_op;
+            dispose_op = fctlChunk.dispose_op;
+            delay = fctlChunk.delay_num * 1000 / (fctlChunk.delay_den == 0 ? 100 : fctlChunk.delay_den);
+            otherChunks.clear();
+            idatChunks.clear();
+            fctlChunk = null;
         }
-        otherChunks.clear();
-        idatChunks.clear();
-        fctlChunk = null;
-    }
-
-    long getDelay() {
-        return fctlChunk.delay_num * 1000 / (fctlChunk.delay_den == 0 ? 100 : fctlChunk.delay_den);
     }
 
 }
