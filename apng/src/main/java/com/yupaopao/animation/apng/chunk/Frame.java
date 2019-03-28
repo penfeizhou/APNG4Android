@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @Description: 作用描述
+ * @Description: 一帧图片所需信息及动画控制参数
  * @Author: pengfei.zhou
  * @CreateDate: 2019/3/27
  */

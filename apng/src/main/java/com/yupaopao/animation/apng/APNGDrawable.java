@@ -1,99 +1,61 @@
 package com.yupaopao.animation.apng;
 
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.DrawFilter;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
-import android.os.HandlerThread;
 
-import com.yupaopao.animation.apng.chunk.ApngDecoder;
+import com.yupaopao.animation.apng.chunk.APNGDecoder;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * @Description: 作用描述
+ * @Description: APNGDrawable
  * @Author: pengfei.zhou
  * @CreateDate: 2019/3/27
  */
-public class APNGDrawable extends Drawable implements Animatable {
+public class APNGDrawable extends Drawable implements Animatable, APNGDecoder.RenderListener {
     private static final String TAG = APNGDrawable.class.getSimpleName();
-    private final Handler animationHandler;
-    private final Handler uiHandler;
     private final Paint paint = new Paint();
-    private volatile ApngDecoder apngDecoder;
-    private boolean running;
+    private final APNGDecoder apngDecoder;
     private DrawFilter drawFilter = new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
-    private Runnable renderTask = new Runnable() {
-        @Override
-        public void run() {
-            if (apngDecoder.canStep()) {
-                animationHandler.postDelayed(this, apngDecoder.step());
-                uiHandler.post(invalidateRunnable);
-            }
-        }
-    };
-
-    private Runnable invalidateRunnable = new Runnable() {
-        @Override
-        public void run() {
-            invalidateSelf();
-        }
-    };
+    private Bitmap bitmap;
 
     public APNGDrawable(final InputStream inputStream) {
         paint.setAntiAlias(true);
-        HandlerThread handlerThread = new HandlerThread("apng");
-        handlerThread.start();
-        animationHandler = new Handler(handlerThread.getLooper());
-        animationHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                apngDecoder = new ApngDecoder(inputStream);
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        uiHandler = new Handler();
+        apngDecoder = new APNGDecoder(inputStream, this);
     }
 
 
     @Override
     public void start() {
-        if (!isRunning()) {
-            running = true;
-            animationHandler.removeCallbacks(renderTask);
-            uiHandler.removeCallbacks(invalidateRunnable);
-            animationHandler.post(renderTask);
-        }
+        apngDecoder.start();
     }
 
     @Override
     public void stop() {
-        running = false;
-        animationHandler.removeCallbacksAndMessages(null);
-        uiHandler.removeCallbacksAndMessages(null);
+        apngDecoder.stop();
     }
 
     @Override
     public boolean isRunning() {
-        return running;
+        return apngDecoder.isRunning();
     }
 
     @Override
     public void draw(Canvas canvas) {
-        if (apngDecoder != null && canvas != null) {
-            canvas.setDrawFilter(drawFilter);
-            apngDecoder.drawCanvas(canvas, paint);
+        if (bitmap == null || bitmap.isRecycled()) {
+            return;
         }
+        Matrix matrix = new Matrix();
+        matrix.setScale(1.0f * getBounds().width() / bitmap.getWidth(), 1.0f * getBounds().height() / bitmap.getHeight());
+        canvas.drawBitmap(bitmap, matrix, paint);
     }
 
     @Override
@@ -109,5 +71,11 @@ public class APNGDrawable extends Drawable implements Animatable {
     @Override
     public int getOpacity() {
         return PixelFormat.TRANSLUCENT;
+    }
+
+    @Override
+    public void onRender(Bitmap bitmap) {
+        this.bitmap = bitmap;
+        this.invalidateSelf();
     }
 }

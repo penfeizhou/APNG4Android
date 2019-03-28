@@ -8,6 +8,8 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
 import android.util.SparseArray;
@@ -22,8 +24,8 @@ import java.util.List;
  * @Author: pengfei.zhou
  * @CreateDate: 2019/3/27
  */
-public class ApngDecoder {
-    private static final String TAG = ApngDecoder.class.getSimpleName();
+public class APNGDecoder {
+    private static final String TAG = APNGDecoder.class.getSimpleName();
     private SparseArray<Frame> frames = new SparseArray<>();
     private Bitmap bitmap;
     private Canvas canvas;
@@ -33,20 +35,82 @@ public class ApngDecoder {
     private Paint paint;
     private int num_plays;
     private int num_frames;
+    private final Handler animationHandler;
+    private final Handler uiHandler;
+    private final RenderListener renderListener;
+    private boolean running;
 
-    public ApngDecoder(InputStream inputStream) {
+    private Runnable renderTask = new Runnable() {
+        @Override
+        public void run() {
+            if (canStep()) {
+                animationHandler.postDelayed(this, step());
+                uiHandler.post(invalidateRunnable);
+            } else {
+                stop();
+            }
+        }
+    };
+
+    private Runnable invalidateRunnable = new Runnable() {
+        @Override
+        public void run() {
+            renderListener.onRender(bitmap);
+        }
+    };
+
+    public APNGDecoder(final InputStream inputStream, RenderListener renderListener) {
+        HandlerThread handlerThread = new HandlerThread("apng");
+        handlerThread.start();
+        animationHandler = new Handler(handlerThread.getLooper());
+        animationHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                decode(inputStream);
+            }
+        });
+        this.uiHandler = new Handler();
+        this.renderListener = renderListener;
+    }
+
+    public void start() {
+        if (running) {
+            Log.i(TAG, "Already started");
+        } else {
+            running = true;
+            animationHandler.removeCallbacks(renderTask);
+            uiHandler.removeCallbacks(invalidateRunnable);
+            animationHandler.post(renderTask);
+        }
+    }
+
+    public void stop() {
+        running = false;
+        animationHandler.removeCallbacks(renderTask);
+        uiHandler.removeCallbacks(invalidateRunnable);
+    }
+
+    public boolean isRunning() {
+        return running;
+    }
+
+    public void setLoopLimit(int limit) {
+        this.num_plays = limit;
+    }
+
+    private void decode(InputStream inputStream) {
         byte[] sigBytes = new byte[8];
         try {
             inputStream.read(sigBytes);
             String signature = new String(sigBytes);
-            Log.d(TAG, "read signature:" + signature);
+            Log.d(TAG, "read png signature:" + signature);
         } catch (IOException e) {
             e.printStackTrace();
         }
         Chunk chunk;
         int lastSeq = -1;
         List<Chunk> otherChunks = new ArrayList<>();
-        ACTLChunk actlChunk = null;
+        ACTLChunk actlChunk;
         while ((chunk = Chunk.read(inputStream)) != null) {
             if (chunk instanceof IENDChunk) {
                 break;
@@ -80,15 +144,12 @@ public class ApngDecoder {
         }
     }
 
-    public void setLoopLimit(int limit) {
-        this.num_plays = limit;
-    }
 
-    public int getNumPlays() {
+    private int getNumPlays() {
         return this.num_plays;
     }
 
-    public boolean canStep() {
+    private boolean canStep() {
         if (getNumPlays() <= 0) {
             return true;
         }
@@ -101,7 +162,7 @@ public class ApngDecoder {
     }
 
     @WorkerThread
-    public long step() {
+    private long step() {
         disposeOp();
         this.frameIndex++;
         if (this.frameIndex >= this.num_frames) {
@@ -179,5 +240,9 @@ public class ApngDecoder {
         fullRect = new Rect(0, 0, ihdrChunk.width, ihdrChunk.height);
         paint = new Paint();
         paint.setAntiAlias(true);
+    }
+
+    public interface RenderListener {
+        void onRender(Bitmap bitmap);
     }
 }
