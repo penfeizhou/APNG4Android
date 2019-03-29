@@ -17,6 +17,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 /**
  * @Description: APNG解码器
@@ -82,13 +85,26 @@ public class APNGDecoder {
         this.renderListener = renderListener;
         this.uiHandler = new Handler();
         this.animationHandler = getAnimationHandler(parallel);
+
     }
 
     public Rect getBounds() {
         if (fullRect != null) {
             return fullRect;
         } else {
-            fullRect = mAPNGStreamLoader.getBounds();
+            Callable<Rect> callable = new Callable<Rect>() {
+                @Override
+                public Rect call() throws Exception {
+                    return mAPNGStreamLoader.getBounds();
+                }
+            };
+            FutureTask<Rect> futureTask = new FutureTask<>(callable);
+            animationHandler.post(futureTask);
+            try {
+                fullRect = futureTask.get();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             return fullRect;
         }
     }
