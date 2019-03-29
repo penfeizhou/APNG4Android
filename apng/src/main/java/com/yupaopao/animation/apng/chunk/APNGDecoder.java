@@ -72,6 +72,7 @@ public class APNGDecoder {
     private final Mode mode;
 
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1, new ThreadPoolExecutor.DiscardPolicy());
+    private byte[] byteBuff = new byte[0];
 
     /**
      * 解码器的渲染回调
@@ -202,9 +203,9 @@ public class APNGDecoder {
                     templateBitmap.recycle();
                     templateBitmap = null;
                 }
+                scheduledThreadPoolExecutor.shutdownNow();
             }
         });
-        scheduledThreadPoolExecutor.shutdownNow();
         if (tempRunning) {
             renderListener.onEnd();
         }
@@ -272,7 +273,7 @@ public class APNGDecoder {
                 pos += chunk.getRawDataLength();
                 if (chunk instanceof IENDChunk) {
                     if (lastSeq >= 0) {
-                        frames.get(lastSeq).endPos = pos;
+                        frames.get(lastSeq).endPos = pos - chunk.getRawDataLength();
                     }
                     break;
                 } else if (chunk instanceof ACTLChunk) {
@@ -281,7 +282,7 @@ public class APNGDecoder {
                     this.num_plays = actlChunk.num_plays;
                 } else if (chunk instanceof FCTLChunk) {
                     if (lastSeq >= 0) {
-                        frames.get(lastSeq).endPos = pos;
+                        frames.get(lastSeq).endPos = pos - chunk.getRawDataLength();
                     }
                     lastSeq++;
                     AbstractFrame frame;
@@ -336,6 +337,11 @@ public class APNGDecoder {
                 }
             }
         }
+        int maxSize = 0;
+        for (AbstractFrame frame : frames) {
+            maxSize = Math.max(maxSize, frame.endPos - frame.startPos);
+        }
+        byteBuff = new byte[maxSize];
     }
 
     private int getNumPlays() {
@@ -370,7 +376,7 @@ public class APNGDecoder {
         return frame.delay;
     }
 
-    private void disposeOp() {
+    private synchronized void disposeOp() {
         if (this.frameIndex < 0) {
             canvas.clipRect(fullRect, Region.Op.REPLACE);
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
@@ -380,7 +386,7 @@ public class APNGDecoder {
         switch (frame.dispose_op) {
             case FCTLChunk.APNG_DISPOSE_OP_PREVIOUS:
                 canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
-                frame.draw(canvas, paint, templateBitmap);
+                frame.draw(canvas, paint, templateBitmap, byteBuff);
                 break;
             case FCTLChunk.APNG_DISPOSE_OP_BACKGROUND:
                 canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
@@ -392,13 +398,13 @@ public class APNGDecoder {
         }
     }
 
-    private void blendOp() {
+    private synchronized void blendOp() {
         AbstractFrame frame = getFrame(this.frameIndex);
         canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
         if (frame.blend_op == FCTLChunk.APNG_BLEND_OP_SOURCE) {
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         }
-        frame.draw(canvas, paint, templateBitmap);
+        frame.draw(canvas, paint, templateBitmap, byteBuff);
     }
 
     private AbstractFrame getFrame(int index) {

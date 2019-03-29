@@ -21,8 +21,8 @@ abstract class AbstractFrame {
     public int startPos;
     public int endPos;
     int sequence_number;
-    private static final byte[] sPNGSignatures = {(byte) 137, 80, 78, 71, 13, 10, 26, 10};
-    private static final byte[] sPNGEndChunk = {0, 0, 0, 0, 0x49, 0x45, 0x4E, 0x44, (byte) 0xAE, 0x42, 0x60, (byte) 0x82};
+    static final byte[] sPNGSignatures = {(byte) 137, 80, 78, 71, 13, 10, 26, 10};
+    static final byte[] sPNGEndChunk = {0, 0, 0, 0, 0x49, 0x45, 0x4E, 0x44, (byte) 0xAE, 0x42, 0x60, (byte) 0x82};
     final Rect dstRect;
     final Rect srcRect;
     final byte blend_op;
@@ -50,7 +50,6 @@ abstract class AbstractFrame {
                 (fctlChunk.x_offset + fctlChunk.width) / sampleSize, (fctlChunk.y_offset + fctlChunk.height) / sampleSize);
     }
 
-
     InputStream toInputStream() {
         List<InputStream> inputStreams = new ArrayList<>();
         InputStream signatureStream = new ByteArrayInputStream(sPNGSignatures);
@@ -73,5 +72,5 @@ abstract class AbstractFrame {
 
     abstract List<IDATChunk> getChunkChain();
 
-    abstract void draw(Canvas canvas, Paint paint, Bitmap reusedBitmap);
+    abstract void draw(Canvas canvas, Paint paint, Bitmap reusedBitmap, byte[] byteBuff);
 }

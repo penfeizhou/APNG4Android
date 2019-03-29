@@ -20,7 +20,7 @@ public class SpeedFirstFrame extends BalancedFrame {
     }
 
     @Override
-    void draw(Canvas canvas, Paint paint, Bitmap reusedBitmap) {
+    void draw(Canvas canvas, Paint paint, Bitmap reusedBitmap, byte[] byteBuff) {
         if (bitmap == null || bitmap.isRecycled()) {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = false;

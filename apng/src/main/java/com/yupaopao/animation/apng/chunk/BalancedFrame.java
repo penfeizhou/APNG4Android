@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +22,7 @@ class BalancedFrame extends AbstractFrame {
     }
 
     @Override
-    void draw(Canvas canvas, Paint paint, Bitmap reusedBitmap) {
+    void draw(Canvas canvas, Paint paint, Bitmap reusedBitmap, byte[] byteBuff) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = false;
         options.inSampleSize = sampleSize;

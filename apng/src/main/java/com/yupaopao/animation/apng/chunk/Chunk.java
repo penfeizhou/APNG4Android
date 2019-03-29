@@ -79,12 +79,12 @@ class Chunk {
         return bytes;
     }
 
-    private static int readIntFromInputStream(InputStream inputStream) throws IOException {
+    static int readIntFromInputStream(InputStream inputStream) throws IOException {
         inputStream.read(ensureBytes());
         return byteArrayToInt(ensureBytes());
     }
 
-    private static String readTypeCodeFromInputStream(InputStream inputStream) throws IOException {
+    static String readTypeCodeFromInputStream(InputStream inputStream) throws IOException {
         inputStream.read(ensureBytes());
         return new String(ensureBytes());
     }
@@ -148,7 +148,7 @@ class Chunk {
     }
 
 
-    private byte readIntByByte(int val, int index) {
+    static byte readIntByByte(int val, int index) {
         if (index == 0) {
             return (byte) ((val >> 24) & 0xff);
         } else if (index == 1) {
