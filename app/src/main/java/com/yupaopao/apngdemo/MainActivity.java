@@ -18,6 +18,9 @@ public class MainActivity extends AppCompatActivity {
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (imageView.getDrawable() instanceof APNGDrawable) {
+                    ((APNGDrawable) imageView.getDrawable()).stop();
+                }
                 APNGDrawable apngDrawable = new APNGDrawable(
                         new APNGAssetLoader(MainActivity.this,
                                 "wheel.png"));

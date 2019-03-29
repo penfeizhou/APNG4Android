@@ -84,4 +84,11 @@ class Frame {
         }
     }
 
+    void clearBitmap() {
+        if (bitmap != null && !bitmap.isRecycled()) {
+            bitmap.recycle();
+            bitmap = null;
+        }
+    }
+
 }

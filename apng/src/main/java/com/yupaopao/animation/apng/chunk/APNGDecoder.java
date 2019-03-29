@@ -12,7 +12,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
-import android.util.SparseArray;
 
 import com.yupaopao.animation.apng.APNGStreamLoader;
 
@@ -28,7 +27,7 @@ import java.util.List;
  */
 public class APNGDecoder {
     private static final String TAG = APNGDecoder.class.getSimpleName();
-    private SparseArray<Frame> frames = new SparseArray<>();
+    private List<Frame> frames = new ArrayList<>();
     private Bitmap bitmap;
     private Canvas canvas;
     private int frameIndex = -1;
@@ -96,17 +95,14 @@ public class APNGDecoder {
     }
 
     public void start() {
-        if (frames.size() == 0) {
-            animationHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (frames.size() == 0) {
-                        readInputStream();
-                    }
+        animationHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (frames.size() == 0) {
+                    readInputStream();
                 }
-            });
-        }
-
+            }
+        });
         if (running) {
             Log.i(TAG, "Already started");
         } else {
@@ -121,6 +117,15 @@ public class APNGDecoder {
         running = false;
         animationHandler.removeCallbacks(renderTask);
         uiHandler.removeCallbacks(invalidateRunnable);
+        animationHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                for (Frame frame : frames) {
+                    frame.clearBitmap();
+                }
+                frames.clear();
+            }
+        });
     }
 
     public boolean isRunning() {
@@ -199,7 +204,7 @@ public class APNGDecoder {
                     Frame frame = new Frame();
                     frame.otherChunks.addAll(otherChunks);
                     frame.sampleSize = sampleSize;
-                    frames.put(lastSeq, frame);
+                    frames.add(frame);
                     frame.sequence_number = lastSeq;
                     frame.fctlChunk = (FCTLChunk) chunk;
                 } else if (chunk instanceof FDATChunk) {
@@ -237,6 +242,9 @@ public class APNGDecoder {
     }
 
     private boolean canStep() {
+        if (frames.size() == 0) {
+            return false;
+        }
         if (getNumPlays() <= 0) {
             return true;
         }
