@@ -1,6 +1,8 @@
 package com.yupaopao.animation.apng.chunk;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Rect;
 
 import java.io.ByteArrayInputStream;
@@ -69,6 +71,5 @@ abstract class AbstractFrame {
 
     abstract List<IDATChunk> getChunkChain();
 
-
-    abstract Bitmap toBitmap();
+    abstract void draw(Canvas canvas, Paint paint);
 }

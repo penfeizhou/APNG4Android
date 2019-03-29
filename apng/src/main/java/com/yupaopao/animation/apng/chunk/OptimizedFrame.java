@@ -2,6 +2,8 @@ package com.yupaopao.animation.apng.chunk;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,10 +62,13 @@ class OptimizedFrame extends AbstractFrame {
     }
 
     @Override
-    Bitmap toBitmap() {
+    void draw(Canvas canvas, Paint paint) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = false;
         options.inSampleSize = sampleSize;
-        return BitmapFactory.decodeStream(toInputStream(), null, options);
+        Bitmap bitmap = BitmapFactory.decodeStream(toInputStream(), null, options);
+        assert bitmap != null;
+        canvas.drawBitmap(bitmap, srcRect, dstRect, paint);
+        bitmap.recycle();
     }
 }

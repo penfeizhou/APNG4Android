@@ -53,7 +53,7 @@ public class APNGDecoder {
                 animationHandler.postDelayed(this, Math.max(0, delay - cost));
                 cachedBitmap = Bitmap.createBitmap(bitmap);
                 uiHandler.post(invalidateRunnable);
-                Log.d(TAG, String.format("delay:%d,cost:%d", delay, cost));
+                Log.i(TAG, String.format("delay:%d,cost:%d", delay, cost));
             } else {
                 stop();
             }
@@ -67,7 +67,7 @@ public class APNGDecoder {
         }
     };
     private int sampleSize = 1;
-    private boolean optimized = false;
+    private boolean optimized = true;
 
     private static final class InnerHandlerProvider {
         private static final Handler sAnimationHandler = createAnimationHandler();
@@ -323,8 +323,7 @@ public class APNGDecoder {
         switch (frame.dispose_op) {
             case FCTLChunk.APNG_DISPOSE_OP_PREVIOUS:
                 canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
-                Bitmap bitmap = frame.toBitmap();
-                canvas.drawBitmap(bitmap, frame.srcRect, frame.dstRect, paint);
+                frame.draw(canvas, paint);
                 break;
             case FCTLChunk.APNG_DISPOSE_OP_BACKGROUND:
                 canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
@@ -342,8 +341,7 @@ public class APNGDecoder {
         if (frame.blend_op == FCTLChunk.APNG_BLEND_OP_SOURCE) {
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         }
-        Bitmap bitmap = frame.toBitmap();
-        canvas.drawBitmap(bitmap, frame.srcRect, frame.dstRect, paint);
+        frame.draw(canvas, paint);
     }
 
     private AbstractFrame getFrame(int index) {

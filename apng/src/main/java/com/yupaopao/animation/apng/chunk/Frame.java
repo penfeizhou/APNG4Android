@@ -2,6 +2,8 @@ package com.yupaopao.animation.apng.chunk;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +22,7 @@ class Frame extends AbstractFrame {
     }
 
     @Override
-    Bitmap toBitmap() {
+    void draw(Canvas canvas, Paint paint) {
         if (bitmap == null) {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = false;
@@ -29,7 +31,7 @@ class Frame extends AbstractFrame {
             otherChunks.clear();
             idatChunks.clear();
         }
-        return bitmap;
+        canvas.drawBitmap(bitmap, srcRect, dstRect, paint);
     }
 
     @Override
