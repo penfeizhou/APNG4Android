@@ -32,6 +32,12 @@ public class APNGDrawable extends Drawable implements Animatable, APNGDecoder.Re
         apngDecoder = new APNGDecoder(provider, this);
     }
 
+    /**
+     * @param loopLimit <=0为无限播放,>0为实际播放次数
+     */
+    public void setLoopLimit(int loopLimit) {
+        apngDecoder.setLoopLimit(loopLimit);
+    }
 
     @Override
     public void start() {

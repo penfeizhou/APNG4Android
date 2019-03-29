@@ -33,6 +33,7 @@ public class APNGDecoder {
     private Rect fullRect;
     private Paint paint;
     private int num_plays;
+    private Integer loopLimit = null;
     private int num_frames;
     private final Handler animationHandler;
     private final Handler uiHandler;
@@ -141,7 +142,7 @@ public class APNGDecoder {
     }
 
     public void setLoopLimit(int limit) {
-        this.num_plays = limit;
+        this.loopLimit = limit;
     }
 
 
@@ -239,7 +240,7 @@ public class APNGDecoder {
     }
 
     private int getNumPlays() {
-        return this.num_plays;
+        return this.loopLimit != null ? this.loopLimit : this.num_plays;
     }
 
     private boolean canStep() {

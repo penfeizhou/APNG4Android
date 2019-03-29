@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
                 APNGDrawable apngDrawable = new APNGDrawable(
                         new APNGResourceLoader(MainActivity.this, R.drawable.sample));
                 imageView.setImageDrawable(apngDrawable);
+                apngDrawable.setLoopLimit(0);
             }
         });
         if (imageView.getDrawable() instanceof APNGDrawable) {
