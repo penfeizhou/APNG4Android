@@ -161,21 +161,20 @@ public class APNGDecoder {
                     frame.recycle();
                 }
                 frames.clear();
+                if (bitmap != null && !bitmap.isRecycled()) {
+                    bitmap.recycle();
+                    bitmap = null;
+                }
+                if (cachedBitmap != null && !cachedBitmap.isRecycled()) {
+                    cachedBitmap.recycle();
+                    cachedBitmap = null;
+                }
+                if (templeateBitmap != null && !templeateBitmap.isRecycled()) {
+                    templeateBitmap.recycle();
+                    templeateBitmap = null;
+                }
             }
         });
-        if (bitmap != null && !bitmap.isRecycled()) {
-            bitmap.recycle();
-            bitmap = null;
-        }
-        if (cachedBitmap != null && !cachedBitmap.isRecycled()) {
-            cachedBitmap.recycle();
-            cachedBitmap = null;
-        }
-        if (templeateBitmap != null && !templeateBitmap.isRecycled()) {
-            templeateBitmap.recycle();
-            templeateBitmap = null;
-        }
-
 
         if (tempRunning) {
             renderListener.onEnd();
