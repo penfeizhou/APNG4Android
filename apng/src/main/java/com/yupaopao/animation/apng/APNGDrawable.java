@@ -116,6 +116,16 @@ public class APNGDrawable extends Drawable implements Animatable2Compat, APNGDec
     }
 
     @Override
+    public boolean setVisible(boolean visible, boolean restart) {
+        if (visible && !restart) {
+            start();
+        } else if (isRunning()) {
+            stop();
+        }
+        return super.setVisible(visible, restart);
+    }
+
+    @Override
     public int getIntrinsicWidth() {
         return apngDecoder.getBounds().width();
     }
