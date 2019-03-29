@@ -8,24 +8,29 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.PixelFormat;
-import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
+import android.support.graphics.drawable.Animatable2Compat;
 
 import com.yupaopao.animation.apng.chunk.APNGDecoder;
 import com.yupaopao.animation.apng.chunk.APNGStreamLoader;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @Description: APNGDrawable
  * @Author: pengfei.zhou
  * @CreateDate: 2019/3/27
  */
-public class APNGDrawable extends Drawable implements Animatable, APNGDecoder.RenderListener {
+public class APNGDrawable extends Drawable implements Animatable2Compat, APNGDecoder.RenderListener {
     private static final String TAG = APNGDrawable.class.getSimpleName();
     private final Paint paint = new Paint();
     private final APNGDecoder apngDecoder;
     private DrawFilter drawFilter = new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
     private Bitmap bitmap;
     private Matrix matrix = new Matrix();
+    private Set<AnimationCallback> animationCallbacks = new HashSet<>();
 
     public APNGDrawable(APNGStreamLoader provider) {
         paint.setAntiAlias(true);
@@ -91,9 +96,23 @@ public class APNGDrawable extends Drawable implements Animatable, APNGDecoder.Re
     }
 
     @Override
+    public void onStart() {
+        for (AnimationCallback animationCallback : animationCallbacks) {
+            animationCallback.onAnimationStart(this);
+        }
+    }
+
+    @Override
     public void onRender(Bitmap bitmap) {
         this.bitmap = bitmap;
         this.invalidateSelf();
+    }
+
+    @Override
+    public void onEnd() {
+        for (AnimationCallback animationCallback : animationCallbacks) {
+            animationCallback.onAnimationEnd(this);
+        }
     }
 
     @Override
@@ -104,5 +123,20 @@ public class APNGDrawable extends Drawable implements Animatable, APNGDecoder.Re
     @Override
     public int getIntrinsicHeight() {
         return apngDecoder.getBounds().height();
+    }
+
+    @Override
+    public void registerAnimationCallback(@NonNull AnimationCallback animationCallback) {
+        this.animationCallbacks.add(animationCallback);
+    }
+
+    @Override
+    public boolean unregisterAnimationCallback(@NonNull AnimationCallback animationCallback) {
+        return this.animationCallbacks.remove(animationCallback);
+    }
+
+    @Override
+    public void clearAnimationCallbacks() {
+        this.animationCallbacks.clear();
     }
 }

@@ -119,10 +119,12 @@ public class APNGDecoder {
             animationHandler.removeCallbacks(renderTask);
             uiHandler.removeCallbacks(invalidateRunnable);
             animationHandler.post(renderTask);
+            renderListener.onStart();
         }
     }
 
     public void stop() {
+        boolean tempRunning = running;
         running = false;
         animationHandler.removeCallbacks(renderTask);
         uiHandler.removeCallbacks(invalidateRunnable);
@@ -135,6 +137,9 @@ public class APNGDecoder {
                 frames.clear();
             }
         });
+        if (tempRunning) {
+            renderListener.onEnd();
+        }
     }
 
     public boolean isRunning() {
@@ -333,6 +338,10 @@ public class APNGDecoder {
     }
 
     public interface RenderListener {
+        void onStart();
+
         void onRender(Bitmap bitmap);
+
+        void onEnd();
     }
 }
