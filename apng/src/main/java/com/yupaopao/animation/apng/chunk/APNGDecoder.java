@@ -13,8 +13,6 @@ import android.os.HandlerThread;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
 
-import com.yupaopao.animation.apng.APNGStreamLoader;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -85,6 +83,15 @@ public class APNGDecoder {
         this.renderListener = renderListener;
         this.uiHandler = new Handler();
         this.animationHandler = getAnimationHandler(parallel);
+    }
+
+    public Rect getBounds() {
+        if (fullRect != null) {
+            return fullRect;
+        } else {
+            fullRect = mAPNGStreamLoader.getBounds();
+            return fullRect;
+        }
     }
 
     private Handler getAnimationHandler(boolean parallel) {
@@ -187,6 +194,7 @@ public class APNGDecoder {
         InputStream inputStream = null;
         try {
             inputStream = mAPNGStreamLoader.getInputStream();
+            inputStream.reset();
             byte[] sigBytes = new byte[8];
             inputStream.read(sigBytes);
             String signature = new String(sigBytes);

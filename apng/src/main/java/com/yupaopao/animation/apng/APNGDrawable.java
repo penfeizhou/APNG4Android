@@ -12,6 +12,7 @@ import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 
 import com.yupaopao.animation.apng.chunk.APNGDecoder;
+import com.yupaopao.animation.apng.chunk.APNGStreamLoader;
 
 /**
  * @Description: APNGDrawable
@@ -85,5 +86,15 @@ public class APNGDrawable extends Drawable implements Animatable, APNGDecoder.Re
     public void onRender(Bitmap bitmap) {
         this.bitmap = bitmap;
         this.invalidateSelf();
+    }
+
+    @Override
+    public int getIntrinsicWidth() {
+        return super.getIntrinsicWidth();
+    }
+
+    @Override
+    public int getIntrinsicHeight() {
+        return super.getIntrinsicHeight();
     }
 }

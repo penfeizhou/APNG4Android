@@ -2,6 +2,8 @@ package com.yupaopao.animation.apng;
 
 import android.content.Context;
 
+import com.yupaopao.animation.apng.chunk.APNGStreamLoader;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -10,7 +12,7 @@ import java.io.InputStream;
  * @Author: pengfei.zhou
  * @CreateDate: 2019/3/28
  */
-public class APNGResourceLoader implements APNGStreamLoader {
+public class APNGResourceLoader extends APNGStreamLoader {
     private final Context mContext;
     private final int mResId;
 
