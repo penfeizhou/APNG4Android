@@ -9,7 +9,6 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
 
@@ -19,6 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Description: APNG解码器
@@ -37,12 +39,11 @@ public class APNGDecoder {
     private int num_plays;
     private Integer loopLimit = null;
     private int num_frames;
-    private final Handler animationHandler;
     private final Handler uiHandler;
     private final RenderListener renderListener;
     private boolean running;
     private final APNGStreamLoader mAPNGStreamLoader;
-    private Bitmap cachedBitmap;
+    // private Bitmap cachedBitmap;
     private Bitmap templateBitmap;
     private Runnable renderTask = new Runnable() {
         @Override
@@ -51,8 +52,8 @@ public class APNGDecoder {
                 long start = System.currentTimeMillis();
                 long delay = step();
                 long cost = System.currentTimeMillis() - start;
-                animationHandler.postDelayed(this, Math.max(0, delay - cost));
-                cachedBitmap = Bitmap.createBitmap(bitmap);
+                scheduledThreadPoolExecutor.schedule(this, Math.max(0, delay - cost), TimeUnit.MILLISECONDS);
+                //cachedBitmap = Bitmap.createBitmap(bitmap);
                 uiHandler.post(invalidateRunnable);
                 Log.i(TAG, String.format("delay:%d,cost:%d", delay, cost));
             } else {
@@ -64,28 +65,13 @@ public class APNGDecoder {
     private Runnable invalidateRunnable = new Runnable() {
         @Override
         public void run() {
-            renderListener.onRender(cachedBitmap);
+            renderListener.onRender(bitmap);
         }
     };
     private int sampleSize = 1;
     private final Mode mode;
 
-    private static final class InnerHandlerProvider {
-        private static final Handler sAnimationHandler = createAnimationHandler();
-
-        private static Handler createAnimationHandler() {
-            HandlerThread handlerThread = new HandlerThread("apng");
-            handlerThread.start();
-            handlerThread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-                @Override
-                public void uncaughtException(Thread t, Throwable e) {
-                    Log.e(TAG, t.toString() + "," + e.getLocalizedMessage());
-                    e.printStackTrace();
-                }
-            });
-            return new Handler(handlerThread.getLooper());
-        }
-    }
+    private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1, new ThreadPoolExecutor.DiscardPolicy());
 
     /**
      * 解码器的渲染回调
@@ -148,7 +134,6 @@ public class APNGDecoder {
         this.mAPNGStreamLoader = provider;
         this.renderListener = renderListener;
         this.uiHandler = new Handler();
-        this.animationHandler = getAnimationHandler(parallel);
         this.mode = mode;
     }
 
@@ -163,7 +148,7 @@ public class APNGDecoder {
                 }
             };
             FutureTask<Rect> futureTask = new FutureTask<>(callable);
-            animationHandler.post(futureTask);
+            scheduledThreadPoolExecutor.execute(futureTask);
             try {
                 fullRect = futureTask.get();
             } catch (Exception e) {
@@ -173,16 +158,8 @@ public class APNGDecoder {
         }
     }
 
-    private Handler getAnimationHandler(boolean parallel) {
-        if (parallel) {
-            return InnerHandlerProvider.createAnimationHandler();
-        } else {
-            return InnerHandlerProvider.sAnimationHandler;
-        }
-    }
-
     public void start() {
-        animationHandler.post(new Runnable() {
+        scheduledThreadPoolExecutor.execute(new Runnable() {
             @Override
             public void run() {
                 if (frames.size() == 0) {
@@ -194,9 +171,9 @@ public class APNGDecoder {
             Log.i(TAG, "Already started");
         } else {
             running = true;
-            animationHandler.removeCallbacks(renderTask);
+            scheduledThreadPoolExecutor.remove(renderTask);
             uiHandler.removeCallbacks(invalidateRunnable);
-            animationHandler.post(renderTask);
+            scheduledThreadPoolExecutor.execute(renderTask);
             renderListener.onStart();
         }
     }
@@ -205,8 +182,8 @@ public class APNGDecoder {
         boolean tempRunning = running;
         running = false;
         uiHandler.removeCallbacks(invalidateRunnable);
-        animationHandler.removeCallbacks(renderTask);
-        animationHandler.post(new Runnable() {
+        scheduledThreadPoolExecutor.remove(renderTask);
+        scheduledThreadPoolExecutor.execute(new Runnable() {
             @Override
             public void run() {
                 for (AbstractFrame frame : frames) {
@@ -217,20 +194,17 @@ public class APNGDecoder {
                     bitmap.recycle();
                     bitmap = null;
                 }
-                if (cachedBitmap != null && !cachedBitmap.isRecycled()) {
-                    cachedBitmap.recycle();
-                    cachedBitmap = null;
-                }
+//                if (cachedBitmap != null && !cachedBitmap.isRecycled()) {
+//                    cachedBitmap.recycle();
+//                    cachedBitmap = null;
+//                }
                 if (templateBitmap != null && !templateBitmap.isRecycled()) {
                     templateBitmap.recycle();
                     templateBitmap = null;
                 }
             }
         });
-        if (animationHandler.getLooper() != InnerHandlerProvider.sAnimationHandler.getLooper()) {
-            animationHandler.getLooper().quitSafely();
-            animationHandler.getLooper().getThread().interrupt();
-        }
+        scheduledThreadPoolExecutor.shutdownNow();
         if (tempRunning) {
             renderListener.onEnd();
         }
@@ -255,7 +229,7 @@ public class APNGDecoder {
             this.sampleSize = sample;
             final boolean tempRunning = running;
             stop();
-            animationHandler.post(new Runnable() {
+            scheduledThreadPoolExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     frames.clear();
@@ -293,14 +267,22 @@ public class APNGDecoder {
             List<Chunk> otherChunks = new ArrayList<>();
             ACTLChunk actlChunk;
             IHDRChunk ihdrChunk = null;
+            int pos = 8;
             while ((chunk = Chunk.read(inputStream, mode == Mode.MODE_MEMORY)) != null) {
+                pos += chunk.getRawDataLength();
                 if (chunk instanceof IENDChunk) {
+                    if (lastSeq >= 0) {
+                        frames.get(lastSeq).endPos = pos;
+                    }
                     break;
                 } else if (chunk instanceof ACTLChunk) {
                     actlChunk = (ACTLChunk) chunk;
                     this.num_frames = actlChunk.num_frames;
                     this.num_plays = actlChunk.num_plays;
                 } else if (chunk instanceof FCTLChunk) {
+                    if (lastSeq >= 0) {
+                        frames.get(lastSeq).endPos = pos;
+                    }
                     lastSeq++;
                     AbstractFrame frame;
                     switch (mode) {
@@ -322,6 +304,7 @@ public class APNGDecoder {
                             break;
                     }
                     frame.sequence_number = lastSeq;
+                    frame.startPos = pos;
                     frames.add(frame);
                 } else if (chunk instanceof FDATChunk) {
                     AbstractFrame frame = frames.get(lastSeq);

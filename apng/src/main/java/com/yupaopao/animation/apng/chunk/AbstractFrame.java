@@ -18,6 +18,8 @@ import java.util.List;
 abstract class AbstractFrame {
     static final String TAG = AbstractFrame.class.getSimpleName();
     final APNGStreamLoader streamLoader;
+    public int startPos;
+    public int endPos;
     int sequence_number;
     private static final byte[] sPNGSignatures = {(byte) 137, 80, 78, 71, 13, 10, 26, 10};
     private static final byte[] sPNGEndChunk = {0, 0, 0, 0, 0x49, 0x45, 0x4E, 0x44, (byte) 0xAE, 0x42, 0x60, (byte) 0x82};

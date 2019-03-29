@@ -25,12 +25,13 @@ class BalancedFrame extends AbstractFrame {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = false;
         options.inSampleSize = sampleSize;
+        options.inMutable = true;
         if (reusedBitmap != null
-                && !reusedBitmap.isRecycled()
-                && reusedBitmap.getWidth() >= srcRect.width()
-                && reusedBitmap.getHeight() >= srcRect.height()) {
-             options.inBitmap = reusedBitmap;
+                && !reusedBitmap.isRecycled()) {
+            reusedBitmap.reconfigure(srcRect.width(), srcRect.height(), Bitmap.Config.ARGB_8888);
+            reusedBitmap.eraseColor(0);
         }
+        options.inBitmap = reusedBitmap;
         Bitmap bitmap = BitmapFactory.decodeStream(toInputStream(), null, options);
         assert bitmap != null;
         canvas.drawBitmap(bitmap, srcRect, dstRect, paint);

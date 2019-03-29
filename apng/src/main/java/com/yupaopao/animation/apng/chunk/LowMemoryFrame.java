@@ -26,25 +26,17 @@ class LowMemoryFrame extends AbstractFrame {
         InputStream inputStream = null;
         try {
             inputStream = streamLoader.getInputStream();
-            inputStream.skip(8);
+            inputStream.skip(startPos);
             Chunk chunk;
-            int lastSeq = -1;
             while ((chunk = Chunk.read(inputStream, false)) != null) {
                 if (chunk instanceof IENDChunk) {
                     break;
                 } else if (chunk instanceof FCTLChunk) {
-                    if (lastSeq >= sequence_number) {
-                        break;
-                    }
-                    lastSeq++;
+                    break;
                 } else if (chunk instanceof FDATChunk) {
-                    if (lastSeq == sequence_number) {
-                        chunkChain.add(new FakedIDATChunk((FDATChunk) chunk));
-                    }
+                    chunkChain.add(new FakedIDATChunk((FDATChunk) chunk));
                 } else if (chunk instanceof IDATChunk) {
-                    if (lastSeq == sequence_number) {
-                        chunkChain.add((IDATChunk) chunk);
-                    }
+                    chunkChain.add((IDATChunk) chunk);
                 }
             }
         } catch (IOException e) {
@@ -66,9 +58,14 @@ class LowMemoryFrame extends AbstractFrame {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = false;
         options.inSampleSize = sampleSize;
+        options.inMutable = true;
+        if (reusedBitmap != null
+                && !reusedBitmap.isRecycled()) {
+            reusedBitmap.reconfigure(srcRect.width(), srcRect.height(), Bitmap.Config.ARGB_8888);
+            reusedBitmap.eraseColor(0);
+        }
         options.inBitmap = reusedBitmap;
-        InputStream inputStream = toInputStream();
-        Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, options);
+        Bitmap bitmap = BitmapFactory.decodeStream(toInputStream(), null, options);
         assert bitmap != null;
         canvas.drawBitmap(bitmap, srcRect, dstRect, paint);
         if (reusedBitmap != bitmap) {
