@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 APNGDrawable apngDrawable = new APNGDrawable(
                         new APNGAssetLoader(MainActivity.this,
-                                "feeds_apng_like_red.png"));
+                                "wheel.png"));
                 imageView.setImageDrawable(apngDrawable);
             }
         });

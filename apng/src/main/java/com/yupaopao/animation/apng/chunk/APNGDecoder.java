@@ -10,6 +10,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
 import android.util.SparseArray;
@@ -79,7 +80,9 @@ public class APNGDecoder {
             animationHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    readInputStream();
+                    if (frames.size() == 0) {
+                        readInputStream();
+                    }
                 }
             });
         }
@@ -117,7 +120,9 @@ public class APNGDecoder {
                 @Override
                 public void run() {
                     frames.clear();
+                    Log.d(TAG, "read start," + Looper.myLooper());
                     readInputStream();
+                    Log.d(TAG, "read stop," + Looper.myLooper());
                 }
             });
         } else {
