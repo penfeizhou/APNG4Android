@@ -10,7 +10,6 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Looper;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
 import android.util.SparseArray;
@@ -42,7 +41,7 @@ public class APNGDecoder {
     private final Handler uiHandler;
     private final RenderListener renderListener;
     private boolean running;
-    private final APNGStreamLoader APNGStreamLoader;
+    private final APNGStreamLoader mAPNGStreamLoader;
     private Runnable renderTask = new Runnable() {
         @Override
         public void run() {
@@ -65,14 +64,35 @@ public class APNGDecoder {
     private int desiredWidth;
     private int desiredHeight;
 
+    private static final class InnerHandlerProvider {
+        private static final Handler sAnimationHandler = createAnimationHandler();
+
+        private static Handler createAnimationHandler() {
+            HandlerThread handlerThread = new HandlerThread("apng");
+            handlerThread.start();
+            return new Handler(handlerThread.getLooper());
+        }
+    }
+
     public APNGDecoder(APNGStreamLoader provider, RenderListener renderListener) {
-        this.APNGStreamLoader = provider;
+        this(provider, renderListener, false);
+    }
+
+    public APNGDecoder(APNGStreamLoader provider, RenderListener renderListener, boolean parallel) {
+        this.mAPNGStreamLoader = provider;
         this.renderListener = renderListener;
         this.uiHandler = new Handler();
+        this.animationHandler = getAnimationHandler(parallel);
+    }
 
-        HandlerThread handlerThread = new HandlerThread("apng");
-        handlerThread.start();
-        animationHandler = new Handler(handlerThread.getLooper());
+    private Handler getAnimationHandler(boolean parallel) {
+        if (parallel) {
+            HandlerThread handlerThread = new HandlerThread("apng");
+            handlerThread.start();
+            return new Handler(handlerThread.getLooper());
+        } else {
+            return InnerHandlerProvider.sAnimationHandler;
+        }
     }
 
     public void start() {
@@ -120,9 +140,7 @@ public class APNGDecoder {
                 @Override
                 public void run() {
                     frames.clear();
-                    Log.d(TAG, "read start," + Looper.myLooper());
                     readInputStream();
-                    Log.d(TAG, "read stop," + Looper.myLooper());
                 }
             });
         } else {
@@ -160,7 +178,7 @@ public class APNGDecoder {
     private void readInputStream() {
         InputStream inputStream = null;
         try {
-            inputStream = APNGStreamLoader.getInputStream();
+            inputStream = mAPNGStreamLoader.getInputStream();
             byte[] sigBytes = new byte[8];
             inputStream.read(sigBytes);
             String signature = new String(sigBytes);
@@ -213,7 +231,6 @@ public class APNGDecoder {
             }
         }
     }
-
 
     private int getNumPlays() {
         return this.num_plays;
