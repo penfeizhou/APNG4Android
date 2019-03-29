@@ -61,8 +61,6 @@ public class APNGDecoder {
         }
     };
     private int sampleSize = 1;
-    private int desiredWidth;
-    private int desiredHeight;
 
     private static final class InnerHandlerProvider {
         private static final Handler sAnimationHandler = createAnimationHandler();
@@ -147,42 +145,34 @@ public class APNGDecoder {
     }
 
 
+    public int getSampleSize() {
+        return sampleSize;
+    }
+
     public void setDesiredSize(int width, int height) {
-        desiredWidth = width;
-        desiredHeight = height;
-        if (fullRect == null) {
+        int sample = getDesiredSample(width, height);
+        if (sample != this.sampleSize) {
+            this.sampleSize = sample;
+            final boolean tempRunning = running;
+            stop();
             animationHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     frames.clear();
                     readInputStream();
+                    if (tempRunning) {
+                        start();
+                    }
                 }
             });
-        } else {
-            int sample = getDesiredSample();
-            if (sample != this.sampleSize) {
-                this.sampleSize = sample;
-                final boolean tempRunning = running;
-                stop();
-                animationHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        frames.clear();
-                        readInputStream();
-                        if (tempRunning) {
-                            start();
-                        }
-                    }
-                });
-            }
         }
     }
 
-    private int getDesiredSample() {
-        if (fullRect == null || desiredWidth == 0 || desiredHeight == 0) {
+    private int getDesiredSample(int desiredWidth, int desiredHeight) {
+        if (desiredWidth == 0 || desiredHeight == 0) {
             return 1;
         }
-        int radio = Math.min(fullRect.width() / desiredWidth, fullRect.height() / desiredHeight);
+        int radio = Math.min(getBounds().width() / desiredWidth, getBounds().height() / desiredHeight);
         int sample = 1;
         while ((sample * 2) <= radio) {
             sample *= 2;
@@ -333,7 +323,6 @@ public class APNGDecoder {
                 break;
         }
         fullRect = new Rect(0, 0, ihdrChunk.width, ihdrChunk.height);
-        sampleSize = getDesiredSample();
         bitmap = Bitmap.createBitmap(ihdrChunk.width / sampleSize, ihdrChunk.height / sampleSize, config);
         canvas = new Canvas(bitmap);
         canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
@@ -344,13 +333,5 @@ public class APNGDecoder {
 
     public interface RenderListener {
         void onRender(Bitmap bitmap);
-    }
-
-    public int getWidth() {
-        return fullRect.width();
-    }
-
-    public int getHeight() {
-        return fullRect.height();
     }
 }

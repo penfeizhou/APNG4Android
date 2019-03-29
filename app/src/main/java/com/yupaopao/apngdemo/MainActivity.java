@@ -2,11 +2,13 @@ package com.yupaopao.apngdemo;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
 import com.yupaopao.animation.apng.APNGAssetLoader;
 import com.yupaopao.animation.apng.APNGDrawable;
+import com.yupaopao.animation.apng.APNGResourceLoader;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,10 +24,18 @@ public class MainActivity extends AppCompatActivity {
                     ((APNGDrawable) imageView.getDrawable()).stop();
                 }
                 APNGDrawable apngDrawable = new APNGDrawable(
-                        new APNGAssetLoader(MainActivity.this,
-                                "wheel.png"));
+                        new APNGResourceLoader(MainActivity.this, R.drawable.sample));
                 imageView.setImageDrawable(apngDrawable);
             }
         });
+        if (imageView.getDrawable() instanceof APNGDrawable) {
+            ((APNGDrawable) imageView.getDrawable()).stop();
+        }
+        APNGDrawable apngDrawable = new APNGDrawable(
+                new APNGResourceLoader(MainActivity.this, R.drawable.wheel));
+        imageView.setImageDrawable(apngDrawable);
+        APNGAssetLoader apngAssetLoader = new APNGAssetLoader(MainActivity.this,
+                "wheel.png");
+        Log.d("test", "wheel check apng" + apngAssetLoader.isAPNG());
     }
 }

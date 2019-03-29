@@ -25,6 +25,7 @@ public class APNGDrawable extends Drawable implements Animatable, APNGDecoder.Re
     private final APNGDecoder apngDecoder;
     private DrawFilter drawFilter = new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
     private Bitmap bitmap;
+    private Matrix matrix = new Matrix();
 
     public APNGDrawable(APNGStreamLoader provider) {
         paint.setAntiAlias(true);
@@ -53,8 +54,6 @@ public class APNGDrawable extends Drawable implements Animatable, APNGDecoder.Re
             return;
         }
         canvas.setDrawFilter(drawFilter);
-        Matrix matrix = new Matrix();
-        matrix.setScale(1.0f * getBounds().width() / bitmap.getWidth(), 1.0f * getBounds().height() / bitmap.getHeight());
         canvas.drawBitmap(bitmap, matrix, paint);
     }
 
@@ -62,6 +61,9 @@ public class APNGDrawable extends Drawable implements Animatable, APNGDecoder.Re
     public void setBounds(int left, int top, int right, int bottom) {
         super.setBounds(left, top, right, bottom);
         apngDecoder.setDesiredSize(getBounds().width(), getBounds().height());
+        matrix.setScale(
+                1.0f * getBounds().width() * apngDecoder.getSampleSize() / apngDecoder.getBounds().width(),
+                1.0f * getBounds().height() * apngDecoder.getSampleSize() / apngDecoder.getBounds().height());
         if (!isRunning()) {
             start();
         }
@@ -90,11 +92,11 @@ public class APNGDrawable extends Drawable implements Animatable, APNGDecoder.Re
 
     @Override
     public int getIntrinsicWidth() {
-        return super.getIntrinsicWidth();
+        return apngDecoder.getBounds().width();
     }
 
     @Override
     public int getIntrinsicHeight() {
-        return super.getIntrinsicHeight();
+        return apngDecoder.getBounds().height();
     }
 }
