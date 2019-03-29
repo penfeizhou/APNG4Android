@@ -22,16 +22,20 @@ class Chunk {
     void parse() {
     }
 
-    static Chunk read(InputStream inputStream) throws IOException {
+    static Chunk read(InputStream inputStream, boolean skipData) throws IOException {
         int length = readIntFromInputStream(inputStream);
         String typeCode = readTypeCodeFromInputStream(inputStream);
         Chunk chunk = newInstance(typeCode);
         chunk.typeCode = typeCode;
         chunk.length = length;
-        chunk.data = new byte[chunk.length];
-        inputStream.read(chunk.data);
-        chunk.crc = readIntFromInputStream(inputStream);
-        chunk.parse();
+        if (skipData && (chunk instanceof IDATChunk || chunk instanceof FDATChunk)) {
+            inputStream.skip(length + 4);
+        } else {
+            chunk.data = new byte[chunk.length];
+            inputStream.read(chunk.data);
+            chunk.crc = readIntFromInputStream(inputStream);
+            chunk.parse();
+        }
         return chunk;
     }
 

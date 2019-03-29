@@ -18,7 +18,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
 /**
@@ -28,7 +27,7 @@ import java.util.concurrent.FutureTask;
  */
 public class APNGDecoder {
     private static final String TAG = APNGDecoder.class.getSimpleName();
-    private List<Frame> frames = new ArrayList<>();
+    private List<AbstractFrame> frames = new ArrayList<>();
     private Bitmap bitmap;
     private Canvas canvas;
     private int frameIndex = -1;
@@ -43,6 +42,7 @@ public class APNGDecoder {
     private final RenderListener renderListener;
     private boolean running;
     private final APNGStreamLoader mAPNGStreamLoader;
+    private Bitmap cachedBitmap;
     private Runnable renderTask = new Runnable() {
         @Override
         public void run() {
@@ -51,7 +51,9 @@ public class APNGDecoder {
                 long delay = step();
                 long cost = System.currentTimeMillis() - start;
                 animationHandler.postDelayed(this, Math.max(0, delay - cost));
+                cachedBitmap = Bitmap.createBitmap(bitmap);
                 uiHandler.post(invalidateRunnable);
+                Log.d(TAG, String.format("delay:%d,cost:%d", delay, cost));
             } else {
                 stop();
             }
@@ -61,10 +63,11 @@ public class APNGDecoder {
     private Runnable invalidateRunnable = new Runnable() {
         @Override
         public void run() {
-            renderListener.onRender(bitmap);
+            renderListener.onRender(cachedBitmap);
         }
     };
     private int sampleSize = 1;
+    private boolean optimized = false;
 
     private static final class InnerHandlerProvider {
         private static final Handler sAnimationHandler = createAnimationHandler();
@@ -86,6 +89,10 @@ public class APNGDecoder {
         this.uiHandler = new Handler();
         this.animationHandler = getAnimationHandler(parallel);
 
+    }
+
+    public void setOptimize(boolean v) {
+        this.optimized = v;
     }
 
     public Rect getBounds() {
@@ -147,12 +154,16 @@ public class APNGDecoder {
         animationHandler.post(new Runnable() {
             @Override
             public void run() {
-                for (Frame frame : frames) {
-                    frame.clearBitmap();
+                for (AbstractFrame frame : frames) {
+                    frame.recycle();
                 }
                 frames.clear();
             }
         });
+        if (bitmap != null && !bitmap.isRecycled()) {
+            bitmap.recycle();
+            bitmap = null;
+        }
         if (tempRunning) {
             renderListener.onEnd();
         }
@@ -215,7 +226,8 @@ public class APNGDecoder {
             int lastSeq = -1;
             List<Chunk> otherChunks = new ArrayList<>();
             ACTLChunk actlChunk;
-            while ((chunk = Chunk.read(inputStream)) != null) {
+            IHDRChunk ihdrChunk = null;
+            while ((chunk = Chunk.read(inputStream, optimized)) != null) {
                 if (chunk instanceof IENDChunk) {
                     break;
                 } else if (chunk instanceof ACTLChunk) {
@@ -224,27 +236,36 @@ public class APNGDecoder {
                     this.num_plays = actlChunk.num_plays;
                 } else if (chunk instanceof FCTLChunk) {
                     lastSeq++;
-                    Frame frame = new Frame();
+                    AbstractFrame frame;
+                    if (optimized) {
+                        frame = new OptimizedFrame(ihdrChunk,
+                                (FCTLChunk) chunk, otherChunks,
+                                sampleSize, mAPNGStreamLoader);
+                    } else {
+                        frame = new Frame(ihdrChunk,
+                                (FCTLChunk) chunk, otherChunks,
+                                sampleSize, mAPNGStreamLoader);
+                    }
                     frame.otherChunks.addAll(otherChunks);
-                    frame.sampleSize = sampleSize;
-                    frames.add(frame);
                     frame.sequence_number = lastSeq;
-                    frame.fctlChunk = (FCTLChunk) chunk;
+                    frames.add(frame);
                 } else if (chunk instanceof FDATChunk) {
-                    Frame frame = frames.get(lastSeq);
-                    if (frame != null) {
-                        frame.idatChunks.add(new FakedIDATChunk((FDATChunk) chunk));
+                    AbstractFrame frame = frames.get(lastSeq);
+                    if (frame instanceof Frame) {
+                        ((Frame) frame).idatChunks.add(new FakedIDATChunk((FDATChunk) chunk));
                     }
                 } else if (chunk instanceof IDATChunk) {
-                    Frame frame = frames.get(lastSeq);
-                    if (frame != null) {
-                        frame.idatChunks.add((IDATChunk) chunk);
+                    AbstractFrame frame = frames.get(lastSeq);
+                    if (frame instanceof Frame) {
+                        ((Frame) frame).idatChunks.add((IDATChunk) chunk);
                     }
                 } else {
                     if (chunk instanceof IHDRChunk) {
+                        ihdrChunk = (IHDRChunk) chunk;
                         createCanvas((IHDRChunk) chunk);
+                    } else {
+                        otherChunks.add(chunk);
                     }
-                    otherChunks.add(chunk);
                 }
             }
         } catch (IOException e) {
@@ -287,8 +308,7 @@ public class APNGDecoder {
             this.frameIndex = 0;
             this.playCount++;
         }
-        Frame frame = getFrame(this.frameIndex);
-        frame.prepare();
+        AbstractFrame frame = getFrame(this.frameIndex);
         blendOp();
         return frame.delay;
     }
@@ -299,12 +319,12 @@ public class APNGDecoder {
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
             return;
         }
-        Frame frame = getFrame(this.frameIndex);
-        frame.prepare();
+        AbstractFrame frame = getFrame(this.frameIndex);
         switch (frame.dispose_op) {
             case FCTLChunk.APNG_DISPOSE_OP_PREVIOUS:
                 canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
-                canvas.drawBitmap(frame.bitmap, frame.srcRect, frame.dstRect, paint);
+                Bitmap bitmap = frame.toBitmap();
+                canvas.drawBitmap(bitmap, frame.srcRect, frame.dstRect, paint);
                 break;
             case FCTLChunk.APNG_DISPOSE_OP_BACKGROUND:
                 canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
@@ -317,16 +337,16 @@ public class APNGDecoder {
     }
 
     private void blendOp() {
-        Frame frame = getFrame(this.frameIndex);
-        frame.prepare();
+        AbstractFrame frame = getFrame(this.frameIndex);
         canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
         if (frame.blend_op == FCTLChunk.APNG_BLEND_OP_SOURCE) {
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         }
-        canvas.drawBitmap(frame.bitmap, frame.srcRect, frame.dstRect, paint);
+        Bitmap bitmap = frame.toBitmap();
+        canvas.drawBitmap(bitmap, frame.srcRect, frame.dstRect, paint);
     }
 
-    private Frame getFrame(int index) {
+    private AbstractFrame getFrame(int index) {
         return frames.get(index);
     }
 

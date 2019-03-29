@@ -48,7 +48,7 @@ public abstract class APNGStreamLoader {
                 return null;
             }
             Chunk chunk;
-            while ((chunk = Chunk.read(inputStream)) != null) {
+            while ((chunk = Chunk.read(inputStream, true)) != null) {
                 if (chunk.getClass() == clz) {
                     return (T) chunk;
                 }
