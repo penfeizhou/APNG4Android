@@ -17,7 +17,7 @@ class Chunk {
     String typeCode;
     byte[] data;
     int crc;
-    private static byte[] __intBytes = new byte[4];
+    private static ThreadLocal<byte[]> __intBytes = new ThreadLocal<>();
 
     void parse() {
     }
@@ -67,14 +67,23 @@ class Chunk {
         return chunk;
     }
 
+    private static byte[] ensureBytes() {
+        byte[] bytes = __intBytes.get();
+        if (bytes == null) {
+            bytes = new byte[4];
+            __intBytes.set(bytes);
+        }
+        return bytes;
+    }
+
     private static int readIntFromInputStream(InputStream inputStream) throws IOException {
-        inputStream.read(__intBytes);
-        return byteArrayToInt(__intBytes);
+        inputStream.read(ensureBytes());
+        return byteArrayToInt(ensureBytes());
     }
 
     private static String readTypeCodeFromInputStream(InputStream inputStream) throws IOException {
-        inputStream.read(__intBytes);
-        return new String(__intBytes);
+        inputStream.read(ensureBytes());
+        return new String(ensureBytes());
     }
 
 
