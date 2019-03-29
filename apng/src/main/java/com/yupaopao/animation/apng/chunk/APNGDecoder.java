@@ -45,7 +45,10 @@ public class APNGDecoder {
         @Override
         public void run() {
             if (canStep()) {
-                animationHandler.postDelayed(this, step());
+                long start = System.currentTimeMillis();
+                long delay = step();
+                long cost = System.currentTimeMillis() - start;
+                animationHandler.postDelayed(this, Math.max(0, delay - cost));
                 uiHandler.post(invalidateRunnable);
             } else {
                 stop();
