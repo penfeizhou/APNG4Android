@@ -11,12 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @Description: 实时从流里解码帧图，减少内存占用
+ * @Description: 帧每次绘制时实时从流种读取APNG原始信息并解码，速度最慢，java内存及memory占用内存都低
  * @Author: pengfei.zhou
  * @CreateDate: 2019/3/29
  */
-class OptimizedFrame extends AbstractFrame {
-    OptimizedFrame(IHDRChunk ihdrChunk, FCTLChunk fctlChunk, List<Chunk> otherChunks, int sampleSize, APNGStreamLoader streamLoader) {
+class LowMemoryFrame extends AbstractFrame {
+    LowMemoryFrame(IHDRChunk ihdrChunk, FCTLChunk fctlChunk, List<Chunk> otherChunks, int sampleSize, APNGStreamLoader streamLoader) {
         super(ihdrChunk, fctlChunk, otherChunks, sampleSize, streamLoader);
     }
 
@@ -67,7 +67,8 @@ class OptimizedFrame extends AbstractFrame {
         options.inJustDecodeBounds = false;
         options.inSampleSize = sampleSize;
         options.inBitmap = reusedBitmap;
-        Bitmap bitmap = BitmapFactory.decodeStream(toInputStream(), null, options);
+        InputStream inputStream = toInputStream();
+        Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, options);
         assert bitmap != null;
         canvas.drawBitmap(bitmap, srcRect, dstRect, paint);
         if (reusedBitmap != bitmap) {

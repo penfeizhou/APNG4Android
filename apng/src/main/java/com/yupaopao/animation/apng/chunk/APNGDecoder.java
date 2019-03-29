@@ -43,7 +43,7 @@ public class APNGDecoder {
     private boolean running;
     private final APNGStreamLoader mAPNGStreamLoader;
     private Bitmap cachedBitmap;
-    private Bitmap templeateBitmap;
+    private Bitmap templateBitmap;
     private Runnable renderTask = new Runnable() {
         @Override
         public void run() {
@@ -68,7 +68,7 @@ public class APNGDecoder {
         }
     };
     private int sampleSize = 1;
-    private final boolean optimized;
+    private final FrameMode frameMode;
 
     private static final class InnerHandlerProvider {
         private static final Handler sAnimationHandler = createAnimationHandler();
@@ -80,22 +80,69 @@ public class APNGDecoder {
         }
     }
 
+    /**
+     * 解码器的渲染回调
+     */
+    public interface RenderListener {
+        /**
+         * 播放开始
+         */
+        void onStart();
+
+        /**
+         * 帧播放
+         */
+        void onRender(Bitmap bitmap);
+
+        /**
+         * 播放结束
+         */
+        void onEnd();
+    }
+
+    public enum FrameMode {
+        /**
+         * 播放速度优先
+         * 该模式下每一帧都缓存解码后的bitmap
+         * java memory低，native memory占用高
+         * 播放速度最快
+         * 大图模式下容易引发OOM，推荐仅小图使用
+         */
+        MODE_SPEED,
+        /**
+         * 内存占用优先
+         * 该模式下每一帧仅保留基本信息，播放时实时从流中实时读取到内存并解码
+         * java memory略高，native memory占用低
+         * 播放速度最慢
+         * 推荐在帧间隔较大情况下使用
+         */
+        MODE_MEMORY,
+        /**
+         * 平衡策略
+         * 该模式下每一帧保留图像原始信息，播放时从内存中解码
+         * java memory高，native memory占用低
+         * 播放速度较慢
+         * 默认使用这种模式
+         */
+        MODE_BALANCED,
+    }
+
     public APNGDecoder(APNGStreamLoader provider, RenderListener renderListener) {
-        this(provider, renderListener, false, true);
+        this(provider, renderListener, false, FrameMode.MODE_BALANCED);
     }
 
     /**
      * @param provider       APNG文件流加载器
      * @param renderListener 渲染的回调
      * @param parallel       是否创建新线程以播放动画，默认为false
-     * @param optimized      是否启用内存优化模式，默认为true
+     * @param frameMode      帧播放方式,@see FrameMode
      */
-    public APNGDecoder(APNGStreamLoader provider, RenderListener renderListener, boolean parallel, boolean optimized) {
+    public APNGDecoder(APNGStreamLoader provider, RenderListener renderListener, boolean parallel, FrameMode frameMode) {
         this.mAPNGStreamLoader = provider;
         this.renderListener = renderListener;
         this.uiHandler = new Handler();
         this.animationHandler = getAnimationHandler(parallel);
-        this.optimized = optimized;
+        this.frameMode = frameMode;
     }
 
     public Rect getBounds() {
@@ -169,9 +216,9 @@ public class APNGDecoder {
                     cachedBitmap.recycle();
                     cachedBitmap = null;
                 }
-                if (templeateBitmap != null && !templeateBitmap.isRecycled()) {
-                    templeateBitmap.recycle();
-                    templeateBitmap = null;
+                if (templateBitmap != null && !templateBitmap.isRecycled()) {
+                    templateBitmap.recycle();
+                    templateBitmap = null;
                 }
             }
         });
@@ -239,7 +286,7 @@ public class APNGDecoder {
             List<Chunk> otherChunks = new ArrayList<>();
             ACTLChunk actlChunk;
             IHDRChunk ihdrChunk = null;
-            while ((chunk = Chunk.read(inputStream, optimized)) != null) {
+            while ((chunk = Chunk.read(inputStream, frameMode == FrameMode.MODE_MEMORY)) != null) {
                 if (chunk instanceof IENDChunk) {
                     break;
                 } else if (chunk instanceof ACTLChunk) {
@@ -249,27 +296,36 @@ public class APNGDecoder {
                 } else if (chunk instanceof FCTLChunk) {
                     lastSeq++;
                     AbstractFrame frame;
-                    if (optimized) {
-                        frame = new OptimizedFrame(ihdrChunk,
-                                (FCTLChunk) chunk, otherChunks,
-                                sampleSize, mAPNGStreamLoader);
-                    } else {
-                        frame = new Frame(ihdrChunk,
-                                (FCTLChunk) chunk, otherChunks,
-                                sampleSize, mAPNGStreamLoader);
+                    switch (frameMode) {
+                        case MODE_SPEED:
+                            frame = new SpeedFirstFrame(ihdrChunk,
+                                    (FCTLChunk) chunk, otherChunks,
+                                    sampleSize, mAPNGStreamLoader);
+                            break;
+                        case MODE_MEMORY:
+                            frame = new LowMemoryFrame(ihdrChunk,
+                                    (FCTLChunk) chunk, otherChunks,
+                                    sampleSize, mAPNGStreamLoader);
+                            break;
+                        case MODE_BALANCED:
+                        default:
+                            frame = new BalancedFrame(ihdrChunk,
+                                    (FCTLChunk) chunk, otherChunks,
+                                    sampleSize, mAPNGStreamLoader);
+                            break;
                     }
                     frame.otherChunks.addAll(otherChunks);
                     frame.sequence_number = lastSeq;
                     frames.add(frame);
                 } else if (chunk instanceof FDATChunk) {
                     AbstractFrame frame = frames.get(lastSeq);
-                    if (frame instanceof Frame) {
-                        ((Frame) frame).idatChunks.add(new FakedIDATChunk((FDATChunk) chunk));
+                    if (frame instanceof BalancedFrame) {
+                        ((BalancedFrame) frame).idatChunks.add(new FakedIDATChunk((FDATChunk) chunk));
                     }
                 } else if (chunk instanceof IDATChunk) {
                     AbstractFrame frame = frames.get(lastSeq);
-                    if (frame instanceof Frame) {
-                        ((Frame) frame).idatChunks.add((IDATChunk) chunk);
+                    if (frame instanceof BalancedFrame) {
+                        ((BalancedFrame) frame).idatChunks.add((IDATChunk) chunk);
                     }
                 } else {
                     if (chunk instanceof IHDRChunk) {
@@ -335,7 +391,7 @@ public class APNGDecoder {
         switch (frame.dispose_op) {
             case FCTLChunk.APNG_DISPOSE_OP_PREVIOUS:
                 canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
-                frame.draw(canvas, paint, templeateBitmap);
+                frame.draw(canvas, paint, templateBitmap);
                 break;
             case FCTLChunk.APNG_DISPOSE_OP_BACKGROUND:
                 canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
@@ -353,7 +409,7 @@ public class APNGDecoder {
         if (frame.blend_op == FCTLChunk.APNG_BLEND_OP_SOURCE) {
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         }
-        frame.draw(canvas, paint, templeateBitmap);
+        frame.draw(canvas, paint, templateBitmap);
     }
 
     private AbstractFrame getFrame(int index) {
@@ -381,14 +437,7 @@ public class APNGDecoder {
         canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));
         paint = new Paint();
         paint.setAntiAlias(true);
-        templeateBitmap = Bitmap.createBitmap(ihdrChunk.width / sampleSize, ihdrChunk.height / sampleSize, config);
+        templateBitmap = Bitmap.createBitmap(ihdrChunk.width / sampleSize, ihdrChunk.height / sampleSize, config);
     }
 
-    public interface RenderListener {
-        void onStart();
-
-        void onRender(Bitmap bitmap);
-
-        void onEnd();
-    }
 }

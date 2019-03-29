@@ -5,19 +5,17 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @Description: 一帧图片所需信息及动画控制参数
+ * @Description: 帧信息中保存图像原始数据，缓存解码后的Bitmap，速度最快，java内存和native内存都很高
  * @Author: pengfei.zhou
- * @CreateDate: 2019/3/27
+ * @CreateDate: 2019/3/29
  */
-class Frame extends AbstractFrame {
-    List<IDATChunk> idatChunks = new ArrayList<>();
+public class SpeedFirstFrame extends BalancedFrame {
     Bitmap bitmap;
 
-    Frame(IHDRChunk ihdrChunk, FCTLChunk fctlChunk, List<Chunk> otherChunks, int sampleSize, APNGStreamLoader streamLoader) {
+    SpeedFirstFrame(IHDRChunk ihdrChunk, FCTLChunk fctlChunk, List<Chunk> otherChunks, int sampleSize, APNGStreamLoader streamLoader) {
         super(ihdrChunk, fctlChunk, otherChunks, sampleSize, streamLoader);
     }
 
