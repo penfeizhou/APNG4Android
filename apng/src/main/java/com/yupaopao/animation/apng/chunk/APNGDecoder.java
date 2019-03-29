@@ -281,7 +281,6 @@ public class APNGDecoder {
         InputStream inputStream = null;
         try {
             inputStream = mAPNGStreamLoader.getInputStream();
-            inputStream.reset();
             byte[] sigBytes = new byte[8];
             inputStream.read(sigBytes);
             String signature = new String(sigBytes);
