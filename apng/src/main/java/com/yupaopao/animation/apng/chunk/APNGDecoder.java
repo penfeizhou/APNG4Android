@@ -67,7 +67,7 @@ public class APNGDecoder {
         }
     };
     private int sampleSize = 1;
-    private boolean optimized = true;
+    private final boolean optimized;
 
     private static final class InnerHandlerProvider {
         private static final Handler sAnimationHandler = createAnimationHandler();
@@ -80,19 +80,21 @@ public class APNGDecoder {
     }
 
     public APNGDecoder(APNGStreamLoader provider, RenderListener renderListener) {
-        this(provider, renderListener, false);
+        this(provider, renderListener, false, true);
     }
 
-    public APNGDecoder(APNGStreamLoader provider, RenderListener renderListener, boolean parallel) {
+    /**
+     * @param provider       APNG文件流加载器
+     * @param renderListener 渲染的回调
+     * @param parallel       是否创建新线程以播放动画，默认为false
+     * @param optimized      是否启用内存优化模式，默认为true
+     */
+    public APNGDecoder(APNGStreamLoader provider, RenderListener renderListener, boolean parallel, boolean optimized) {
         this.mAPNGStreamLoader = provider;
         this.renderListener = renderListener;
         this.uiHandler = new Handler();
         this.animationHandler = getAnimationHandler(parallel);
-
-    }
-
-    public void setOptimize(boolean v) {
-        this.optimized = v;
+        this.optimized = optimized;
     }
 
     public Rect getBounds() {
