@@ -32,6 +32,11 @@ public class APNGDrawable extends Drawable implements Animatable2Compat, APNGDec
     private Matrix matrix = new Matrix();
     private Set<AnimationCallback> animationCallbacks = new HashSet<>();
 
+    public APNGDrawable(APNGStreamLoader provider, boolean parallel, APNGDecoder.Mode mode) {
+        paint.setAntiAlias(true);
+        apngDecoder = new APNGDecoder(provider, this, parallel, mode);
+    }
+
     public APNGDrawable(APNGStreamLoader provider) {
         paint.setAntiAlias(true);
         apngDecoder = new APNGDecoder(provider, this);

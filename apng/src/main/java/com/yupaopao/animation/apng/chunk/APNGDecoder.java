@@ -68,7 +68,7 @@ public class APNGDecoder {
         }
     };
     private int sampleSize = 1;
-    private final FrameMode frameMode;
+    private final Mode mode;
 
     private static final class InnerHandlerProvider {
         private static final Handler sAnimationHandler = createAnimationHandler();
@@ -76,6 +76,13 @@ public class APNGDecoder {
         private static Handler createAnimationHandler() {
             HandlerThread handlerThread = new HandlerThread("apng");
             handlerThread.start();
+            handlerThread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+                @Override
+                public void uncaughtException(Thread t, Throwable e) {
+                    Log.e(TAG, t.toString() + "," + e.getLocalizedMessage());
+                    e.printStackTrace();
+                }
+            });
             return new Handler(handlerThread.getLooper());
         }
     }
@@ -100,7 +107,7 @@ public class APNGDecoder {
         void onEnd();
     }
 
-    public enum FrameMode {
+    public enum Mode {
         /**
          * 播放速度优先
          * 该模式下每一帧都缓存解码后的bitmap
@@ -128,21 +135,21 @@ public class APNGDecoder {
     }
 
     public APNGDecoder(APNGStreamLoader provider, RenderListener renderListener) {
-        this(provider, renderListener, false, FrameMode.MODE_BALANCED);
+        this(provider, renderListener, false, Mode.MODE_BALANCED);
     }
 
     /**
      * @param provider       APNG文件流加载器
      * @param renderListener 渲染的回调
      * @param parallel       是否创建新线程以播放动画，默认为false
-     * @param frameMode      帧播放方式,@see FrameMode
+     * @param mode           帧播放方式,@see FrameMode
      */
-    public APNGDecoder(APNGStreamLoader provider, RenderListener renderListener, boolean parallel, FrameMode frameMode) {
+    public APNGDecoder(APNGStreamLoader provider, RenderListener renderListener, boolean parallel, Mode mode) {
         this.mAPNGStreamLoader = provider;
         this.renderListener = renderListener;
         this.uiHandler = new Handler();
         this.animationHandler = getAnimationHandler(parallel);
-        this.frameMode = frameMode;
+        this.mode = mode;
     }
 
     public Rect getBounds() {
@@ -168,9 +175,7 @@ public class APNGDecoder {
 
     private Handler getAnimationHandler(boolean parallel) {
         if (parallel) {
-            HandlerThread handlerThread = new HandlerThread("apng");
-            handlerThread.start();
-            return new Handler(handlerThread.getLooper());
+            return InnerHandlerProvider.createAnimationHandler();
         } else {
             return InnerHandlerProvider.sAnimationHandler;
         }
@@ -286,7 +291,7 @@ public class APNGDecoder {
             List<Chunk> otherChunks = new ArrayList<>();
             ACTLChunk actlChunk;
             IHDRChunk ihdrChunk = null;
-            while ((chunk = Chunk.read(inputStream, frameMode == FrameMode.MODE_MEMORY)) != null) {
+            while ((chunk = Chunk.read(inputStream, mode == Mode.MODE_MEMORY)) != null) {
                 if (chunk instanceof IENDChunk) {
                     break;
                 } else if (chunk instanceof ACTLChunk) {
@@ -296,7 +301,7 @@ public class APNGDecoder {
                 } else if (chunk instanceof FCTLChunk) {
                     lastSeq++;
                     AbstractFrame frame;
-                    switch (frameMode) {
+                    switch (mode) {
                         case MODE_SPEED:
                             frame = new SpeedFirstFrame(ihdrChunk,
                                     (FCTLChunk) chunk, otherChunks,
@@ -314,7 +319,6 @@ public class APNGDecoder {
                                     sampleSize, mAPNGStreamLoader);
                             break;
                     }
-                    frame.otherChunks.addAll(otherChunks);
                     frame.sequence_number = lastSeq;
                     frames.add(frame);
                 } else if (chunk instanceof FDATChunk) {
