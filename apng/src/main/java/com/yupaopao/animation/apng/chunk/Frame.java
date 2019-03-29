@@ -22,7 +22,7 @@ class Frame extends AbstractFrame {
     }
 
     @Override
-    void draw(Canvas canvas, Paint paint) {
+    void draw(Canvas canvas, Paint paint, Bitmap reusedBitmap) {
         if (bitmap == null) {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = false;

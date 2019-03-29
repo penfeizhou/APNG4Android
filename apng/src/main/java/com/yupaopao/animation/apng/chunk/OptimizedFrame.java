@@ -62,13 +62,16 @@ class OptimizedFrame extends AbstractFrame {
     }
 
     @Override
-    void draw(Canvas canvas, Paint paint) {
+    void draw(Canvas canvas, Paint paint, Bitmap reusedBitmap) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = false;
         options.inSampleSize = sampleSize;
+        options.inBitmap = reusedBitmap;
         Bitmap bitmap = BitmapFactory.decodeStream(toInputStream(), null, options);
         assert bitmap != null;
         canvas.drawBitmap(bitmap, srcRect, dstRect, paint);
-        bitmap.recycle();
+        if (reusedBitmap != bitmap) {
+            bitmap.recycle();
+        }
     }
 }

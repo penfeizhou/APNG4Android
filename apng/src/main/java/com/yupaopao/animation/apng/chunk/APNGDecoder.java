@@ -43,6 +43,7 @@ public class APNGDecoder {
     private boolean running;
     private final APNGStreamLoader mAPNGStreamLoader;
     private Bitmap cachedBitmap;
+    private Bitmap templeateBitmap;
     private Runnable renderTask = new Runnable() {
         @Override
         public void run() {
@@ -166,6 +167,16 @@ public class APNGDecoder {
             bitmap.recycle();
             bitmap = null;
         }
+        if (cachedBitmap != null && !cachedBitmap.isRecycled()) {
+            cachedBitmap.recycle();
+            cachedBitmap = null;
+        }
+        if (templeateBitmap != null && !templeateBitmap.isRecycled()) {
+            templeateBitmap.recycle();
+            templeateBitmap = null;
+        }
+
+
         if (tempRunning) {
             renderListener.onEnd();
         }
@@ -325,7 +336,7 @@ public class APNGDecoder {
         switch (frame.dispose_op) {
             case FCTLChunk.APNG_DISPOSE_OP_PREVIOUS:
                 canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
-                frame.draw(canvas, paint);
+                frame.draw(canvas, paint, templeateBitmap);
                 break;
             case FCTLChunk.APNG_DISPOSE_OP_BACKGROUND:
                 canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
@@ -343,7 +354,7 @@ public class APNGDecoder {
         if (frame.blend_op == FCTLChunk.APNG_BLEND_OP_SOURCE) {
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         }
-        frame.draw(canvas, paint);
+        frame.draw(canvas, paint, templeateBitmap);
     }
 
     private AbstractFrame getFrame(int index) {
@@ -371,6 +382,7 @@ public class APNGDecoder {
         canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));
         paint = new Paint();
         paint.setAntiAlias(true);
+        templeateBitmap = Bitmap.createBitmap(ihdrChunk.width / sampleSize, ihdrChunk.height / sampleSize, config);
     }
 
     public interface RenderListener {

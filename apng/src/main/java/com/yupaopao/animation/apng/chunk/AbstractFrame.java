@@ -71,5 +71,5 @@ abstract class AbstractFrame {
 
     abstract List<IDATChunk> getChunkChain();
 
-    abstract void draw(Canvas canvas, Paint paint);
+    abstract void draw(Canvas canvas, Paint paint, Bitmap reusedBitmap);
 }
