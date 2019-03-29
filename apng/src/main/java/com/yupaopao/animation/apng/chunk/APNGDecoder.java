@@ -204,8 +204,8 @@ public class APNGDecoder {
     public void stop() {
         boolean tempRunning = running;
         running = false;
-        animationHandler.removeCallbacks(renderTask);
         uiHandler.removeCallbacks(invalidateRunnable);
+        animationHandler.removeCallbacks(renderTask);
         animationHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -227,7 +227,10 @@ public class APNGDecoder {
                 }
             }
         });
-
+        if (animationHandler.getLooper() != InnerHandlerProvider.sAnimationHandler.getLooper()) {
+            animationHandler.getLooper().quitSafely();
+            animationHandler.getLooper().getThread().interrupt();
+        }
         if (tempRunning) {
             renderListener.onEnd();
         }

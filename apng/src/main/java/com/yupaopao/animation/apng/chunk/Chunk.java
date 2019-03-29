@@ -23,6 +23,9 @@ class Chunk {
     }
 
     static Chunk read(InputStream inputStream, boolean skipData) throws IOException {
+        if (Thread.interrupted()) {
+            return null;
+        }
         int length = readIntFromInputStream(inputStream);
         String typeCode = readTypeCodeFromInputStream(inputStream);
         Chunk chunk = newInstance(typeCode);
