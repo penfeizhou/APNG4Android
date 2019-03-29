@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
             ((APNGDrawable) imageView.getDrawable()).stop();
         }
         APNGDrawable apngDrawable = new APNGDrawable(
-                new APNGResourceLoader(MainActivity.this, R.drawable.wheel));
+                new APNGAssetLoader(MainActivity.this, "wheel.png"));
         imageView.setImageDrawable(apngDrawable);
         APNGAssetLoader apngAssetLoader = new APNGAssetLoader(MainActivity.this,
                 "wheel.png");
