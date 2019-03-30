@@ -28,7 +28,6 @@ public class APNGDrawable extends Drawable implements Animatable2Compat, APNGDec
     private final Paint paint = new Paint();
     private final APNGDecoder apngDecoder;
     private DrawFilter drawFilter = new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
-    private Bitmap bitmap;
     private Matrix matrix = new Matrix();
     private Set<AnimationCallback> animationCallbacks = new HashSet<>();
 
@@ -66,11 +65,8 @@ public class APNGDrawable extends Drawable implements Animatable2Compat, APNGDec
 
     @Override
     public void draw(Canvas canvas) {
-        if (bitmap == null || bitmap.isRecycled()) {
-            return;
-        }
         canvas.setDrawFilter(drawFilter);
-        canvas.drawBitmap(bitmap, matrix, paint);
+        apngDecoder.draw(canvas, matrix, paint);
     }
 
     @Override
@@ -109,7 +105,6 @@ public class APNGDrawable extends Drawable implements Animatable2Compat, APNGDec
 
     @Override
     public void onRender(Bitmap bitmap) {
-        this.bitmap = bitmap;
         this.invalidateSelf();
     }
 

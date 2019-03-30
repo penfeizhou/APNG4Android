@@ -3,6 +3,7 @@ package com.yupaopao.animation.apng.chunk;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.PorterDuff;
@@ -52,7 +53,7 @@ public class APNGDecoder {
                 long start = System.currentTimeMillis();
                 long delay = step();
                 long cost = System.currentTimeMillis() - start;
-                scheduledThreadPoolExecutor.schedule(this, Math.max(0, delay - cost), TimeUnit.MILLISECONDS);
+                getExecutor().schedule(this, Math.max(0, delay - cost), TimeUnit.MILLISECONDS);
                 //cachedBitmap = Bitmap.createBitmap(bitmap);
                 uiHandler.post(invalidateRunnable);
                 // Log.i(TAG, String.format("delay:%d,cost:%d", delay, cost));
@@ -71,7 +72,7 @@ public class APNGDecoder {
     private int sampleSize = 1;
     private final Mode mode;
 
-    private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1, new ThreadPoolExecutor.DiscardPolicy());
+    private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
     private byte[] byteBuff = new byte[0];
 
     /**
@@ -149,7 +150,7 @@ public class APNGDecoder {
                 }
             };
             FutureTask<Rect> futureTask = new FutureTask<>(callable);
-            scheduledThreadPoolExecutor.execute(futureTask);
+            getExecutor().execute(futureTask);
             try {
                 fullRect = futureTask.get();
             } catch (Exception e) {
@@ -159,8 +160,15 @@ public class APNGDecoder {
         }
     }
 
+    private ScheduledThreadPoolExecutor getExecutor() {
+        if (scheduledThreadPoolExecutor == null || scheduledThreadPoolExecutor.isShutdown()) {
+            scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1, new ThreadPoolExecutor.DiscardPolicy());
+        }
+        return scheduledThreadPoolExecutor;
+    }
+
     public void start() {
-        scheduledThreadPoolExecutor.execute(new Runnable() {
+        getExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 if (frames.size() == 0) {
@@ -172,9 +180,9 @@ public class APNGDecoder {
             Log.i(TAG, "Already started");
         } else {
             running = true;
-            scheduledThreadPoolExecutor.remove(renderTask);
+            getExecutor().remove(renderTask);
             uiHandler.removeCallbacks(invalidateRunnable);
-            scheduledThreadPoolExecutor.execute(renderTask);
+            getExecutor().execute(renderTask);
             renderListener.onStart();
         }
     }
@@ -183,8 +191,8 @@ public class APNGDecoder {
         boolean tempRunning = running;
         running = false;
         uiHandler.removeCallbacks(invalidateRunnable);
-        scheduledThreadPoolExecutor.remove(renderTask);
-        scheduledThreadPoolExecutor.execute(new Runnable() {
+        getExecutor().remove(renderTask);
+        getExecutor().execute(new Runnable() {
             @Override
             public void run() {
                 for (AbstractFrame frame : frames) {
@@ -207,9 +215,9 @@ public class APNGDecoder {
         });
 
         if (bitmap == null || bitmap.isRecycled()) {
-            scheduledThreadPoolExecutor.shutdownNow();
+            getExecutor().shutdownNow();
         } else {
-            scheduledThreadPoolExecutor.shutdown();
+            getExecutor().shutdown();
         }
         if (tempRunning) {
             renderListener.onEnd();
@@ -224,6 +232,13 @@ public class APNGDecoder {
         this.loopLimit = limit;
     }
 
+    public synchronized void draw(Canvas canvas, Matrix matrix, Paint paint) {
+        if (bitmap == null || bitmap.isRecycled()) {
+            return;
+        }
+        canvas.drawBitmap(bitmap, matrix, paint);
+    }
+
 
     public int getSampleSize() {
         return sampleSize;
@@ -235,7 +250,7 @@ public class APNGDecoder {
             this.sampleSize = sample;
             final boolean tempRunning = running;
             stop();
-            scheduledThreadPoolExecutor.execute(new Runnable() {
+            getExecutor().execute(new Runnable() {
                 @Override
                 public void run() {
                     frames.clear();
@@ -375,7 +390,7 @@ public class APNGDecoder {
     }
 
     @WorkerThread
-    private long step() {
+    private synchronized long step() {
         disposeOp();
         this.frameIndex++;
         if (this.frameIndex >= this.num_frames) {
@@ -387,7 +402,7 @@ public class APNGDecoder {
         return frame.delay;
     }
 
-    private synchronized void disposeOp() {
+    private void disposeOp() {
         if (this.frameIndex < 0) {
             canvas.clipRect(fullRect, Region.Op.REPLACE);
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
@@ -409,7 +424,7 @@ public class APNGDecoder {
         }
     }
 
-    private synchronized void blendOp() {
+    private void blendOp() {
         AbstractFrame frame = getFrame(this.frameIndex);
         canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
         if (frame.blend_op == FCTLChunk.APNG_BLEND_OP_SOURCE) {
