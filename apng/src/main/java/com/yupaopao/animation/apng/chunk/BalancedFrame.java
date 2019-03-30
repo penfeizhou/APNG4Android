@@ -50,24 +50,17 @@ class BalancedFrame extends AbstractFrame {
     }
 
     @Override
-    void draw(Canvas canvas, Paint paint, Bitmap reusedBitmap, byte[] byteBuff) {
+    Bitmap draw(Canvas canvas, Paint paint, Bitmap reusedBitmap, byte[] byteBuff) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = false;
         options.inSampleSize = sampleSize;
         options.inMutable = true;
-        if (reusedBitmap != null
-                && !reusedBitmap.isRecycled()) {
-            reusedBitmap.reconfigure(srcRect.width(), srcRect.height(), Bitmap.Config.ARGB_8888);
-            reusedBitmap.eraseColor(0);
-        }
         options.inBitmap = reusedBitmap;
         int length = toByteArray(byteBuff);
         Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, length, options);
         assert bitmap != null;
         canvas.drawBitmap(bitmap, srcRect, dstRect, paint);
-        if (reusedBitmap != bitmap) {
-            bitmap.recycle();
-        }
+        return bitmap;
     }
 
     @Override

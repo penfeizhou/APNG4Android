@@ -16,7 +16,10 @@ import android.util.Log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -44,8 +47,6 @@ public class APNGDecoder {
     private final RenderListener renderListener;
     private boolean running;
     private final APNGStreamLoader mAPNGStreamLoader;
-    // private Bitmap cachedBitmap;
-    private Bitmap templateBitmap;
     private Runnable renderTask = new Runnable() {
         @Override
         public void run() {
@@ -54,7 +55,6 @@ public class APNGDecoder {
                 long delay = step();
                 long cost = System.currentTimeMillis() - start;
                 getExecutor().schedule(this, Math.max(0, delay - cost), TimeUnit.MILLISECONDS);
-                //cachedBitmap = Bitmap.createBitmap(bitmap);
                 uiHandler.post(invalidateRunnable);
                 // Log.i(TAG, String.format("delay:%d,cost:%d", delay, cost));
             } else {
@@ -74,6 +74,40 @@ public class APNGDecoder {
 
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
     private byte[] byteBuff = new byte[0];
+
+    private Set<Bitmap> cacheBitmaps = new HashSet<>();
+
+
+    private Bitmap obtainBitmap(int width, int height) {
+        Bitmap ret = null;
+        Iterator<Bitmap> iterator = cacheBitmaps.iterator();
+        while (iterator.hasNext()) {
+            int reuseSize = width * height * 4;
+            ret = iterator.next();
+            if (ret != null && ret.getAllocationByteCount() >= reuseSize) {
+                iterator.remove();
+                if (ret.getWidth() != width || ret.getHeight() != height) {
+                    ret.reconfigure(width, height, Bitmap.Config.ARGB_8888);
+                }
+                ret.eraseColor(0);
+                return ret;
+            }
+        }
+
+        try {
+            Bitmap.Config config = Bitmap.Config.ARGB_8888;
+            ret = Bitmap.createBitmap(width, height, config);
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
+        }
+        return ret;
+    }
+
+    private void recycleBitmap(Bitmap bitmap) {
+        if (bitmap != null && !cacheBitmaps.contains(bitmap)) {
+            cacheBitmaps.add(bitmap);
+        }
+    }
 
     /**
      * 解码器的渲染回调
@@ -203,14 +237,12 @@ public class APNGDecoder {
                     bitmap.recycle();
                     bitmap = null;
                 }
-//                if (cachedBitmap != null && !cachedBitmap.isRecycled()) {
-//                    cachedBitmap.recycle();
-//                    cachedBitmap = null;
-//                }
-                if (templateBitmap != null && !templateBitmap.isRecycled()) {
-                    templateBitmap.recycle();
-                    templateBitmap = null;
+                for (Bitmap bitmap : cacheBitmaps) {
+                    if (bitmap != null && !bitmap.isRecycled()) {
+                        bitmap.recycle();
+                    }
                 }
+                cacheBitmaps.clear();
             }
         });
 
@@ -375,6 +407,9 @@ public class APNGDecoder {
     }
 
     private boolean canStep() {
+        if (!isRunning()) {
+            return false;
+        }
         if (frames.size() == 0) {
             return false;
         }
@@ -412,7 +447,7 @@ public class APNGDecoder {
         switch (frame.dispose_op) {
             case FCTLChunk.APNG_DISPOSE_OP_PREVIOUS:
                 canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
-                frame.draw(canvas, paint, templateBitmap, byteBuff);
+                recycleBitmap(frame.draw(canvas, paint, obtainBitmap(frame.srcRect.width(), frame.srcRect.height()), byteBuff));
                 break;
             case FCTLChunk.APNG_DISPOSE_OP_BACKGROUND:
                 canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
@@ -430,7 +465,7 @@ public class APNGDecoder {
         if (frame.blend_op == FCTLChunk.APNG_BLEND_OP_SOURCE) {
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         }
-        frame.draw(canvas, paint, templateBitmap, byteBuff);
+        recycleBitmap(frame.draw(canvas, paint, obtainBitmap(frame.srcRect.width(), frame.srcRect.height()), byteBuff));
     }
 
     private AbstractFrame getFrame(int index) {
@@ -438,27 +473,13 @@ public class APNGDecoder {
     }
 
     private void createCanvas(IHDRChunk ihdrChunk) {
-        Bitmap.Config config;
-        switch (ihdrChunk.colorType) {
-            case 0:
-            case 2:
-            case 3:
-                config = Bitmap.Config.ARGB_4444;
-                break;
-            case 4:
-            case 6:
-            default:
-                config = Bitmap.Config.ARGB_8888;
-                break;
-        }
         fullRect = new Rect(0, 0, ihdrChunk.width, ihdrChunk.height);
-        bitmap = Bitmap.createBitmap(ihdrChunk.width / sampleSize, ihdrChunk.height / sampleSize, config);
+        bitmap = obtainBitmap(ihdrChunk.width / sampleSize, ihdrChunk.height / sampleSize);
         canvas = new Canvas(bitmap);
         canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));
         paint = new Paint();
         paint.setAntiAlias(true);
-        templateBitmap = Bitmap.createBitmap(ihdrChunk.width / sampleSize, ihdrChunk.height / sampleSize, config);
     }
 
 }

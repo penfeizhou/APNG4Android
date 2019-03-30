@@ -5,9 +5,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -54,5 +51,5 @@ abstract class AbstractFrame {
 
     }
 
-    abstract void draw(Canvas canvas, Paint paint, Bitmap reusedBitmap, byte[] byteBuff);
+    abstract Bitmap draw(Canvas canvas, Paint paint, Bitmap reusedBitmap, byte[] byteBuff);
 }

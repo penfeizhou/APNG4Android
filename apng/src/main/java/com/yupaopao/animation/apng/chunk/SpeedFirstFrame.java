@@ -41,7 +41,7 @@ class SpeedFirstFrame extends BalancedFrame {
     }
 
     @Override
-    void draw(Canvas canvas, Paint paint, Bitmap reusedBitmap, byte[] byteBuff) {
+    Bitmap draw(Canvas canvas, Paint paint, Bitmap reusedBitmap, byte[] byteBuff) {
         if (bitmap == null || bitmap.isRecycled()) {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = false;
@@ -52,6 +52,7 @@ class SpeedFirstFrame extends BalancedFrame {
             idatChunks.clear();
         }
         canvas.drawBitmap(bitmap, srcRect, dstRect, paint);
+        return null;
     }
 
     @Override
