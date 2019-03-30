@@ -5,10 +5,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.CRC32;
 
@@ -18,31 +16,31 @@ import java.util.zip.CRC32;
  * @CreateDate: 2019/3/29
  */
 class LowMemoryFrame extends AbstractFrame {
+    private CRC32 crc32 = new CRC32();
+    private BitmapFactory.Options options = new BitmapFactory.Options();
 
     LowMemoryFrame(IHDRChunk ihdrChunk, FCTLChunk fctlChunk, List<Chunk> otherChunks, int sampleSize, APNGStreamLoader streamLoader) {
         super(ihdrChunk, fctlChunk, otherChunks, sampleSize, streamLoader);
     }
 
-    InputStream toInputStream(byte[] byteBuff) {
-        List<InputStream> inputStreams = new ArrayList<>();
-        InputStream signatureStream = new ByteArrayInputStream(sPNGSignatures);
-        inputStreams.add(signatureStream);
-        inputStreams.add(ihdrChunk.toInputStream());
-        for (Chunk chunk : otherChunks) {
-            inputStreams.add(chunk.toInputStream());
-        }
-        inputStreams.add(idatStream(byteBuff));
-        inputStreams.add(new ByteArrayInputStream(sPNGEndChunk));
-        return new ChainInputStream(inputStreams.toArray(new InputStream[0]));
-    }
-
-    private InputStream idatStream(byte[] byteBuff) {
+    private int generatePNGRaw(byte[] byteBuff) {
         InputStream inputStream = null;
         int offset = 0;
+        System.arraycopy(sPNGSignatures, 0, byteBuff, offset, sPNGSignatures.length);
+        offset += sPNGSignatures.length;
+
+        ihdrChunk.copy(byteBuff, offset);
+        offset += ihdrChunk.getRawDataLength();
+
+        for (Chunk chunk : otherChunks) {
+            chunk.copy(byteBuff, offset);
+            offset += chunk.getRawDataLength();
+        }
+
         try {
             inputStream = streamLoader.getInputStream();
             inputStream.skip(startPos);
-            while (offset < endPos - startPos) {
+            while (offset < endPos) {
                 inputStream.read(byteBuff, offset, 8);
                 int length = byteBuff[offset + 3] & 0xFF |
                         (byteBuff[offset + 2] & 0xFF) << 8 |
@@ -66,7 +64,7 @@ class LowMemoryFrame extends AbstractFrame {
                     inputStream.read(byteBuff, offset, length);
                     inputStream.skip(4);
 
-                    CRC32 crc32 = new CRC32();
+                    crc32.reset();
                     crc32.update(byteBuff, offset - 4, 4);
                     crc32.update(byteBuff, offset, length);
                     int crc = (int) crc32.getValue();
@@ -83,6 +81,7 @@ class LowMemoryFrame extends AbstractFrame {
                     break;
                 }
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -94,12 +93,13 @@ class LowMemoryFrame extends AbstractFrame {
                 }
             }
         }
-        return new ByteArrayInputStream(byteBuff, 0, offset);
+        System.arraycopy(sPNGEndChunk, 0, byteBuff, offset, sPNGEndChunk.length);
+        offset += sPNGEndChunk.length;
+        return offset;
     }
 
     @Override
     void draw(Canvas canvas, Paint paint, Bitmap reusedBitmap, byte[] byteBuff) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = false;
         options.inSampleSize = sampleSize;
         options.inMutable = true;
@@ -109,7 +109,8 @@ class LowMemoryFrame extends AbstractFrame {
             reusedBitmap.eraseColor(0);
         }
         options.inBitmap = reusedBitmap;
-        Bitmap bitmap = BitmapFactory.decodeStream(toInputStream(byteBuff), null, options);
+        int length = generatePNGRaw(byteBuff);
+        Bitmap bitmap = BitmapFactory.decodeByteArray(byteBuff, 0, length, options);
         assert bitmap != null;
         canvas.drawBitmap(bitmap, srcRect, dstRect, paint);
         if (reusedBitmap != bitmap) {
