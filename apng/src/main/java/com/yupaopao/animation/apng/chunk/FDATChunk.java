@@ -8,7 +8,10 @@ import java.nio.ByteBuffer;
  * @CreateDate: 2019/3/27
  */
 class FDATChunk extends Chunk {
-    static final String ID = "fdAT";
+    static final int ID = ('f' & 0xFF) << 24
+            | ('d' & 0xFF) << 16
+            | ('A' & 0xFF) << 8
+            | ('T' & 0xFF);
     int sequence_number;
 
     @Override

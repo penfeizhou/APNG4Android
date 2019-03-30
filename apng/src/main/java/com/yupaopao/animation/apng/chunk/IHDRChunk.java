@@ -8,7 +8,10 @@ import java.nio.ByteBuffer;
  * @CreateDate: 2019/3/27
  */
 class IHDRChunk extends Chunk {
-    static final String ID = "IHDR";
+    static final int ID = ('I' & 0xFF) << 24
+            | ('H' & 0xFF) << 16
+            | ('D' & 0xFF) << 8
+            | ('R' & 0xFF);
     /**
      * 图像宽度，以像素为单位
      */

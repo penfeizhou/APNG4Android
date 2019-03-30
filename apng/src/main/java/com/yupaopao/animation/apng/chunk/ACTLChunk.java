@@ -8,7 +8,10 @@ import java.nio.ByteBuffer;
  * @CreateDate: 2019/3/27
  */
 class ACTLChunk extends Chunk {
-    final static String ID = "acTL";
+    static final int ID = ('a' & 0xFF) << 24
+            | ('c' & 0xFF) << 16
+            | ('T' & 0xFF) << 8
+            | ('L' & 0xFF);
     int num_frames;
     int num_plays;
 

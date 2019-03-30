@@ -6,5 +6,8 @@ package com.yupaopao.animation.apng.chunk;
  * @CreateDate: 2019/3/27
  */
 class IDATChunk extends Chunk {
-    static final String ID = "IDAT";
+    static final int ID = ('I' & 0xFF) << 24
+            | ('D' & 0xFF) << 16
+            | ('A' & 0xFF) << 8
+            | ('T' & 0xFF);
 }

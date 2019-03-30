@@ -43,7 +43,7 @@ class ChunkInputStream extends InputStream {
         if (curOffset >= 0 && curOffset <= 3) {
             ret = readIntByByte(mChunk.length, curOffset);
         } else if (curOffset >= 4 && curOffset <= 7) {
-            ret = mChunk.typeCode.getBytes()[curOffset - 4];
+            ret = readIntByByte(mChunk.type, curOffset - 4);
         } else if (curOffset >= mChunk.getRawDataLength()) {
             return -1;
         } else if (curOffset >= mChunk.getRawDataLength() - 4) {

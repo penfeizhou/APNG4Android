@@ -14,7 +14,7 @@ import java.io.InputStream;
  */
 class Chunk {
     int length;
-    String typeCode;
+    int type;
     byte[] data;
     int crc;
     private static ThreadLocal<byte[]> __intBytes = new ThreadLocal<>();
@@ -27,9 +27,9 @@ class Chunk {
             return null;
         }
         int length = readIntFromInputStream(inputStream);
-        String typeCode = readTypeCodeFromInputStream(inputStream);
-        Chunk chunk = newInstance(typeCode);
-        chunk.typeCode = typeCode;
+        int type = readIntFromInputStream(inputStream);
+        Chunk chunk = newInstance(type);
+        chunk.type = type;
         chunk.length = length;
         if (skipData && (chunk instanceof IDATChunk || chunk instanceof FDATChunk)) {
             inputStream.skip(length + 4);
@@ -42,7 +42,7 @@ class Chunk {
         return chunk;
     }
 
-    private static Chunk newInstance(String typeCode) {
+    private static Chunk newInstance(int typeCode) {
         Chunk chunk;
         switch (typeCode) {
             case IHDRChunk.ID:
@@ -129,11 +129,10 @@ class Chunk {
     }
 
     void copyTypeCode(byte[] dst, int offset) {
-        byte[] typeCodeBytes = typeCode.getBytes();
-        dst[offset] = typeCodeBytes[0];
-        dst[offset + 1] = typeCodeBytes[1];
-        dst[offset + 2] = typeCodeBytes[2];
-        dst[offset + 3] = typeCodeBytes[3];
+        dst[offset] = readIntByByte(type, 0);
+        dst[offset + 1] = readIntByByte(type, 1);
+        dst[offset + 2] = readIntByByte(type, 2);
+        dst[offset + 3] = readIntByByte(type, 3);
     }
 
     void copyData(byte[] dst, int offset) {

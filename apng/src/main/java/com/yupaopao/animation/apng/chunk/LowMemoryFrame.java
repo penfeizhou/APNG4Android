@@ -82,9 +82,12 @@ class LowMemoryFrame extends AbstractFrame {
                         (byteBuff[offset + 1] & 0xFF) << 16 |
                         (byteBuff[offset] & 0xFF) << 24;
                 offset += 4;
-                String typeCode = new String(byteBuff, offset, 4);
+                int type = byteBuff[offset + 3] & 0xFF |
+                        (byteBuff[offset + 2] & 0xFF) << 8 |
+                        (byteBuff[offset + 1] & 0xFF) << 16 |
+                        (byteBuff[offset] & 0xFF) << 24;
                 offset += 4;
-                if (FDATChunk.ID.equals(typeCode)) {
+                if (FDATChunk.ID == type) {
                     length -= 4;
                     byteBuff[offset - 8] = Chunk.readIntByByte(length, 0);
                     byteBuff[offset - 7] = Chunk.readIntByByte(length, 1);
@@ -105,7 +108,7 @@ class LowMemoryFrame extends AbstractFrame {
                     byteBuff[offset++] = Chunk.readIntByByte(crc, 1);
                     byteBuff[offset++] = Chunk.readIntByByte(crc, 2);
                     byteBuff[offset++] = Chunk.readIntByByte(crc, 3);
-                } else if (IDATChunk.ID.equals(typeCode)) {
+                } else if (IDATChunk.ID == type) {
                     inputStream.read(byteBuff, offset, length + 4);
                     offset += length + 4;
                 } else {

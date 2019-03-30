@@ -8,7 +8,10 @@ import java.nio.ByteBuffer;
  * @CreateDate: 2019/3/27
  */
 class FCTLChunk extends Chunk {
-    static final String ID = "fcTL";
+    static final int ID = ('f' & 0xFF) << 24
+            | ('c' & 0xFF) << 16
+            | ('T' & 0xFF) << 8
+            | ('L' & 0xFF);
     int sequence_number;
     /**
      * x_offset >= 0
