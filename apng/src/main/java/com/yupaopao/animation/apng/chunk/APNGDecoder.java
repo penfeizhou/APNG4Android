@@ -55,7 +55,7 @@ public class APNGDecoder {
                 scheduledThreadPoolExecutor.schedule(this, Math.max(0, delay - cost), TimeUnit.MILLISECONDS);
                 //cachedBitmap = Bitmap.createBitmap(bitmap);
                 uiHandler.post(invalidateRunnable);
-                Log.i(TAG, String.format("delay:%d,cost:%d", delay, cost));
+                // Log.i(TAG, String.format("delay:%d,cost:%d", delay, cost));
             } else {
                 stop();
             }
@@ -203,9 +203,14 @@ public class APNGDecoder {
                     templateBitmap.recycle();
                     templateBitmap = null;
                 }
-                scheduledThreadPoolExecutor.shutdownNow();
             }
         });
+
+        if (bitmap == null || bitmap.isRecycled()) {
+            scheduledThreadPoolExecutor.shutdownNow();
+        } else {
+            scheduledThreadPoolExecutor.shutdown();
+        }
         if (tempRunning) {
             renderListener.onEnd();
         }
