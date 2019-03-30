@@ -326,6 +326,17 @@ public class APNGDecoder {
                     }
                 }
             }
+
+            int maxSize = 0;
+            for (AbstractFrame frame : frames) {
+                maxSize = Math.max(maxSize, frame.endPos - frame.startPos);
+            }
+            maxSize += ihdrChunk.getRawDataLength();
+            for (Chunk each : otherChunks) {
+                maxSize += each.getRawDataLength();
+            }
+            maxSize += 20;
+            byteBuff = new byte[maxSize];
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -337,11 +348,6 @@ public class APNGDecoder {
                 }
             }
         }
-        int maxSize = 0;
-        for (AbstractFrame frame : frames) {
-            maxSize = Math.max(maxSize, frame.endPos - frame.startPos);
-        }
-        byteBuff = new byte[maxSize];
     }
 
     private int getNumPlays() {
