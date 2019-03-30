@@ -19,5 +19,26 @@
         android:layout_height="100dp"
         android:layout_gravity="center"
         android:text="测试页面2"
-        android:textSize="20dp" />]
+        android:textSize="20dp" />
+    <TextView
+        android:id="@+id/tv_mode1"
+        android:layout_width="wrap_content"
+        android:layout_height="100dp"
+        android:layout_gravity="center"
+        android:text="测试模式1"
+        android:textSize="20dp" />
+    <TextView
+        android:id="@+id/tv_mode2"
+        android:layout_width="wrap_content"
+        android:layout_height="100dp"
+        android:layout_gravity="center"
+        android:text="测试模式2"
+        android:textSize="20dp" />
+    <TextView
+        android:id="@+id/tv_mode3"
+        android:layout_width="wrap_content"
+        android:layout_height="100dp"
+        android:layout_gravity="center"
+        android:text="测试模式3"
+        android:textSize="20dp" />
 </LinearLayout>
