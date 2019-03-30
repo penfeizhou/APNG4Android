@@ -50,27 +50,9 @@ abstract class AbstractFrame {
                 (fctlChunk.x_offset + fctlChunk.width) / sampleSize, (fctlChunk.y_offset + fctlChunk.height) / sampleSize);
     }
 
-    InputStream toInputStream() {
-        List<InputStream> inputStreams = new ArrayList<>();
-        InputStream signatureStream = new ByteArrayInputStream(sPNGSignatures);
-        inputStreams.add(signatureStream);
-        List<IDATChunk> chunkChain = getChunkChain();
-        inputStreams.add(ihdrChunk.toInputStream());
-        for (Chunk chunk : otherChunks) {
-            inputStreams.add(chunk.toInputStream());
-        }
-        for (Chunk chunk : chunkChain) {
-            inputStreams.add(chunk.toInputStream());
-        }
-        inputStreams.add(new ByteArrayInputStream(sPNGEndChunk));
-        return new ChainInputStream(inputStreams.toArray(new InputStream[0]));
-    }
-
     void recycle() {
 
     }
-
-    abstract List<IDATChunk> getChunkChain();
 
     abstract void draw(Canvas canvas, Paint paint, Bitmap reusedBitmap, byte[] byteBuff);
 }

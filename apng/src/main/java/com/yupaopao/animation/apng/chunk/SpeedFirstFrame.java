@@ -12,7 +12,7 @@ import java.util.List;
  * @Author: pengfei.zhou
  * @CreateDate: 2019/3/29
  */
-public class SpeedFirstFrame extends BalancedFrame {
+class SpeedFirstFrame extends BalancedFrame {
     Bitmap bitmap;
 
     SpeedFirstFrame(IHDRChunk ihdrChunk, FCTLChunk fctlChunk, List<Chunk> otherChunks, int sampleSize, APNGStreamLoader streamLoader) {
@@ -62,10 +62,5 @@ public class SpeedFirstFrame extends BalancedFrame {
             bitmap.recycle();
             bitmap = null;
         }
-    }
-
-    @Override
-    List<IDATChunk> getChunkChain() {
-        return idatChunks;
     }
 }

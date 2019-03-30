@@ -5,7 +5,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,9 +15,38 @@ import java.util.List;
  */
 class BalancedFrame extends AbstractFrame {
     List<IDATChunk> idatChunks = new ArrayList<>();
+    byte[] data = null;
 
     BalancedFrame(IHDRChunk ihdrChunk, FCTLChunk fctlChunk, List<Chunk> otherChunks, int sampleSize, APNGStreamLoader streamLoader) {
         super(ihdrChunk, fctlChunk, otherChunks, sampleSize, streamLoader);
+    }
+
+    int toByteArray(byte[] buffer) {
+        if (data != null) {
+            return data.length;
+        }
+        int offset = 0;
+        System.arraycopy(sPNGSignatures, 0, buffer, offset, sPNGSignatures.length);
+        offset += sPNGSignatures.length;
+
+        ihdrChunk.copy(buffer, offset);
+        offset += ihdrChunk.getRawDataLength();
+
+        for (Chunk chunk : otherChunks) {
+            chunk.copy(buffer, offset);
+            offset += chunk.getRawDataLength();
+        }
+        for (Chunk idatChunk : idatChunks) {
+            idatChunk.copy(buffer, offset);
+            offset += idatChunk.getRawDataLength();
+        }
+        System.arraycopy(sPNGEndChunk, 0, buffer, offset, sPNGEndChunk.length);
+        offset += sPNGEndChunk.length;
+        otherChunks.clear();
+        idatChunks.clear();
+        data = new byte[offset];
+        System.arraycopy(buffer, 0, data, 0, offset);
+        return offset;
     }
 
     @Override
@@ -33,7 +61,8 @@ class BalancedFrame extends AbstractFrame {
             reusedBitmap.eraseColor(0);
         }
         options.inBitmap = reusedBitmap;
-        Bitmap bitmap = BitmapFactory.decodeStream(toInputStream(), null, options);
+        int length = toByteArray(byteBuff);
+        Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, length, options);
         assert bitmap != null;
         canvas.drawBitmap(bitmap, srcRect, dstRect, paint);
         if (reusedBitmap != bitmap) {
@@ -45,10 +74,5 @@ class BalancedFrame extends AbstractFrame {
     void recycle() {
         super.recycle();
         idatChunks.clear();
-    }
-
-    @Override
-    List<IDATChunk> getChunkChain() {
-        return idatChunks;
     }
 }

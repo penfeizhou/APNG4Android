@@ -23,39 +23,6 @@ class LowMemoryFrame extends AbstractFrame {
         super(ihdrChunk, fctlChunk, otherChunks, sampleSize, streamLoader);
     }
 
-    @Override
-    List<IDATChunk> getChunkChain() {
-        List<IDATChunk> chunkChain = new ArrayList<>();
-        InputStream inputStream = null;
-        try {
-            inputStream = streamLoader.getInputStream();
-            inputStream.skip(startPos);
-            Chunk chunk;
-            while ((chunk = Chunk.read(inputStream, false)) != null) {
-                if (chunk instanceof IENDChunk) {
-                    break;
-                } else if (chunk instanceof FCTLChunk) {
-                    break;
-                } else if (chunk instanceof FDATChunk) {
-                    chunkChain.add(new FakedIDATChunk((FDATChunk) chunk));
-                } else if (chunk instanceof IDATChunk) {
-                    chunkChain.add((IDATChunk) chunk);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return chunkChain;
-    }
-
     InputStream toInputStream(byte[] byteBuff) {
         List<InputStream> inputStreams = new ArrayList<>();
         InputStream signatureStream = new ByteArrayInputStream(sPNGSignatures);
