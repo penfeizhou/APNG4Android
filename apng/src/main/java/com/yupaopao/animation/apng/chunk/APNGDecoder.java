@@ -310,7 +310,7 @@ public class APNGDecoder {
             Chunk chunk;
             int lastSeq = -1;
             List<Chunk> otherChunks = new ArrayList<>();
-            ACTLChunk actlChunk;
+            ACTLChunk actlChunk = null;
             IHDRChunk ihdrChunk = null;
             int pos = 8;
             while ((chunk = Chunk.read(inputStream, mode == Mode.MODE_MEMORY)) != null) {
@@ -353,12 +353,29 @@ public class APNGDecoder {
                     frame.startPos = pos;
                     frames.add(frame);
                 } else if (chunk instanceof FDATChunk) {
-                    Frame frame = frames.get(lastSeq);
+                    Frame frame = getFrame(lastSeq);
                     if (frame instanceof BalancedFrame) {
                         ((BalancedFrame) frame).idatChunks.add(new FakedIDATChunk((FDATChunk) chunk));
                     }
                 } else if (chunk instanceof IDATChunk) {
-                    Frame frame = frames.get(lastSeq);
+                    if (actlChunk == null) {
+                        //如果为非APNG图片，则只解码PNG
+                        lastSeq = 0;
+                        FCTLChunk fakeChunk = new FCTLChunk();
+                        fakeChunk.width = ihdrChunk.width;
+                        fakeChunk.height = ihdrChunk.height;
+                        Frame frame = new PNGFrame(
+                                ihdrChunk,
+                                fakeChunk,
+                                otherChunks,
+                                sampleSize,
+                                mAPNGStreamLoader);
+                        frames.add(frame);
+                        num_frames = 1;
+                        num_plays = 1;
+                        continue;
+                    }
+                    Frame frame = getFrame(lastSeq);
                     if (frame instanceof BalancedFrame) {
                         ((BalancedFrame) frame).idatChunks.add((IDATChunk) chunk);
                     }

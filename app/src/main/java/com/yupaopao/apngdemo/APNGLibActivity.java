@@ -21,7 +21,7 @@ public class APNGLibActivity extends Activity {
         setContentView(R.layout.activity_apnglib);
         LinearLayout linearLayout = findViewById(R.id.layout);
         String[] assetFiles = {
-                "test1.png",
+                "test.png",
                 "test2.png",
                 "test3.png",
                 "test4.png",
