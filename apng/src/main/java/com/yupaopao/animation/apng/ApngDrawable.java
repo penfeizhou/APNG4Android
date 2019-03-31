@@ -15,6 +15,7 @@ import android.support.graphics.drawable.Animatable2Compat;
 import com.yupaopao.animation.apng.chunk.APNGDecoder;
 import com.yupaopao.animation.apng.chunk.APNGStreamLoader;
 
+import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,6 +31,8 @@ public class APNGDrawable extends Drawable implements Animatable2Compat, APNGDec
     private DrawFilter drawFilter = new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
     private Matrix matrix = new Matrix();
     private Set<AnimationCallback> animationCallbacks = new HashSet<>();
+    private Bitmap bitmap;
+    private ByteBuffer byteBuffer;
 
     @Deprecated
     public APNGDrawable(APNGStreamLoader provider, APNGDecoder.Mode mode) {
@@ -57,6 +60,13 @@ public class APNGDrawable extends Drawable implements Animatable2Compat, APNGDec
     @Override
     public void stop() {
         apngDecoder.stop();
+        if (bitmap != null && !bitmap.isRecycled()) {
+            bitmap.recycle();
+            bitmap = null;
+        }
+        if (byteBuffer != null) {
+            byteBuffer = null;
+        }
     }
 
     @Override
@@ -66,8 +76,11 @@ public class APNGDrawable extends Drawable implements Animatable2Compat, APNGDec
 
     @Override
     public void draw(Canvas canvas) {
+        if (bitmap == null || bitmap.isRecycled()) {
+            return;
+        }
         canvas.setDrawFilter(drawFilter);
-        apngDecoder.draw(canvas, matrix, paint);
+        canvas.drawBitmap(bitmap, matrix, paint);
     }
 
     @Override
@@ -105,7 +118,20 @@ public class APNGDrawable extends Drawable implements Animatable2Compat, APNGDec
     }
 
     @Override
-    public void onRender(Bitmap bitmap) {
+    public void onRender(Bitmap ret) {
+        if (!isRunning()) {
+            return;
+        }
+        if (this.bitmap == null || this.bitmap.isRecycled()) {
+            this.bitmap = Bitmap.createBitmap(ret.getWidth(), ret.getHeight(), Bitmap.Config.ARGB_8888);
+        }
+        if (byteBuffer == null || byteBuffer.limit() < ret.getByteCount()) {
+            byteBuffer = ByteBuffer.allocate(ret.getByteCount());
+        }
+        byteBuffer.rewind();
+        ret.copyPixelsToBuffer(byteBuffer);
+        byteBuffer.rewind();
+        this.bitmap.copyPixelsFromBuffer(byteBuffer);
         this.invalidateSelf();
     }
 

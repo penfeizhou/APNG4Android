@@ -3,13 +3,11 @@ package com.yupaopao.animation.apng.chunk;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.os.Handler;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
 
@@ -44,7 +42,6 @@ public class APNGDecoder {
     private int num_plays;
     private Integer loopLimit = null;
     private int num_frames;
-    private final Handler uiHandler;
     private final RenderListener renderListener;
     private boolean running;
     private final APNGStreamLoader mAPNGStreamLoader;
@@ -56,18 +53,10 @@ public class APNGDecoder {
                 long delay = step();
                 long cost = System.currentTimeMillis() - start;
                 getExecutor().schedule(this, Math.max(0, delay - cost), TimeUnit.MILLISECONDS);
-                uiHandler.post(invalidateRunnable);
-                // Log.i(TAG, String.format("delay:%d,cost:%d", delay, cost));
+                renderListener.onRender(bitmap);
             } else {
                 stop();
             }
-        }
-    };
-
-    private Runnable invalidateRunnable = new Runnable() {
-        @Override
-        public void run() {
-            renderListener.onRender(bitmap);
         }
     };
     private int sampleSize = 1;
@@ -176,7 +165,6 @@ public class APNGDecoder {
     public APNGDecoder(APNGStreamLoader provider, RenderListener renderListener, Mode mode) {
         this.mAPNGStreamLoader = provider;
         this.renderListener = renderListener;
-        this.uiHandler = new Handler();
         this.mode = mode;
     }
 
@@ -222,7 +210,6 @@ public class APNGDecoder {
         } else {
             running = true;
             getExecutor().remove(renderTask);
-            uiHandler.removeCallbacks(invalidateRunnable);
             getExecutor().execute(renderTask);
             renderListener.onStart();
         }
@@ -231,7 +218,6 @@ public class APNGDecoder {
     public void stop() {
         boolean tempRunning = running;
         running = false;
-        uiHandler.removeCallbacks(invalidateRunnable);
         getExecutor().remove(renderTask);
         getExecutor().execute(new Runnable() {
             @Override
@@ -253,6 +239,10 @@ public class APNGDecoder {
                     }
                 }
                 cacheBitmaps.clear();
+                if (snapShot != null) {
+                    snapShot.byteBuffer = null;
+                    snapShot = null;
+                }
             }
         });
 
@@ -272,13 +262,6 @@ public class APNGDecoder {
 
     public void setLoopLimit(int limit) {
         this.loopLimit = limit;
-    }
-
-    public synchronized void draw(Canvas canvas, Matrix matrix, Paint paint) {
-        if (bitmap == null || bitmap.isRecycled()) {
-            return;
-        }
-        canvas.drawBitmap(bitmap, matrix, paint);
     }
 
 
@@ -436,15 +419,17 @@ public class APNGDecoder {
     }
 
     @WorkerThread
-    private synchronized long step() {
-        this.frameIndex++;
-        if (this.frameIndex >= this.num_frames) {
-            this.frameIndex = 0;
-            this.playCount++;
+    private long step() {
+        synchronized (APNGDecoder.this) {
+            this.frameIndex++;
+            if (this.frameIndex >= this.num_frames) {
+                this.frameIndex = 0;
+                this.playCount++;
+            }
+            Frame frame = getFrame(this.frameIndex);
+            renderFrame(frame);
+            return frame.delay;
         }
-        Frame frame = getFrame(this.frameIndex);
-        renderFrame(frame);
-        return frame.delay;
     }
 
     private void renderFrame(Frame frame) {
@@ -475,6 +460,7 @@ public class APNGDecoder {
             // 从快照中恢复上一帧之前的显示内容
             case FCTLChunk.APNG_DISPOSE_OP_PREVIOUS:
                 try {
+                    snapShot.byteBuffer.rewind();
                     bitmap.copyPixelsFromBuffer(snapShot.byteBuffer);
                 } catch (Exception e) {
                     e.printStackTrace();
