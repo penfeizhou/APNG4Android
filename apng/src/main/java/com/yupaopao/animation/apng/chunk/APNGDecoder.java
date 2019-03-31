@@ -14,10 +14,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -63,6 +66,7 @@ public class APNGDecoder {
     private byte[] decodingBuffers = new byte[0];
 
     private Set<Bitmap> cacheBitmaps = new HashSet<>();
+    private Map<Bitmap, Canvas> cachedCanvas = new WeakHashMap<>();
     private ByteBuffer frameBuffer;
 
     private class SnapShot {
@@ -237,6 +241,7 @@ public class APNGDecoder {
                 if (frameBuffer != null) {
                     frameBuffer = null;
                 }
+                cachedCanvas.clear();
             }
         });
 
@@ -429,7 +434,11 @@ public class APNGDecoder {
             return;
         }
         Bitmap bitmap = obtainBitmap(fullRect.width() / sampleSize, fullRect.height() / sampleSize);
-        Canvas canvas = new Canvas(bitmap);
+        Canvas canvas = cachedCanvas.get(bitmap);
+        if (canvas == null) {
+            canvas = new Canvas(bitmap);
+            cachedCanvas.put(bitmap, canvas);
+        }
         // 从缓存中恢复当前帧
         frameBuffer.rewind();
         bitmap.copyPixelsFromBuffer(frameBuffer);
