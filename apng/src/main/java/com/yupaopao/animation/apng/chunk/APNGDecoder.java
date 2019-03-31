@@ -15,6 +15,7 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -77,6 +78,13 @@ public class APNGDecoder {
 
     private Set<Bitmap> cacheBitmaps = new HashSet<>();
 
+    private class SnapShot {
+        byte dispose_op;
+        Rect dstRect;
+        ByteBuffer byteBuffer;
+    }
+
+    private SnapShot snapShot = new SnapShot();
 
     private Bitmap obtainBitmap(int width, int height) {
         Bitmap ret = null;
@@ -426,49 +434,76 @@ public class APNGDecoder {
 
     @WorkerThread
     private synchronized long step() {
-        disposeOp();
         this.frameIndex++;
         if (this.frameIndex >= this.num_frames) {
             this.frameIndex = 0;
             this.playCount++;
         }
         Frame frame = getFrame(this.frameIndex);
-        blendOp();
+        renderFrame(frame);
         return frame.delay;
     }
 
-    private void disposeOp() {
-        if (this.frameIndex < 0) {
-            canvas.clipRect(fullRect, Region.Op.REPLACE);
-            canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+    private void renderFrame(Frame frame) {
+        if (frame == null) {
             return;
         }
-        Frame frame = getFrame(this.frameIndex);
-        switch (frame.dispose_op) {
+
+        if (snapShot.dispose_op == FCTLChunk.APNG_DISPOSE_OP_PREVIOUS
+                && frame.dispose_op == FCTLChunk.APNG_DISPOSE_OP_PREVIOUS) {
+            Log.e(TAG, "Should not be like this");
+        }
+
+        // 如果需要在下一帧渲染前恢复当前显示内容，需要在渲染前将当前显示内容保存到快照中
+        if (frame.dispose_op == FCTLChunk.APNG_DISPOSE_OP_PREVIOUS) {
+            try {
+                snapShot.byteBuffer.rewind();
+                bitmap.copyPixelsToBuffer(snapShot.byteBuffer);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        //开始绘制前，处理快照中的设定
+        switch (snapShot.dispose_op) {
+            // 从快照中恢复上一帧之前的显示内容
             case FCTLChunk.APNG_DISPOSE_OP_PREVIOUS:
-                canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
-                recycleBitmap(frame.draw(canvas, paint, obtainBitmap(frame.srcRect.width(), frame.srcRect.height()), byteBuff));
+                try {
+                    bitmap.copyPixelsFromBuffer(snapShot.byteBuffer);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 break;
+            // 清空上一帧所画区域
             case FCTLChunk.APNG_DISPOSE_OP_BACKGROUND:
-                canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
+                canvas.clipRect(snapShot.dstRect, Region.Op.REPLACE);
                 canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
                 break;
+            // 什么都不做
             case FCTLChunk.APNG_DISPOSE_OP_NON:
             default:
                 break;
         }
-    }
 
-    private void blendOp() {
-        Frame frame = getFrame(this.frameIndex);
+        //开始真正绘制当前帧的内容
         canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
         if (frame.blend_op == FCTLChunk.APNG_BLEND_OP_SOURCE) {
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         }
         recycleBitmap(frame.draw(canvas, paint, obtainBitmap(frame.srcRect.width(), frame.srcRect.height()), byteBuff));
+
+        //然后根据dispose设定传递到快照信息中
+        if (frame.blend_op == FCTLChunk.APNG_DISPOSE_OP_PREVIOUS) {
+            snapShot.dispose_op = frame.dispose_op;
+            snapShot.dstRect = frame.dstRect;
+        }
     }
 
     private Frame getFrame(int index) {
+        if (index < 0 || index >= frames.size()) {
+            return null;
+        }
         return frames.get(index);
     }
 
@@ -480,6 +515,7 @@ public class APNGDecoder {
         canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));
         paint = new Paint();
         paint.setAntiAlias(true);
+        snapShot.byteBuffer = ByteBuffer.allocate(bitmap.getByteCount());
     }
 
 }
