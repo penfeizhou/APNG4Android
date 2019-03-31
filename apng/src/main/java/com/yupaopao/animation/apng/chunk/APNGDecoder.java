@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -33,8 +32,6 @@ import java.util.concurrent.TimeUnit;
 public class APNGDecoder {
     private static final String TAG = APNGDecoder.class.getSimpleName();
     private List<Frame> frames = new ArrayList<>();
-    private Bitmap bitmap;
-    private Canvas canvas;
     private int frameIndex = -1;
     private int playCount;
     private Rect fullRect;
@@ -53,7 +50,7 @@ public class APNGDecoder {
                 long delay = step();
                 long cost = System.currentTimeMillis() - start;
                 getExecutor().schedule(this, Math.max(0, delay - cost), TimeUnit.MILLISECONDS);
-                renderListener.onRender(bitmap);
+                renderListener.onRender(frameBuffer);
             } else {
                 stop();
             }
@@ -63,9 +60,10 @@ public class APNGDecoder {
     private final Mode mode;
 
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
-    private byte[] byteBuff = new byte[0];
+    private byte[] decodingBuffers = new byte[0];
 
     private Set<Bitmap> cacheBitmaps = new HashSet<>();
+    private ByteBuffer frameBuffer;
 
     private class SnapShot {
         byte dispose_op;
@@ -118,7 +116,7 @@ public class APNGDecoder {
         /**
          * 帧播放
          */
-        void onRender(Bitmap bitmap);
+        void onRender(ByteBuffer byteBuffer);
 
         /**
          * 播放结束
@@ -226,13 +224,6 @@ public class APNGDecoder {
                     frame.recycle();
                 }
                 frames.clear();
-                if (bitmap != null && !bitmap.isRecycled()) {
-                    bitmap.recycle();
-                    bitmap = null;
-                }
-                if (canvas != null) {
-                    canvas = null;
-                }
                 for (Bitmap bitmap : cacheBitmaps) {
                     if (bitmap != null && !bitmap.isRecycled()) {
                         bitmap.recycle();
@@ -243,10 +234,13 @@ public class APNGDecoder {
                     snapShot.byteBuffer = null;
                     snapShot = null;
                 }
+                if (frameBuffer != null) {
+                    frameBuffer = null;
+                }
             }
         });
 
-        if (bitmap == null || bitmap.isRecycled()) {
+        if (frameBuffer == null) {
             getExecutor().shutdownNow();
         } else {
             getExecutor().shutdown();
@@ -382,7 +376,7 @@ public class APNGDecoder {
                 maxSize += each.getRawDataLength();
             }
             maxSize += 20;
-            byteBuff = new byte[maxSize];
+            decodingBuffers = new byte[maxSize];
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -420,38 +414,31 @@ public class APNGDecoder {
 
     @WorkerThread
     private long step() {
-        synchronized (APNGDecoder.this) {
-            this.frameIndex++;
-            if (this.frameIndex >= this.num_frames) {
-                this.frameIndex = 0;
-                this.playCount++;
-            }
-            Frame frame = getFrame(this.frameIndex);
-            renderFrame(frame);
-            return frame.delay;
+        this.frameIndex++;
+        if (this.frameIndex >= this.num_frames) {
+            this.frameIndex = 0;
+            this.playCount++;
         }
+        Frame frame = getFrame(this.frameIndex);
+        renderFrame(frame);
+        return frame.delay;
     }
 
     private void renderFrame(Frame frame) {
         if (frame == null) {
             return;
         }
-        ByteBuffer dstByteBuffer = snapShot.byteBuffer;
-
-        if (snapShot.dispose_op == FCTLChunk.APNG_DISPOSE_OP_PREVIOUS
-                && frame.dispose_op == FCTLChunk.APNG_DISPOSE_OP_PREVIOUS) {
-            Log.e(TAG, "Should not be like this");
-            dstByteBuffer = ByteBuffer.allocate(bitmap.getByteCount());
-        }
+        Bitmap bitmap = obtainBitmap(fullRect.width() / sampleSize, fullRect.height() / sampleSize);
+        Canvas canvas = new Canvas(bitmap);
+        // 从缓存中恢复当前帧
+        frameBuffer.rewind();
+        bitmap.copyPixelsFromBuffer(frameBuffer);
 
         // 如果需要在下一帧渲染前恢复当前显示内容，需要在渲染前将当前显示内容保存到快照中
         if (frame.dispose_op == FCTLChunk.APNG_DISPOSE_OP_PREVIOUS) {
-            try {
-                snapShot.byteBuffer.rewind();
-                bitmap.copyPixelsToBuffer(dstByteBuffer);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            frameBuffer.rewind();
+            snapShot.byteBuffer.rewind();
+            snapShot.byteBuffer.put(frameBuffer);
         }
 
 
@@ -459,12 +446,8 @@ public class APNGDecoder {
         switch (snapShot.dispose_op) {
             // 从快照中恢复上一帧之前的显示内容
             case FCTLChunk.APNG_DISPOSE_OP_PREVIOUS:
-                try {
-                    snapShot.byteBuffer.rewind();
-                    bitmap.copyPixelsFromBuffer(snapShot.byteBuffer);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                snapShot.byteBuffer.rewind();
+                bitmap.copyPixelsFromBuffer(snapShot.byteBuffer);
                 break;
             // 清空上一帧所画区域
             case FCTLChunk.APNG_DISPOSE_OP_BACKGROUND:
@@ -482,14 +465,17 @@ public class APNGDecoder {
         if (frame.blend_op == FCTLChunk.APNG_BLEND_OP_SOURCE) {
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         }
-        recycleBitmap(frame.draw(canvas, paint, obtainBitmap(frame.srcRect.width(), frame.srcRect.height()), byteBuff));
+        recycleBitmap(frame.draw(canvas, paint, obtainBitmap(frame.srcRect.width(), frame.srcRect.height()), decodingBuffers));
 
         //然后根据dispose设定传递到快照信息中
+        snapShot.dispose_op = frame.dispose_op;
+        snapShot.dstRect = frame.dstRect;
         if (frame.blend_op == FCTLChunk.APNG_DISPOSE_OP_PREVIOUS) {
-            snapShot.dispose_op = frame.dispose_op;
-            snapShot.dstRect = frame.dstRect;
-            snapShot.byteBuffer = dstByteBuffer;
+            snapShot.byteBuffer.rewind();
         }
+        frameBuffer.rewind();
+        bitmap.copyPixelsToBuffer(frameBuffer);
+        recycleBitmap(bitmap);
     }
 
     private Frame getFrame(int index) {
@@ -501,13 +487,10 @@ public class APNGDecoder {
 
     private void createCanvas(IHDRChunk ihdrChunk) {
         fullRect = new Rect(0, 0, ihdrChunk.width, ihdrChunk.height);
-        bitmap = obtainBitmap(ihdrChunk.width / sampleSize, ihdrChunk.height / sampleSize);
-        canvas = new Canvas(bitmap);
-        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-        canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));
         paint = new Paint();
         paint.setAntiAlias(true);
-        snapShot.byteBuffer = ByteBuffer.allocate(bitmap.getByteCount());
+        frameBuffer = ByteBuffer.allocate((ihdrChunk.width * ihdrChunk.height / sampleSize ^ 2 + 1) * 4);
+        snapShot.byteBuffer = ByteBuffer.allocate((ihdrChunk.width * ihdrChunk.height / sampleSize ^ 2 + 1) * 4);
     }
 
 }

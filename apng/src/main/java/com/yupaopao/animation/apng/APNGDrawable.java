@@ -32,7 +32,6 @@ public class APNGDrawable extends Drawable implements Animatable2Compat, APNGDec
     private Matrix matrix = new Matrix();
     private Set<AnimationCallback> animationCallbacks = new HashSet<>();
     private Bitmap bitmap;
-    private ByteBuffer byteBuffer;
 
     @Deprecated
     public APNGDrawable(APNGStreamLoader provider, APNGDecoder.Mode mode) {
@@ -63,9 +62,6 @@ public class APNGDrawable extends Drawable implements Animatable2Compat, APNGDec
         if (bitmap != null && !bitmap.isRecycled()) {
             bitmap.recycle();
             bitmap = null;
-        }
-        if (byteBuffer != null) {
-            byteBuffer = null;
         }
     }
 
@@ -118,18 +114,13 @@ public class APNGDrawable extends Drawable implements Animatable2Compat, APNGDec
     }
 
     @Override
-    public void onRender(Bitmap ret) {
+    public void onRender(ByteBuffer byteBuffer) {
         if (!isRunning()) {
             return;
         }
         if (this.bitmap == null || this.bitmap.isRecycled()) {
-            this.bitmap = Bitmap.createBitmap(ret.getWidth(), ret.getHeight(), Bitmap.Config.ARGB_8888);
+            this.bitmap = Bitmap.createBitmap(getBounds().width(), getBounds().height(), Bitmap.Config.ARGB_8888);
         }
-        if (byteBuffer == null || byteBuffer.limit() < ret.getByteCount()) {
-            byteBuffer = ByteBuffer.allocate(ret.getByteCount());
-        }
-        byteBuffer.rewind();
-        ret.copyPixelsToBuffer(byteBuffer);
         byteBuffer.rewind();
         this.bitmap.copyPixelsFromBuffer(byteBuffer);
         this.invalidateSelf();
