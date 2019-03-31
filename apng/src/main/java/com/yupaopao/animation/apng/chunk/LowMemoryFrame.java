@@ -15,7 +15,7 @@ import java.util.zip.CRC32;
  * @Author: pengfei.zhou
  * @CreateDate: 2019/3/29
  */
-class LowMemoryFrame extends AbstractFrame {
+class LowMemoryFrame extends Frame {
     private CRC32 crc32 = new CRC32();
     private BitmapFactory.Options options = new BitmapFactory.Options();
 

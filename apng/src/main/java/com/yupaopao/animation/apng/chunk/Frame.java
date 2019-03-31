@@ -12,8 +12,8 @@ import java.util.List;
  * @Author: pengfei.zhou
  * @CreateDate: 2019/3/27
  */
-abstract class AbstractFrame {
-    static final String TAG = AbstractFrame.class.getSimpleName();
+abstract class Frame {
+    static final String TAG = Frame.class.getSimpleName();
     final APNGStreamLoader streamLoader;
     public int startPos;
     public int endPos;
@@ -30,9 +30,9 @@ abstract class AbstractFrame {
     final List<Chunk> otherChunks;
     final int sampleSize;
 
-    AbstractFrame(IHDRChunk ihdrChunk, FCTLChunk fctlChunk,
-                  List<Chunk> otherChunks,
-                  int sampleSize, APNGStreamLoader streamLoader) {
+    Frame(IHDRChunk ihdrChunk, FCTLChunk fctlChunk,
+          List<Chunk> otherChunks,
+          int sampleSize, APNGStreamLoader streamLoader) {
         this.ihdrChunk = new FakedIHDRChunk(ihdrChunk, fctlChunk.width, fctlChunk.height);
         this.fctlChunk = fctlChunk;
         this.otherChunks = otherChunks;

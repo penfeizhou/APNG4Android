@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class APNGDecoder {
     private static final String TAG = APNGDecoder.class.getSimpleName();
-    private List<AbstractFrame> frames = new ArrayList<>();
+    private List<Frame> frames = new ArrayList<>();
     private Bitmap bitmap;
     private Canvas canvas;
     private int frameIndex = -1;
@@ -229,7 +229,7 @@ public class APNGDecoder {
         getExecutor().execute(new Runnable() {
             @Override
             public void run() {
-                for (AbstractFrame frame : frames) {
+                for (Frame frame : frames) {
                     frame.recycle();
                 }
                 frames.clear();
@@ -337,7 +337,7 @@ public class APNGDecoder {
                         frames.get(lastSeq).endPos = pos - chunk.getRawDataLength();
                     }
                     lastSeq++;
-                    AbstractFrame frame;
+                    Frame frame;
                     switch (mode) {
                         case MODE_SPEED:
                             frame = new SpeedFirstFrame(ihdrChunk,
@@ -360,12 +360,12 @@ public class APNGDecoder {
                     frame.startPos = pos;
                     frames.add(frame);
                 } else if (chunk instanceof FDATChunk) {
-                    AbstractFrame frame = frames.get(lastSeq);
+                    Frame frame = frames.get(lastSeq);
                     if (frame instanceof BalancedFrame) {
                         ((BalancedFrame) frame).idatChunks.add(new FakedIDATChunk((FDATChunk) chunk));
                     }
                 } else if (chunk instanceof IDATChunk) {
-                    AbstractFrame frame = frames.get(lastSeq);
+                    Frame frame = frames.get(lastSeq);
                     if (frame instanceof BalancedFrame) {
                         ((BalancedFrame) frame).idatChunks.add((IDATChunk) chunk);
                     }
@@ -380,7 +380,7 @@ public class APNGDecoder {
             }
 
             int maxSize = 0;
-            for (AbstractFrame frame : frames) {
+            for (Frame frame : frames) {
                 maxSize = Math.max(maxSize, frame.endPos - frame.startPos);
             }
             maxSize += ihdrChunk.getRawDataLength();
@@ -432,7 +432,7 @@ public class APNGDecoder {
             this.frameIndex = 0;
             this.playCount++;
         }
-        AbstractFrame frame = getFrame(this.frameIndex);
+        Frame frame = getFrame(this.frameIndex);
         blendOp();
         return frame.delay;
     }
@@ -443,7 +443,7 @@ public class APNGDecoder {
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
             return;
         }
-        AbstractFrame frame = getFrame(this.frameIndex);
+        Frame frame = getFrame(this.frameIndex);
         switch (frame.dispose_op) {
             case FCTLChunk.APNG_DISPOSE_OP_PREVIOUS:
                 canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
@@ -460,7 +460,7 @@ public class APNGDecoder {
     }
 
     private void blendOp() {
-        AbstractFrame frame = getFrame(this.frameIndex);
+        Frame frame = getFrame(this.frameIndex);
         canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
         if (frame.blend_op == FCTLChunk.APNG_BLEND_OP_SOURCE) {
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
@@ -468,7 +468,7 @@ public class APNGDecoder {
         recycleBitmap(frame.draw(canvas, paint, obtainBitmap(frame.srcRect.width(), frame.srcRect.height()), byteBuff));
     }
 
-    private AbstractFrame getFrame(int index) {
+    private Frame getFrame(int index) {
         return frames.get(index);
     }
 

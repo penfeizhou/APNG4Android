@@ -13,7 +13,7 @@ import java.util.List;
  * @Author: pengfei.zhou
  * @CreateDate: 2019/3/27
  */
-class BalancedFrame extends AbstractFrame {
+class BalancedFrame extends Frame {
     List<IDATChunk> idatChunks = new ArrayList<>();
     byte[] data = null;
 
