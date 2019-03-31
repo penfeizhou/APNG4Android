@@ -25,6 +25,7 @@ public class APNGLibActivity extends Activity {
                 "test2.png",
                 "test3.png",
                 "test4.png",
+                "test5.png",
                 "wheel.png",
         };
         for (String assetFile : assetFiles) {
