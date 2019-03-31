@@ -105,10 +105,6 @@ class Chunk {
         return data[i];
     }
 
-    InputStream toInputStream() {
-        return new ChunkInputStream(this);
-    }
-
     void copy(byte[] dst, int offset) {
         copyLength(dst, offset);
         offset += 4;
