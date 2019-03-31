@@ -465,8 +465,9 @@ public class APNGDecoder {
         if (frame.blend_op == FCTLChunk.APNG_BLEND_OP_SOURCE) {
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         }
-        recycleBitmap(frame.draw(canvas, paint, obtainBitmap(frame.srcRect.width(), frame.srcRect.height()), decodingBuffers));
-
+        Bitmap inBitmap = obtainBitmap(frame.srcRect.width(), frame.srcRect.height());
+        recycleBitmap(frame.draw(canvas, paint, inBitmap, decodingBuffers));
+        recycleBitmap(inBitmap);
         //然后根据dispose设定传递到快照信息中
         snapShot.dispose_op = frame.dispose_op;
         snapShot.dstRect = frame.dstRect;
