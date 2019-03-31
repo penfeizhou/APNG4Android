@@ -26,23 +26,15 @@ public class APNGLibActivity extends Activity {
         final APNGResourceLoader resourceLoader = new APNGResourceLoader(APNGLibActivity.this, R.drawable.sample);
         final APNGFileLoader fileLoader = new APNGFileLoader("/sdcard/Pictures/wheel.png");
         imageView.setImageDrawable(
-                new APNGDrawable(
-                        assetLoader,
-                        true,
-                        APNGDecoder.Mode.MODE_SPEED));
+                new APNGDrawable(assetLoader));
 
         final ImageView imageView2 = findViewById(R.id.imageView2);
         imageView2.setImageDrawable(
-                new APNGDrawable(
-                        assetLoader,
-                        true,
-                        APNGDecoder.Mode.MODE_BALANCED));
+                new APNGDrawable(assetLoader));
 
         final ImageView imageView3 = findViewById(R.id.imageView3);
         imageView3.setImageDrawable(
-                new APNGDrawable(
-                        assetLoader, true,
-                        APNGDecoder.Mode.MODE_MEMORY));
+                new APNGDrawable(assetLoader));
     }
 //    imageView.setOnClickListener(new View.OnClickListener() {
 //            @Override

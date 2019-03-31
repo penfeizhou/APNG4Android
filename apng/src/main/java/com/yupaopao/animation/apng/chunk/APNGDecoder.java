@@ -165,16 +165,15 @@ public class APNGDecoder {
     }
 
     public APNGDecoder(APNGStreamLoader provider, RenderListener renderListener) {
-        this(provider, renderListener, false, Mode.MODE_BALANCED);
+        this(provider, renderListener, Mode.MODE_MEMORY);
     }
 
     /**
      * @param provider       APNG文件流加载器
      * @param renderListener 渲染的回调
-     * @param parallel       是否创建新线程以播放动画，默认为false
      * @param mode           帧播放方式,@see FrameMode
      */
-    public APNGDecoder(APNGStreamLoader provider, RenderListener renderListener, boolean parallel, Mode mode) {
+    public APNGDecoder(APNGStreamLoader provider, RenderListener renderListener, Mode mode) {
         this.mAPNGStreamLoader = provider;
         this.renderListener = renderListener;
         this.uiHandler = new Handler();
@@ -355,14 +354,15 @@ public class APNGDecoder {
                                     (FCTLChunk) chunk, otherChunks,
                                     sampleSize, mAPNGStreamLoader);
                             break;
-                        case MODE_MEMORY:
-                            frame = new LowMemoryFrame(ihdrChunk,
+
+                        case MODE_BALANCED:
+                            frame = new BalancedFrame(ihdrChunk,
                                     (FCTLChunk) chunk, otherChunks,
                                     sampleSize, mAPNGStreamLoader);
                             break;
-                        case MODE_BALANCED:
+                        case MODE_MEMORY:
                         default:
-                            frame = new BalancedFrame(ihdrChunk,
+                            frame = new LowMemoryFrame(ihdrChunk,
                                     (FCTLChunk) chunk, otherChunks,
                                     sampleSize, mAPNGStreamLoader);
                             break;

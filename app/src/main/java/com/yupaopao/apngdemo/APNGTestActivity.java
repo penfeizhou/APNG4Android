@@ -27,7 +27,6 @@ public class APNGTestActivity extends Activity {
         imageView.setImageDrawable(
                 new APNGDrawable(
                         assetLoader,
-                        true,
                         mode == 0 ? APNGDecoder.Mode.MODE_SPEED
                                 : (mode == 1 ? APNGDecoder.Mode.MODE_BALANCED
                                 : APNGDecoder.Mode.MODE_MEMORY)));
@@ -37,7 +36,6 @@ public class APNGTestActivity extends Activity {
                 imageView.setImageDrawable(
                         new APNGDrawable(
                                 assetLoader,
-                                true,
                                 mode == 0 ? APNGDecoder.Mode.MODE_SPEED
                                         : (mode == 1 ? APNGDecoder.Mode.MODE_BALANCED
                                         : APNGDecoder.Mode.MODE_MEMORY)));
