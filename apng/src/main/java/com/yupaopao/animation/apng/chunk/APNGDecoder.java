@@ -245,6 +245,9 @@ public class APNGDecoder {
                     bitmap.recycle();
                     bitmap = null;
                 }
+                if (canvas != null) {
+                    canvas = null;
+                }
                 for (Bitmap bitmap : cacheBitmaps) {
                     if (bitmap != null && !bitmap.isRecycled()) {
                         bitmap.recycle();
@@ -448,17 +451,19 @@ public class APNGDecoder {
         if (frame == null) {
             return;
         }
+        ByteBuffer dstByteBuffer = snapShot.byteBuffer;
 
         if (snapShot.dispose_op == FCTLChunk.APNG_DISPOSE_OP_PREVIOUS
                 && frame.dispose_op == FCTLChunk.APNG_DISPOSE_OP_PREVIOUS) {
             Log.e(TAG, "Should not be like this");
+            dstByteBuffer = ByteBuffer.allocate(bitmap.getByteCount());
         }
 
         // 如果需要在下一帧渲染前恢复当前显示内容，需要在渲染前将当前显示内容保存到快照中
         if (frame.dispose_op == FCTLChunk.APNG_DISPOSE_OP_PREVIOUS) {
             try {
                 snapShot.byteBuffer.rewind();
-                bitmap.copyPixelsToBuffer(snapShot.byteBuffer);
+                bitmap.copyPixelsToBuffer(dstByteBuffer);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -497,6 +502,7 @@ public class APNGDecoder {
         if (frame.blend_op == FCTLChunk.APNG_DISPOSE_OP_PREVIOUS) {
             snapShot.dispose_op = frame.dispose_op;
             snapShot.dstRect = frame.dstRect;
+            snapShot.byteBuffer = dstByteBuffer;
         }
     }
 
