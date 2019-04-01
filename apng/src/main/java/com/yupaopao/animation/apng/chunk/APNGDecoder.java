@@ -236,7 +236,6 @@ public class APNGDecoder {
                 cacheBitmaps.clear();
                 if (snapShot != null) {
                     snapShot.byteBuffer = null;
-                    snapShot = null;
                 }
                 if (frameBuffer != null) {
                     frameBuffer = null;
