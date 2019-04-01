@@ -61,6 +61,22 @@ public class APNGDrawable extends Drawable implements Animatable2Compat, APNGDec
         apngDecoder.setLoopLimit(loopLimit);
     }
 
+    public void reset() {
+        apngDecoder.reset();
+    }
+
+    public void pause() {
+        apngDecoder.pause();
+    }
+
+    public void resume() {
+        apngDecoder.resume();
+    }
+
+    public boolean isPaused() {
+        return apngDecoder.isPaused();
+    }
+
     @Override
     public void start() {
         apngDecoder.start();
