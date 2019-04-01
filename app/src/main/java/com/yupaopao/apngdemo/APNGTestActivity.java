@@ -24,21 +24,20 @@ public class APNGTestActivity extends Activity {
         final ImageView imageView = findViewById(R.id.imageView);
         final APNGAssetLoader assetLoader = new APNGAssetLoader(this, "wheel.png");
         final int mode = getIntent().getIntExtra("mode", 0);
-        imageView.setImageDrawable(
-                new APNGDrawable(
-                        assetLoader,
-                        mode == 0 ? APNGDecoder.Mode.MODE_SPEED
-                                : (mode == 1 ? APNGDecoder.Mode.MODE_BALANCED
-                                : APNGDecoder.Mode.MODE_MEMORY)));
+        final APNGDrawable apngDrawable = new APNGDrawable(
+                assetLoader,
+                mode == 0 ? APNGDecoder.Mode.MODE_SPEED
+                        : (mode == 1 ? APNGDecoder.Mode.MODE_BALANCED
+                        : APNGDecoder.Mode.MODE_MEMORY));
+        imageView.setImageDrawable(apngDrawable);
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                imageView.setImageDrawable(
-                        new APNGDrawable(
-                                assetLoader,
-                                mode == 0 ? APNGDecoder.Mode.MODE_SPEED
-                                        : (mode == 1 ? APNGDecoder.Mode.MODE_BALANCED
-                                        : APNGDecoder.Mode.MODE_MEMORY)));
+                if (apngDrawable.isPaused()) {
+                    apngDrawable.resume();
+                } else {
+                    apngDrawable.pause();
+                }
             }
         });
     }

@@ -44,10 +44,14 @@ public class APNGDecoder {
     private int num_frames;
     private final RenderListener renderListener;
     private boolean running;
+    private boolean paused;
     private final APNGStreamLoader mAPNGStreamLoader;
     private Runnable renderTask = new Runnable() {
         @Override
         public void run() {
+            if (paused) {
+                return;
+            }
             if (canStep()) {
                 long start = System.currentTimeMillis();
                 long delay = step();
@@ -211,6 +215,7 @@ public class APNGDecoder {
             Log.i(TAG, "Already started");
         } else {
             running = true;
+            reset();
             getExecutor().remove(renderTask);
             getExecutor().execute(renderTask);
             renderListener.onStart();
@@ -258,8 +263,27 @@ public class APNGDecoder {
         return running;
     }
 
+    public boolean isPaused() {
+        return paused;
+    }
+
     public void setLoopLimit(int limit) {
         this.loopLimit = limit;
+    }
+
+    public void reset() {
+        this.playCount = 0;
+        this.frameIndex = -1;
+    }
+
+    public void pause() {
+        paused = true;
+        getExecutor().remove(renderTask);
+    }
+
+    public void resume() {
+        paused = false;
+        getExecutor().execute(renderTask);
     }
 
 
