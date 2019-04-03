@@ -500,8 +500,10 @@ public class APNGDecoder {
                 break;
             // 清空上一帧所画区域
             case FCTLChunk.APNG_DISPOSE_OP_BACKGROUND:
-                canvas.clipRect(snapShot.dstRect, Region.Op.REPLACE);
+                canvas.save();
+                canvas.clipRect(snapShot.dstRect);
                 canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+                canvas.restore();
                 break;
             // 什么都不做
             case FCTLChunk.APNG_DISPOSE_OP_NON:
@@ -510,13 +512,15 @@ public class APNGDecoder {
         }
 
         //开始真正绘制当前帧的内容
-        canvas.clipRect(frame.dstRect, Region.Op.REPLACE);
+        canvas.save();
+        canvas.clipRect(frame.dstRect);
         if (frame.blend_op == FCTLChunk.APNG_BLEND_OP_SOURCE) {
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         }
         Bitmap inBitmap = obtainBitmap(frame.srcRect.width(), frame.srcRect.height());
         recycleBitmap(frame.draw(canvas, paint, inBitmap, decodingBuffers));
         recycleBitmap(inBitmap);
+        canvas.restore();
         //然后根据dispose设定传递到快照信息中
         snapShot.dispose_op = frame.dispose_op;
         snapShot.dstRect = frame.dstRect;
