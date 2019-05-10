@@ -11,9 +11,9 @@ import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.graphics.drawable.Animatable2Compat;
-import android.view.Choreographer;
 
 import com.yupaopao.animation.apng.chunk.APNGDecoder;
 import com.yupaopao.animation.apng.chunk.APNGStreamLoader;
@@ -35,7 +35,25 @@ public class APNGDrawable extends Drawable implements Animatable2Compat, APNGDec
     private Matrix matrix = new Matrix();
     private Set<AnimationCallback> animationCallbacks = new HashSet<>();
     private Bitmap bitmap;
-    private Handler uiHandler = new Handler(Looper.getMainLooper());
+    private static final int MSG_ANIMATION_START = 1;
+    private static final int MSG_ANIMATION_END = 2;
+    private Handler uiHandler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_ANIMATION_START:
+                    for (AnimationCallback animationCallback : animationCallbacks) {
+                        animationCallback.onAnimationStart(APNGDrawable.this);
+                    }
+                    break;
+                case MSG_ANIMATION_END:
+                    for (AnimationCallback animationCallback : animationCallbacks) {
+                        animationCallback.onAnimationEnd(APNGDrawable.this);
+                    }
+                    break;
+            }
+        }
+    };
     private Runnable invalidateRunnable = new Runnable() {
         @Override
         public void run() {
@@ -134,9 +152,7 @@ public class APNGDrawable extends Drawable implements Animatable2Compat, APNGDec
 
     @Override
     public void onStart() {
-        for (AnimationCallback animationCallback : animationCallbacks) {
-            animationCallback.onAnimationStart(this);
-        }
+        Message.obtain(uiHandler, MSG_ANIMATION_START).sendToTarget();
     }
 
     @Override
@@ -157,9 +173,7 @@ public class APNGDrawable extends Drawable implements Animatable2Compat, APNGDec
 
     @Override
     public void onEnd() {
-        for (AnimationCallback animationCallback : animationCallbacks) {
-            animationCallback.onAnimationEnd(this);
-        }
+        Message.obtain(uiHandler, MSG_ANIMATION_END).sendToTarget();
     }
 
     @Override
