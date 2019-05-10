@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
-import android.graphics.Region;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
 
@@ -14,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -213,12 +211,16 @@ public class APNGDecoder {
         });
         if (running) {
             Log.i(TAG, "Already started");
-        } else {
+        } else if (getNumPlays() == 0
+                || this.playCount < getNumPlays() - 1
+                || (this.playCount == getNumPlays() - 1 && this.frameIndex < this.num_frames - 1)) {
             running = true;
-            reset();
+            this.frameIndex = -1;
             getExecutor().remove(renderTask);
             getExecutor().execute(renderTask);
             renderListener.onStart();
+        } else {
+            Log.i(TAG, "No need to started");
         }
     }
 
