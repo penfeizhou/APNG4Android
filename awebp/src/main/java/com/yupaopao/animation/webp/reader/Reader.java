@@ -14,7 +14,8 @@ public interface Reader {
 
     int read(byte[] buffer, int byteCount) throws IOException;
 
-    int available();
+    int available() throws IOException;
+
     /**
      * @return uint16 A 16-bit, little-endian, unsigned integer.
      */

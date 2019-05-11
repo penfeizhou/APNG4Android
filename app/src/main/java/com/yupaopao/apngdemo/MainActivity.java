@@ -10,6 +10,10 @@ import android.util.Log;
 import android.view.View;
 
 import com.yupaopao.animation.webp.AssetStreamLoader;
+import com.yupaopao.animation.webp.decode.WebPParser;
+import com.yupaopao.animation.webp.reader.StreamReader;
+
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -50,8 +54,13 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        AssetStreamLoader loader = new AssetStreamLoader(this, "animation.webp");
+        AssetStreamLoader loader = new AssetStreamLoader(this, "1.webp");
         Log.d("test", "" + loader.isAnimatedWebp());
+        try {
+            WebPParser.parse(new StreamReader(loader.getInputStream()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

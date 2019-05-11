@@ -1,4 +1,4 @@
-package com.yupaopao.animation.webp.chunk;
+package com.yupaopao.animation.webp.decode;
 
 
 import com.yupaopao.animation.webp.reader.Reader;
@@ -10,8 +10,8 @@ import java.io.IOException;
  * @Author: pengfei.zhou
  * @CreateDate: 2019-05-11
  */
-public class VP8XChunk extends Chunk {
-    static final int ID = Chunk.fourCCToInt("VP8X");
+class VP8XChunk extends BaseChunk {
+    static final int ID = BaseChunk.fourCCToInt("VP8X");
     /**
      * 0                   1                   2                   3
      * 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -58,8 +58,7 @@ public class VP8XChunk extends Chunk {
      */
     int canvasHeight;
 
-    @Override
-    void parse(Reader reader) throws IOException {
+    void innerParse(Reader reader) throws IOException {
         flags = reader.peek();
         reader.skip(3);
         canvasWidth = reader.get1Based();

@@ -13,32 +13,13 @@ import java.io.InputStream;
  * @CreateDate: 2019/3/27
  */
 class Chunk {
-    long size;
+    int size;
     int fourCC;
     byte[] data;
     int crc;
     private static ThreadLocal<byte[]> __intBytes = new ThreadLocal<>();
 
-    protected static int fourCCToInt(String fourCC) {
-        if (TextUtils.isEmpty(fourCC) || fourCC.length() != 4) {
-            return 0xbadeffff;
-        }
-        return (fourCC.charAt(0) & 0xff)
-                | (fourCC.charAt(1) & 0xff) << 8
-                | (fourCC.charAt(2) & 0xff) << 16
-                | (fourCC.charAt(3) & 0xff) << 24
-                ;
-    }
-
     void parse() {
-    }
-
-    /**
-     * Parse chunk data here
-     * @param reader current reader
-     */
-    void parse(Reader reader) throws IOException {
-        reader.skip(this.size);
     }
 
     static Chunk read(InputStream inputStream, boolean skipData) throws IOException {
