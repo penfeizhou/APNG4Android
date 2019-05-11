@@ -4,11 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * @Description: Length (长度)	4字节	指定数据块中数据域的长度，其长度不超过(231－1)字节
- * Chunk Type Code (数据块类型码)	4字节	数据块类型码由ASCII字母(A-Z和a-z)组成
- * Chunk Data (数据块数据)	可变长度	存储按照Chunk Type Code指定的数据
- * CRC (循环冗余检测)	4字节	存储用来检测是否有错误的循环冗余码
- * @Link https://www.w3.org/TR/PNG
+ * @Link {https://developers.google.com/speed/webp/docs/riff_container#extended_file_format}
  * @Author: pengfei.zhou
  * @CreateDate: 2019/3/27
  */
@@ -46,24 +42,6 @@ class Chunk {
     private static Chunk newInstance(int typeCode) {
         Chunk chunk;
         switch (typeCode) {
-            case IHDRChunk.ID:
-                chunk = new IHDRChunk();
-                break;
-            case IDATChunk.ID:
-                chunk = new IDATChunk();
-                break;
-            case IENDChunk.ID:
-                chunk = new IENDChunk();
-                break;
-            case ACTLChunk.ID:
-                chunk = new ACTLChunk();
-                break;
-            case FCTLChunk.ID:
-                chunk = new FCTLChunk();
-                break;
-            case FDATChunk.ID:
-                chunk = new FDATChunk();
-                break;
             default:
                 chunk = new Chunk();
                 break;
@@ -84,12 +62,6 @@ class Chunk {
         inputStream.read(ensureBytes());
         return byteArrayToInt(ensureBytes());
     }
-
-    static String readTypeCodeFromInputStream(InputStream inputStream) throws IOException {
-        inputStream.read(ensureBytes());
-        return new String(ensureBytes());
-    }
-
 
     private static int byteArrayToInt(byte[] b) {
         return b[3] & 0xFF |
