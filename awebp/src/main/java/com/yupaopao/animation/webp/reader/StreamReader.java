@@ -39,18 +39,13 @@ public class StreamReader extends FilterInputStream implements Reader {
     @Override
     public byte peek() throws IOException {
         byte[] buf = ensureBytes();
-        read(buf, 0, 2);
+        read(buf, 0, 1);
         return buf[0];
     }
 
     @Override
     public int read(byte[] buffer, int byteCount) throws IOException {
         return read(buffer, 0, byteCount);
-    }
-
-    @Override
-    public int available() {
-        return available();
     }
 
     @Override
