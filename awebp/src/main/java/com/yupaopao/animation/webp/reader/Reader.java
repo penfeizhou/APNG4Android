@@ -10,6 +10,8 @@ import java.io.IOException;
 public interface Reader {
     long skip(long total) throws IOException;
 
+    byte peek() throws IOException;
+
     int read(byte[] buffer, int byteCount) throws IOException;
 
     /**
@@ -36,4 +38,14 @@ public interface Reader {
      * @return 1-based An unsigned integer field storing values offset by -1. e.g., Such a field would store value 25 as 24.
      */
     int get1Based() throws IOException;
+
+    /**
+     * @return read FourCC and match chars
+     */
+    boolean matchFourCC(String chars) throws IOException;
+
+    /**
+     * close io
+     */
+    void release();
 }

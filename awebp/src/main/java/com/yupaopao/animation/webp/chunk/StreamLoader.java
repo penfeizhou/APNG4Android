@@ -2,6 +2,9 @@ package com.yupaopao.animation.webp.chunk;
 
 import android.graphics.Rect;
 
+import com.yupaopao.animation.webp.reader.Reader;
+import com.yupaopao.animation.webp.reader.StreamReader;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -15,6 +18,10 @@ public abstract class StreamLoader {
      * 打开APNG的文件流，读取完后会自动close
      */
     public abstract InputStream getInputStream() throws IOException;
+
+    protected Reader obtain() throws IOException {
+        return new StreamReader(getInputStream());
+    }
 
     /**
      * 获取图像尺寸信息
@@ -33,19 +40,15 @@ public abstract class StreamLoader {
      * @link {https://developers.google.com/speed/webp/docs/riff_container#webp_file_header}
      */
     public boolean isWebp() {
-        InputStream inputStream = null;
+        Reader reader = null;
         try {
-            inputStream = getInputStream();
-            return parseWebpHeader(inputStream);
+            reader = obtain();
+            return reader.matchFourCC("RIFF") && reader.skip(4) == 4 && reader.matchFourCC("WEBP");
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            if (reader != null) {
+                reader.release();
             }
         }
         return false;
@@ -56,43 +59,25 @@ public abstract class StreamLoader {
      * @link {https://developers.google.com/speed/webp/docs/riff_container#extended_file_format}
      */
     public boolean isAnimatedWebp() {
-        InputStream inputStream = null;
+        Reader reader = null;
         try {
-            inputStream = getInputStream();
-            return parseWebpHeader(inputStream) && parseAnimationHeader(inputStream);
+            reader = obtain();
+            return reader.matchFourCC("RIFF")
+                    && reader.skip(4) == 4
+                    && reader.matchFourCC("WEBP")
+                    && reader.matchFourCC("VP8X")
+                    && (reader.peek() & 0x2) == 0x2
+                    ;
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            if (reader != null) {
+                reader.release();
             }
         }
         return false;
     }
 
-    private boolean parseAnimationHeader(InputStream inputStream) throws IOException {
-        return inputStream.read() == 'V'
-                && inputStream.read() == 'P'
-                && inputStream.read() == '8'
-                && inputStream.read() == 'X'
-                && (inputStream.read() & 0x2) == 0x2;
-    }
-
-    private boolean parseWebpHeader(InputStream inputStream) throws IOException {
-        return inputStream.read() == 'R'
-                && inputStream.read() == 'I'
-                && inputStream.read() == 'F'
-                && inputStream.read() == 'F'
-                && inputStream.skip(4) == 4
-                && inputStream.read() == 'W'
-                && inputStream.read() == 'E'
-                && inputStream.read() == 'B'
-                && inputStream.read() == 'P';
-    }
 
     private <T> T getChunk(Class<? extends T> clz) {
         InputStream inputStream = null;

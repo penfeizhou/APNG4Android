@@ -1,5 +1,7 @@
 package com.yupaopao.animation.webp.reader;
 
+import android.text.TextUtils;
+
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,7 +23,7 @@ public class StreamReader extends FilterInputStream implements Reader {
      * @param in the underlying input stream, or <code>null</code> if
      *           this instance is to be created without an underlying stream.
      */
-    protected StreamReader(InputStream in) {
+    public StreamReader(InputStream in) {
         super(in);
     }
 
@@ -32,6 +34,13 @@ public class StreamReader extends FilterInputStream implements Reader {
             __intBytes.set(bytes);
         }
         return bytes;
+    }
+
+    @Override
+    public byte peek() throws IOException {
+        byte[] buf = ensureBytes();
+        read(buf, 0, 2);
+        return buf[0];
     }
 
     @Override
@@ -68,5 +77,28 @@ public class StreamReader extends FilterInputStream implements Reader {
     @Override
     public int get1Based() throws IOException {
         return getUInt24() + 1;
+    }
+
+    @Override
+    public boolean matchFourCC(String chars) throws IOException {
+        if (TextUtils.isEmpty(chars) || chars.length() != 4) {
+            return false;
+        }
+        int fourCC = getFourCC();
+        for (int i = 0; i < 4; i++) {
+            if (((fourCC >> (i * 8)) & 0xff) != chars.charAt(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public void release() {
+        try {
+            close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
