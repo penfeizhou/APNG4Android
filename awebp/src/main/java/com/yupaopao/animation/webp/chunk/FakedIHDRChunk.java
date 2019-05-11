@@ -45,8 +45,8 @@ class FakedIHDRChunk extends IHDRChunk {
     }
 
     FakedIHDRChunk(IHDRChunk ihdrChunk, int width, int height) {
-        this.length = ihdrChunk.length;
-        this.type = ihdrChunk.type;
+        this.size = ihdrChunk.size;
+        this.fourCC = ihdrChunk.fourCC;
         this.bitDepth = ihdrChunk.bitDepth;
         this.colorType = ihdrChunk.colorType;
         this.width = width;
@@ -62,11 +62,11 @@ class FakedIHDRChunk extends IHDRChunk {
         this.data[6] = (byte) ((this.height >> 8) & 0xff);
         this.data[7] = (byte) (this.height & 0xff);
         CRC32 crc32 = new CRC32();
-        crc32.update(readIntByByte(this.type, 0));
-        crc32.update(readIntByByte(this.type, 1));
-        crc32.update(readIntByByte(this.type, 2));
-        crc32.update(readIntByByte(this.type, 3));
-        crc32.update(this.data, 0, this.length);
+        crc32.update(readIntByByte(this.fourCC, 0));
+        crc32.update(readIntByByte(this.fourCC, 1));
+        crc32.update(readIntByByte(this.fourCC, 2));
+        crc32.update(readIntByByte(this.fourCC, 3));
+        crc32.update(this.data, 0, this.size);
         crc = (int) crc32.getValue();
     }
 }

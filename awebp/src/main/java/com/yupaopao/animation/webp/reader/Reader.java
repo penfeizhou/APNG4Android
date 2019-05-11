@@ -14,6 +14,7 @@ public interface Reader {
 
     int read(byte[] buffer, int byteCount) throws IOException;
 
+    int available();
     /**
      * @return uint16 A 16-bit, little-endian, unsigned integer.
      */
@@ -27,7 +28,7 @@ public interface Reader {
     /**
      * @return uint32 A 32-bit, little-endian, unsigned integer.
      */
-    int getUInt32() throws IOException;
+    long getUInt32() throws IOException;
 
     /**
      * @return FourCC A FourCC (four-character code) is a uint32 created by concatenating four ASCII characters in little-endian order.

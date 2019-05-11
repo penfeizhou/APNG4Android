@@ -1,5 +1,9 @@
 package com.yupaopao.animation.webp.chunk;
 
+import android.text.TextUtils;
+
+import com.yupaopao.animation.webp.reader.Reader;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -9,13 +13,32 @@ import java.io.InputStream;
  * @CreateDate: 2019/3/27
  */
 class Chunk {
-    int length;
-    int type;
+    long size;
+    int fourCC;
     byte[] data;
     int crc;
     private static ThreadLocal<byte[]> __intBytes = new ThreadLocal<>();
 
+    protected static int fourCCToInt(String fourCC) {
+        if (TextUtils.isEmpty(fourCC) || fourCC.length() != 4) {
+            return 0xbadeffff;
+        }
+        return (fourCC.charAt(0) & 0xff)
+                | (fourCC.charAt(1) & 0xff) << 8
+                | (fourCC.charAt(2) & 0xff) << 16
+                | (fourCC.charAt(3) & 0xff) << 24
+                ;
+    }
+
     void parse() {
+    }
+
+    /**
+     * Parse chunk data here
+     * @param reader current reader
+     */
+    void parse(Reader reader) throws IOException {
+        reader.skip(this.size);
     }
 
     static Chunk read(InputStream inputStream, boolean skipData) throws IOException {
@@ -26,12 +49,12 @@ class Chunk {
 
         int length = readIntFromInputStream(inputStream);
         Chunk chunk = newInstance(type);
-        chunk.type = type;
-        chunk.length = length;
+        chunk.fourCC = type;
+        chunk.size = length;
         if (skipData && (chunk instanceof IDATChunk || chunk instanceof FDATChunk)) {
             inputStream.skip(length + 4);
         } else {
-            chunk.data = new byte[chunk.length];
+            chunk.data = new byte[(int) chunk.size];
             inputStream.read(chunk.data);
             chunk.crc = readIntFromInputStream(inputStream);
             chunk.parse();
@@ -71,7 +94,7 @@ class Chunk {
     }
 
     int getRawDataLength() {
-        return length + 12;
+        return (int) (size + 12);
     }
 
     int peekData(int i) {
@@ -85,27 +108,27 @@ class Chunk {
         offset += 4;
         if (data != null && data.length > 0) {
             copyData(dst, offset);
-            offset += length;
+            offset += size;
         }
         copyCrc(dst, offset);
     }
 
     void copyLength(byte[] dst, int offset) {
-        dst[offset] = readIntByByte(length, 0);
-        dst[offset + 1] = readIntByByte(length, 1);
-        dst[offset + 2] = readIntByByte(length, 2);
-        dst[offset + 3] = readIntByByte(length, 3);
+        dst[offset] = readIntByByte((int) size, 0);
+        dst[offset + 1] = readIntByByte((int) size, 1);
+        dst[offset + 2] = readIntByByte((int) size, 2);
+        dst[offset + 3] = readIntByByte((int) size, 3);
     }
 
     void copyTypeCode(byte[] dst, int offset) {
-        dst[offset] = readIntByByte(type, 0);
-        dst[offset + 1] = readIntByByte(type, 1);
-        dst[offset + 2] = readIntByByte(type, 2);
-        dst[offset + 3] = readIntByByte(type, 3);
+        dst[offset] = readIntByByte(fourCC, 0);
+        dst[offset + 1] = readIntByByte(fourCC, 1);
+        dst[offset + 2] = readIntByByte(fourCC, 2);
+        dst[offset + 3] = readIntByByte(fourCC, 3);
     }
 
     void copyData(byte[] dst, int offset) {
-        System.arraycopy(data, 0, dst, offset, length);
+        System.arraycopy(data, 0, dst, offset, (int) size);
     }
 
     void copyCrc(byte[] dst, int offset) {
