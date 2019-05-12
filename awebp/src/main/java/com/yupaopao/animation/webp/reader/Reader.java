@@ -14,6 +14,8 @@ public interface Reader {
 
     void reset() throws IOException;
 
+    int position();
+
     int read(byte[] buffer, int start, int byteCount) throws IOException;
 
     int available() throws IOException;
@@ -51,5 +53,5 @@ public interface Reader {
     /**
      * close io
      */
-    void release();
+    void close() throws IOException;
 }

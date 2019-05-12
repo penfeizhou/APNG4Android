@@ -48,7 +48,11 @@ public abstract class StreamLoader {
             e.printStackTrace();
         } finally {
             if (reader != null) {
-                reader.release();
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
         return false;
@@ -72,7 +76,11 @@ public abstract class StreamLoader {
             e.printStackTrace();
         } finally {
             if (reader != null) {
-                reader.release();
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
         return false;

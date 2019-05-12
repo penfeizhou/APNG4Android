@@ -1,5 +1,6 @@
 package com.yupaopao.animation.webp.decode;
 
+import com.yupaopao.animation.webp.DataUtil;
 import com.yupaopao.animation.webp.reader.Reader;
 
 import java.io.IOException;
@@ -18,7 +19,7 @@ import java.io.IOException;
  * @CreateDate: 2019-05-11
  */
 public class ALPHChunk extends BaseChunk {
-    static final int ID = BaseChunk.fourCCToInt("ALPH");
+    static final int ID = DataUtil.fourCCToInt("ALPH");
     byte flags;
     /**
      * Pre-processing (P): 2 bits
