@@ -1,10 +1,18 @@
 package com.yupaopao.animation.webp.decode;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import com.yupaopao.animation.webp.reader.Reader;
+import com.yupaopao.animation.webp.reader.StreamReader;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,17 +39,48 @@ public class WebPParser {
             chunks.add(parseChunk(reader));
         }
         Log.d("test", "done");
+        long offset = 12;
+        VP8XChunk vp8xChunk = null;
+        for (BaseChunk chunk : chunks) {
+            if (chunk instanceof VP8XChunk) {
+                vp8xChunk = (VP8XChunk) chunk;
+            }
+            if (chunk instanceof ANMFChunk) {
+                int vp8chunkSize = chunk.payloadSize - 16;
+                ByteBuffer byteBuffer = ByteBuffer.allocate(12 + vp8xChunk.getContentLength() + vp8chunkSize);
+                byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+                byteBuffer.put(BaseChunk.fourCCToByte("RIFF"));
+                byteBuffer.put(BaseChunk.uInt32ToByte(12 + vp8xChunk.getContentLength() + vp8chunkSize));
+                byteBuffer.put(BaseChunk.fourCCToByte("WEBP"));
+                byteBuffer.put(BaseChunk.uInt32ToByte(VP8XChunk.ID));
+                byteBuffer.put(BaseChunk.uInt32ToByte(vp8xChunk.payloadSize));
+                byteBuffer.putInt(0);
+                byteBuffer.put(BaseChunk.oneBasedToByte(((ANMFChunk) chunk).frameWidth));
+                byteBuffer.put(BaseChunk.oneBasedToByte(((ANMFChunk) chunk).frameHeight));
+                reader.reset();
+                reader.skip(offset + 8 + 16);
+                reader.read(byteBuffer.array(), byteBuffer.position(), vp8chunkSize);
+                Bitmap bitmap = BitmapFactory.decodeByteArray(byteBuffer.array(), 0, byteBuffer.array().length);
+                assert bitmap != null;
+                ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteBuffer.array());
+                Reader reader1 = new StreamReader(byteArrayInputStream);
+                parse(reader1);
+                File file = new File("/data/user/0/com.yupaopao.apngdemo/cache/1");
+                FileOutputStream fileOutputStream = new FileOutputStream(file);
+                fileOutputStream.write(byteBuffer.array());
+                fileOutputStream.flush();
+                break;
+            }
+            offset += chunk.getContentLength();
+        }
+
+
     }
 
     public static BaseChunk parseChunk(Reader reader) throws IOException {
         //@link {https://developers.google.com/speed/webp/docs/riff_container#riff_file_format}
         int chunkFourCC = reader.getFourCC();
-        if (chunkFourCC == 0x38505600) {
-            //TODO check format exception
-            chunkFourCC = VP8Chunk.ID;
-            reader.skip(1);
-        }
-        long chunkSize = reader.getUInt32();
+        int chunkSize = reader.getUInt32();
         BaseChunk chunk;
         if (VP8XChunk.ID == chunkFourCC) {
             chunk = new VP8XChunk();
@@ -65,7 +104,7 @@ public class WebPParser {
             chunk = new BaseChunk();
         }
         chunk.chunkFourCC = chunkFourCC;
-        chunk.chunkSize = chunkSize;
+        chunk.payloadSize = chunkSize;
         chunk.parse(reader);
         return chunk;
     }
