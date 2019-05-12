@@ -3,8 +3,6 @@ package com.yupaopao.animation.webp.decode;
 import com.yupaopao.animation.webp.reader.Reader;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * ANMF chunk:
@@ -101,7 +99,7 @@ public class ANMFChunk extends BaseChunk {
         this.frameHeight = reader.get1Based();
         this.frameDuration = reader.getUInt24();
         this.flags = reader.peek();
-        long bounds = available - chunkSize;
+        long bounds = available - payloadSize;
         while (reader.available() > bounds) {
             BaseChunk chunk = WebPParser.parseChunk(reader);
             if (chunk instanceof ALPHChunk) {

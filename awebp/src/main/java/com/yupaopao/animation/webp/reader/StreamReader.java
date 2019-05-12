@@ -44,11 +44,6 @@ public class StreamReader extends FilterInputStream implements Reader {
     }
 
     @Override
-    public int read(byte[] buffer, int byteCount) throws IOException {
-        return read(buffer, 0, byteCount);
-    }
-
-    @Override
     public int getUInt16() throws IOException {
         byte[] buf = ensureBytes();
         read(buf, 0, 2);
@@ -63,7 +58,7 @@ public class StreamReader extends FilterInputStream implements Reader {
     }
 
     @Override
-    public long getUInt32() throws IOException {
+    public int getUInt32() throws IOException {
         byte[] buf = ensureBytes();
         read(buf, 0, 4);
         return buf[0] & 0xff | (buf[1] & 0xff) << 8 | (buf[2] & 0xff) << 16 | (buf[3] & 0xff) << 24;

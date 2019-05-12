@@ -2,6 +2,8 @@ package com.yupaopao.apngdemo;
 
 import android.Manifest;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -16,7 +18,6 @@ import com.yupaopao.animation.webp.reader.StreamReader;
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,6 +62,13 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        try {
+            Bitmap bitmap = BitmapFactory.decodeStream(loader.getInputStream());
+            Log.d("test", "" + loader.isAnimatedWebp());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override
