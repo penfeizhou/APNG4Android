@@ -20,6 +20,7 @@ public class WebPParser {
         if (!reader.matchFourCC("RIFF")) {
             throw new FormatException();
         }
+        reader.skip(4);
         if (!reader.matchFourCC("WEBP")) {
             throw new FormatException();
         }
