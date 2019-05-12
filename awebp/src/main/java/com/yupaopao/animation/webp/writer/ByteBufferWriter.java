@@ -67,4 +67,9 @@ public class ByteBufferWriter implements Writer {
     @Override
     public void close() {
     }
+
+    @Override
+    public void reset() {
+        byteBuffer.reset();
+    }
 }

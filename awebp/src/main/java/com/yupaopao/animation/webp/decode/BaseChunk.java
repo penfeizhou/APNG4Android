@@ -1,7 +1,5 @@
 package com.yupaopao.animation.webp.decode;
 
-import android.text.TextUtils;
-
 import com.yupaopao.animation.webp.reader.Reader;
 
 import java.io.IOException;
@@ -14,8 +12,8 @@ import java.io.IOException;
 public class BaseChunk {
     public int chunkFourCC;
     public int payloadSize;
-    public Reader reader;
     public int offset;
+    public static final int CHUNCK_HEADER_OFFSET = 8;
 
     final void parse(Reader reader) throws IOException {
         int available = reader.available();
@@ -42,6 +40,6 @@ public class BaseChunk {
     }
 
     int getContentLength() {
-        return payloadSize + 8 + (payloadSize & 1);
+        return payloadSize + CHUNCK_HEADER_OFFSET + (payloadSize & 1);
     }
 }

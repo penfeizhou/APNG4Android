@@ -2,20 +2,12 @@ package com.yupaopao.apngdemo;
 
 import android.Manifest;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 
-import com.yupaopao.animation.webp.AssetStreamLoader;
-import com.yupaopao.animation.webp.decode.WebPParser;
-import com.yupaopao.animation.webp.reader.StreamReader;
-
-import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
     @Override
@@ -55,20 +47,6 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        AssetStreamLoader loader = new AssetStreamLoader(this, "1.webp");
-        Log.d("test", "" + loader.isAnimatedWebp());
-        try {
-            WebPParser.parse(new StreamReader(loader.getInputStream()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            Bitmap bitmap = BitmapFactory.decodeStream(loader.getInputStream());
-            Log.d("test", "" + loader.isAnimatedWebp());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
     }
 
     @Override
