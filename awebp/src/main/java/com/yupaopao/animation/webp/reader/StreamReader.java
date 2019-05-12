@@ -13,6 +13,7 @@ import java.io.InputStream;
  */
 public class StreamReader extends FilterInputStream implements Reader {
     private static ThreadLocal<byte[]> __intBytes = new ThreadLocal<>();
+    private int position;
 
     /**
      * Creates a <code>FilterInputStream</code>
@@ -41,6 +42,31 @@ public class StreamReader extends FilterInputStream implements Reader {
         byte[] buf = ensureBytes();
         read(buf, 0, 1);
         return buf[0];
+    }
+
+    @Override
+    public int read(byte[] b, int off, int len) throws IOException {
+        int ret = super.read(b, off, len);
+        position += Math.max(0, ret);
+        return ret;
+    }
+
+    @Override
+    public synchronized void reset() throws IOException {
+        super.reset();
+        position = 0;
+    }
+
+    @Override
+    public long skip(long n) throws IOException {
+        long ret = super.skip(n);
+        position += ret;
+        return ret;
+    }
+
+    @Override
+    public int position() {
+        return position;
     }
 
     @Override
@@ -88,14 +114,5 @@ public class StreamReader extends FilterInputStream implements Reader {
             }
         }
         return true;
-    }
-
-    @Override
-    public void release() {
-        try {
-            close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }

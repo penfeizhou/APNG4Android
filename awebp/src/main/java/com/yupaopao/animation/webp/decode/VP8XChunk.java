@@ -1,6 +1,7 @@
 package com.yupaopao.animation.webp.decode;
 
 
+import com.yupaopao.animation.webp.DataUtil;
 import com.yupaopao.animation.webp.reader.Reader;
 
 import java.io.IOException;
@@ -11,7 +12,7 @@ import java.io.IOException;
  * @CreateDate: 2019-05-11
  */
 class VP8XChunk extends BaseChunk {
-    static final int ID = BaseChunk.fourCCToInt("VP8X");
+    static final int ID = DataUtil.fourCCToInt("VP8X");
     /**
      * 0                   1                   2                   3
      * 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1

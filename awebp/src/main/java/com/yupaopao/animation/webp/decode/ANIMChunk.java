@@ -1,5 +1,6 @@
 package com.yupaopao.animation.webp.decode;
 
+import com.yupaopao.animation.webp.DataUtil;
 import com.yupaopao.animation.webp.reader.Reader;
 
 import java.io.IOException;
@@ -20,7 +21,7 @@ import java.io.IOException;
  * @CreateDate: 2019-05-11
  */
 public class ANIMChunk extends BaseChunk {
-    static final int ID = BaseChunk.fourCCToInt("ANIM");
+    static final int ID = DataUtil.fourCCToInt("ANIM");
     /**
      * The default background color of the canvas in [Blue, Green, Red, Alpha] byte order.
      * This color MAY be used to fill the unused space on the canvas around the frames, as well as the transparent pixels of the first frame.
@@ -34,7 +35,7 @@ public class ANIMChunk extends BaseChunk {
 
     @Override
     void innerParse(Reader reader) throws IOException {
-        this.backgroundColor = (int) reader.getUInt32();
+        this.backgroundColor = reader.getUInt32();
         this.loopCount = reader.getUInt16();
     }
 }
