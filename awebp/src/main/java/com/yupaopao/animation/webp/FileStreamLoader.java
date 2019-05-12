@@ -1,8 +1,6 @@
 package com.yupaopao.animation.webp;
 
 
-import com.yupaopao.animation.webp.chunk.StreamLoader;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;

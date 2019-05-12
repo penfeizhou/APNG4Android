@@ -1,16 +1,21 @@
-package com.yupaopao.animation.webp.chunk;
+package com.yupaopao.animation.webp.decode;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
 
+import com.yupaopao.animation.webp.StreamLoader;
+import com.yupaopao.animation.webp.reader.Reader;
+import com.yupaopao.animation.webp.writer.ByteStreamWriter;
+import com.yupaopao.animation.webp.writer.Writer;
+
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -32,18 +37,18 @@ import java.util.concurrent.TimeUnit;
  */
 public class AnimatedWebpDecoder {
     private static final String TAG = AnimatedWebpDecoder.class.getSimpleName();
+    private final Paint mTransparentFillPaint;
     private List<Frame> frames = new ArrayList<>();
     private int frameIndex = -1;
     private int playCount;
-    private Rect fullRect;
     private Paint paint;
-    private int num_plays;
+    private int loopCount;
     private Integer loopLimit = null;
     private int num_frames;
     private final RenderListener renderListener;
     private boolean running;
     private boolean paused;
-    private final StreamLoader mStreamLoader;
+    private Reader mReader;
     private Runnable renderTask = new Runnable() {
         @Override
         public void run() {
@@ -62,22 +67,17 @@ public class AnimatedWebpDecoder {
         }
     };
     private int sampleSize = 1;
-    private final Mode mode;
 
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
-    private byte[] decodingBuffers = new byte[0];
 
     private Set<Bitmap> cacheBitmaps = new HashSet<>();
     private Map<Bitmap, Canvas> cachedCanvas = new WeakHashMap<>();
     private ByteBuffer frameBuffer;
-
-    private class SnapShot {
-        byte dispose_op;
-        Rect dstRect;
-        ByteBuffer byteBuffer;
-    }
-
-    private SnapShot snapShot = new SnapShot();
+    private Rect fullRect;
+    private int canvasWidth;
+    private int canvasHeight;
+    private int backgroundColor;
+    private Writer mWriter = new ByteStreamWriter();
 
     private Bitmap obtainBitmap(int width, int height) {
         Bitmap ret = null;
@@ -130,46 +130,22 @@ public class AnimatedWebpDecoder {
         void onEnd();
     }
 
-    public enum Mode {
-        /**
-         * 播放速度优先
-         * 该模式下每一帧都缓存解码后的bitmap
-         * java memory低，native memory占用高
-         * 播放速度最快
-         * 大图模式下容易引发OOM，推荐仅小图使用
-         */
-        MODE_SPEED,
-        /**
-         * 内存占用优先
-         * 该模式下每一帧仅保留基本信息，播放时实时从流中实时读取到内存并解码
-         * java memory略高，native memory占用低
-         * 播放速度最慢
-         * 推荐在帧间隔较大情况下使用
-         */
-        MODE_MEMORY,
-        /**
-         * 平衡策略
-         * 该模式下每一帧保留图像原始信息，播放时从内存中解码
-         * java memory高，native memory占用低
-         * 播放速度较慢
-         * 默认使用这种模式
-         */
-        MODE_BALANCED,
-    }
-
-    public AnimatedWebpDecoder(StreamLoader provider, RenderListener renderListener) {
-        this(provider, renderListener, Mode.MODE_MEMORY);
-    }
 
     /**
-     * @param provider       APNG文件流加载器
+     * @param loader         webp的reader
      * @param renderListener 渲染的回调
-     * @param mode           帧播放方式,@see FrameMode
      */
-    public AnimatedWebpDecoder(StreamLoader provider, RenderListener renderListener, Mode mode) {
-        this.mStreamLoader = provider;
+    public AnimatedWebpDecoder(StreamLoader loader, RenderListener renderListener) {
+        try {
+            this.mReader = loader.obtain();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         this.renderListener = renderListener;
-        this.mode = mode;
+        mTransparentFillPaint = new Paint();
+        mTransparentFillPaint.setColor(Color.TRANSPARENT);
+        mTransparentFillPaint.setStyle(Paint.Style.FILL);
+        mTransparentFillPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
     }
 
     public Rect getBounds() {
@@ -179,7 +155,10 @@ public class AnimatedWebpDecoder {
             Callable<Rect> callable = new Callable<Rect>() {
                 @Override
                 public Rect call() throws Exception {
-                    return mStreamLoader.getBounds();
+                    if (fullRect == null) {
+                        read();
+                    }
+                    return fullRect;
                 }
             };
             FutureTask<Rect> futureTask = new FutureTask<>(callable);
@@ -205,7 +184,11 @@ public class AnimatedWebpDecoder {
             @Override
             public void run() {
                 if (frames.size() == 0) {
-                    readInputStream();
+                    try {
+                        read();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });
@@ -231,9 +214,6 @@ public class AnimatedWebpDecoder {
         getExecutor().execute(new Runnable() {
             @Override
             public void run() {
-                for (Frame frame : frames) {
-                    frame.recycle();
-                }
                 frames.clear();
                 for (Bitmap bitmap : cacheBitmaps) {
                     if (bitmap != null && !bitmap.isRecycled()) {
@@ -241,13 +221,16 @@ public class AnimatedWebpDecoder {
                     }
                 }
                 cacheBitmaps.clear();
-                if (snapShot != null) {
-                    snapShot.byteBuffer = null;
-                }
                 if (frameBuffer != null) {
                     frameBuffer = null;
                 }
                 cachedCanvas.clear();
+                try {
+                    mReader.close();
+                    mWriter.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -303,9 +286,13 @@ public class AnimatedWebpDecoder {
                 @Override
                 public void run() {
                     frames.clear();
-                    readInputStream();
-                    if (tempRunning) {
-                        start();
+                    try {
+                        read();
+                        if (tempRunning) {
+                            start();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
             });
@@ -324,121 +311,25 @@ public class AnimatedWebpDecoder {
         return sample;
     }
 
-    private void readInputStream() {
-        InputStream inputStream = null;
-        try {
-            inputStream = mStreamLoader.getInputStream();
-            byte[] sigBytes = new byte[8];
-            inputStream.read(sigBytes);
-            String signature = new String(sigBytes);
-            Log.d(TAG, "read png signature:" + signature);
-            Chunk chunk;
-            int lastSeq = -1;
-            List<Chunk> otherChunks = new ArrayList<>();
-            ACTLChunk actlChunk = null;
-            IHDRChunk ihdrChunk = null;
-            int pos = 8;
-            while ((chunk = Chunk.read(inputStream, mode == Mode.MODE_MEMORY)) != null) {
-                pos += chunk.getRawDataLength();
-                if (chunk instanceof IENDChunk) {
-                    if (lastSeq >= 0) {
-                        frames.get(lastSeq).endPos = pos - chunk.getRawDataLength();
-                    }
-                    break;
-                } else if (chunk instanceof ACTLChunk) {
-                    actlChunk = (ACTLChunk) chunk;
-                    this.num_frames = actlChunk.num_frames;
-                    this.num_plays = actlChunk.num_plays;
-                } else if (chunk instanceof FCTLChunk) {
-                    if (lastSeq >= 0) {
-                        frames.get(lastSeq).endPos = pos - chunk.getRawDataLength();
-                    }
-                    lastSeq++;
-                    Frame frame;
-                    switch (mode) {
-                        case MODE_SPEED:
-                            frame = new SpeedFirstFrame(ihdrChunk,
-                                    (FCTLChunk) chunk, otherChunks,
-                                    sampleSize, mStreamLoader);
-                            break;
-
-                        case MODE_BALANCED:
-                            frame = new BalancedFrame(ihdrChunk,
-                                    (FCTLChunk) chunk, otherChunks,
-                                    sampleSize, mStreamLoader);
-                            break;
-                        case MODE_MEMORY:
-                        default:
-                            frame = new LowMemoryFrame(ihdrChunk,
-                                    (FCTLChunk) chunk, otherChunks,
-                                    sampleSize, mStreamLoader);
-                            break;
-                    }
-                    frame.sequence_number = lastSeq;
-                    frame.startPos = pos;
-                    frames.add(frame);
-                } else if (chunk instanceof FDATChunk) {
-                    Frame frame = getFrame(lastSeq);
-                    if (frame instanceof BalancedFrame) {
-                        ((BalancedFrame) frame).idatChunks.add(new FakedIDATChunk((FDATChunk) chunk));
-                    }
-                } else if (chunk instanceof IDATChunk) {
-                    if (actlChunk == null) {
-                        //如果为非APNG图片，则只解码PNG
-                        lastSeq = 0;
-                        FCTLChunk fakeChunk = new FCTLChunk();
-                        fakeChunk.width = ihdrChunk.width;
-                        fakeChunk.height = ihdrChunk.height;
-                        Frame frame = new PNGFrame(
-                                ihdrChunk,
-                                fakeChunk,
-                                otherChunks,
-                                sampleSize,
-                                mStreamLoader);
-                        frames.add(frame);
-                        num_frames = 1;
-                        num_plays = 1;
-                        continue;
-                    }
-                    Frame frame = getFrame(lastSeq);
-                    if (frame instanceof BalancedFrame) {
-                        ((BalancedFrame) frame).idatChunks.add((IDATChunk) chunk);
-                    }
-                } else {
-                    if (chunk instanceof IHDRChunk) {
-                        ihdrChunk = (IHDRChunk) chunk;
-                        createCanvas((IHDRChunk) chunk);
-                    } else {
-                        otherChunks.add(chunk);
-                    }
-                }
-            }
-
-            int maxSize = 0;
-            for (Frame frame : frames) {
-                maxSize = Math.max(maxSize, frame.endPos - frame.startPos);
-            }
-            maxSize += ihdrChunk.getRawDataLength();
-            for (Chunk each : otherChunks) {
-                maxSize += each.getRawDataLength();
-            }
-            maxSize += 20;
-            decodingBuffers = new byte[maxSize];
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+    private void read() throws IOException {
+        List<BaseChunk> chunks = WebPParser.parse(mReader);
+        for (BaseChunk chunk : chunks) {
+            if (chunk instanceof VP8XChunk) {
+                this.canvasWidth = ((VP8XChunk) chunk).canvasWidth;
+                this.canvasHeight = ((VP8XChunk) chunk).canvasHeight;
+            } else if (chunk instanceof ANIMChunk) {
+                this.backgroundColor = ((ANIMChunk) chunk).backgroundColor;
+                this.loopCount = ((ANIMChunk) chunk).loopCount;
+            } else if (chunk instanceof ANMFChunk) {
+                frames.add(new Frame(mReader, (ANMFChunk) chunk));
             }
         }
+        this.num_frames = frames.size();
+        createCanvas();
     }
 
     private int getNumPlays() {
-        return this.loopLimit != null ? this.loopLimit : this.num_plays;
+        return this.loopLimit != null ? this.loopLimit : this.loopCount;
     }
 
     private boolean canStep() {
@@ -467,8 +358,11 @@ public class AnimatedWebpDecoder {
             this.playCount++;
         }
         Frame frame = getFrame(this.frameIndex);
+        if (frame == null) {
+            return 0;
+        }
         renderFrame(frame);
-        return frame.delay;
+        return frame.frameDuration;
     }
 
     private void renderFrame(Frame frame) {
@@ -485,50 +379,22 @@ public class AnimatedWebpDecoder {
         frameBuffer.rewind();
         bitmap.copyPixelsFromBuffer(frameBuffer);
 
-        // 如果需要在下一帧渲染前恢复当前显示内容，需要在渲染前将当前显示内容保存到快照中
-        if (frame.dispose_op == FCTLChunk.APNG_DISPOSE_OP_PREVIOUS) {
-            frameBuffer.rewind();
-            snapShot.byteBuffer.rewind();
-            snapShot.byteBuffer.put(frameBuffer);
+        if (this.frameIndex == 0) {
+            canvas.drawColor(backgroundColor);
+        } else {
+            Frame preFrame = frames.get(this.frameIndex - 1);
+            //Dispose to background color. Fill the rectangle on the canvas covered by the current frame with background color specified in the ANIM chunk.
+            if (preFrame.disposalMethod) {
+                final float left = (float) preFrame.frameX / (float) sampleSize;
+                final float top = (float) preFrame.frameY / (float) sampleSize;
+                final float right = (float) (preFrame.frameX + preFrame.frameWidth) / (float) sampleSize;
+                final float bottom = (float) (preFrame.frameY + preFrame.frameHeight) / (float) sampleSize;
+                canvas.drawRect(left, top, right, bottom, mTransparentFillPaint);
+            }
         }
-
-
-        //开始绘制前，处理快照中的设定
-        switch (snapShot.dispose_op) {
-            // 从快照中恢复上一帧之前的显示内容
-            case FCTLChunk.APNG_DISPOSE_OP_PREVIOUS:
-                snapShot.byteBuffer.rewind();
-                bitmap.copyPixelsFromBuffer(snapShot.byteBuffer);
-                break;
-            // 清空上一帧所画区域
-            case FCTLChunk.APNG_DISPOSE_OP_BACKGROUND:
-                canvas.save();
-                canvas.clipRect(snapShot.dstRect);
-                canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-                canvas.restore();
-                break;
-            // 什么都不做
-            case FCTLChunk.APNG_DISPOSE_OP_NON:
-            default:
-                break;
-        }
-
-        //开始真正绘制当前帧的内容
-        canvas.save();
-        canvas.clipRect(frame.dstRect);
-        if (frame.blend_op == FCTLChunk.APNG_BLEND_OP_SOURCE) {
-            canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-        }
-        Bitmap inBitmap = obtainBitmap(frame.srcRect.width(), frame.srcRect.height());
-        recycleBitmap(frame.draw(canvas, paint, inBitmap, decodingBuffers));
+        Bitmap inBitmap = obtainBitmap(frame.frameWidth / sampleSize, frame.frameHeight / sampleSize);
+        recycleBitmap(frame.draw(canvas, paint, sampleSize, inBitmap, mWriter));
         recycleBitmap(inBitmap);
-        canvas.restore();
-        //然后根据dispose设定传递到快照信息中
-        snapShot.dispose_op = frame.dispose_op;
-        snapShot.dstRect = frame.dstRect;
-        if (frame.blend_op == FCTLChunk.APNG_DISPOSE_OP_PREVIOUS) {
-            snapShot.byteBuffer.rewind();
-        }
         frameBuffer.rewind();
         bitmap.copyPixelsToBuffer(frameBuffer);
         recycleBitmap(bitmap);
@@ -541,12 +407,12 @@ public class AnimatedWebpDecoder {
         return frames.get(index);
     }
 
-    private void createCanvas(IHDRChunk ihdrChunk) {
-        fullRect = new Rect(0, 0, ihdrChunk.width, ihdrChunk.height);
+    private void createCanvas() {
+        fullRect = new Rect(0, 0, canvasWidth, canvasHeight);
         paint = new Paint();
         paint.setAntiAlias(true);
-        frameBuffer = ByteBuffer.allocate((ihdrChunk.width * ihdrChunk.height / sampleSize ^ 2 + 1) * 4);
-        snapShot.byteBuffer = ByteBuffer.allocate((ihdrChunk.width * ihdrChunk.height / sampleSize ^ 2 + 1) * 4);
+        frameBuffer = ByteBuffer.allocate((canvasWidth * canvasHeight / sampleSize ^ 2 + 1) * 4);
+        mTransparentFillPaint.setColor(backgroundColor);
     }
 
 }

@@ -15,9 +15,9 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.graphics.drawable.Animatable2Compat;
 
-import com.yupaopao.animation.webp.chunk.AnimatedWebpDecoder;
-import com.yupaopao.animation.webp.chunk.StreamLoader;
+import com.yupaopao.animation.webp.decode.AnimatedWebpDecoder;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Set;
@@ -60,12 +60,6 @@ public class AnimatedWebpDrawable extends Drawable implements Animatable2Compat,
             invalidateSelf();
         }
     };
-
-    @Deprecated
-    public AnimatedWebpDrawable(StreamLoader provider, AnimatedWebpDecoder.Mode mode) {
-        paint.setAntiAlias(true);
-        animatedWebpDecoder = new AnimatedWebpDecoder(provider, this, mode);
-    }
 
     public AnimatedWebpDrawable(StreamLoader provider) {
         paint.setAntiAlias(true);

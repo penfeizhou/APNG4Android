@@ -3,8 +3,6 @@ package com.yupaopao.animation.webp;
 import android.content.Context;
 
 
-import com.yupaopao.animation.webp.chunk.StreamLoader;
-
 import java.io.IOException;
 import java.io.InputStream;
 
