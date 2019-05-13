@@ -1,4 +1,4 @@
-package com.yupaopao.animation.webp.decode;
+package com.yupaopao.animation.decode;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -6,11 +6,12 @@ import android.graphics.Rect;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
 
-import com.yupaopao.animation.webp.StreamLoader;
-import com.yupaopao.animation.webp.writer.ByteBufferWriter;
-import com.yupaopao.animation.webp.writer.Writer;
+import com.yupaopao.animation.io.Reader;
+import com.yupaopao.animation.io.Writer;
+import com.yupaopao.animation.loader.StreamLoader;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -30,7 +31,7 @@ import java.util.concurrent.TimeUnit;
  * @Author: pengfei.zhou
  * @CreateDate: 2019/3/27
  */
-public abstract class FrameSeqDecoder {
+public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     private static final String TAG = FrameSeqDecoder.class.getSimpleName();
     protected final StreamLoader mLoader;
     protected List<Frame> frames = new ArrayList<>();
@@ -65,7 +66,11 @@ public abstract class FrameSeqDecoder {
     protected Map<Bitmap, Canvas> cachedCanvas = new WeakHashMap<>();
     protected ByteBuffer frameBuffer;
     protected Rect fullRect;
-    protected Writer mWriter = new ByteBufferWriter();
+    protected W mWriter = getWriter();
+
+    protected abstract W getWriter();
+
+    protected abstract R getReader(InputStream inputStream);
 
     protected Bitmap obtainBitmap(int width, int height) {
         Bitmap ret = null;
@@ -136,7 +141,7 @@ public abstract class FrameSeqDecoder {
                 @Override
                 public Rect call() throws Exception {
                     if (fullRect == null) {
-                        initCanvasBounds(read());
+                        initCanvasBounds(read(getReader(mLoader.obtain())));
                     }
                     return fullRect;
                 }
@@ -170,7 +175,7 @@ public abstract class FrameSeqDecoder {
             public void run() {
                 if (frames.size() == 0) {
                     try {
-                        initCanvasBounds(read());
+                        initCanvasBounds(read(getReader(mLoader.obtain())));
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -281,7 +286,7 @@ public abstract class FrameSeqDecoder {
                 public void run() {
                     frames.clear();
                     try {
-                        initCanvasBounds(read());
+                        initCanvasBounds(read(getReader(mLoader.obtain())));
                         if (tempRunning) {
                             start();
                         }
@@ -305,7 +310,7 @@ public abstract class FrameSeqDecoder {
         return sample;
     }
 
-    protected abstract Rect read() throws IOException;
+    protected abstract Rect read(R reader) throws IOException;
 
     private int getNumPlays() {
         return this.loopLimit != null ? this.loopLimit : this.getLoopCount();

@@ -1,6 +1,6 @@
 package com.yupaopao.animation.webp.decode;
 
-import com.yupaopao.animation.webp.DataUtil;
+import com.yupaopao.animation.webp.io.DataUtil;
 
 /**
  * Alpha

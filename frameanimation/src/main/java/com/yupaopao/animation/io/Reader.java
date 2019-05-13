@@ -1,4 +1,4 @@
-package com.yupaopao.animation.webp.reader;
+package com.yupaopao.animation.io;
 
 import java.io.IOException;
 import java.io.InputStream;

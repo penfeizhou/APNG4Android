@@ -7,8 +7,9 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 
-import com.yupaopao.animation.webp.reader.Reader;
-import com.yupaopao.animation.webp.writer.Writer;
+import com.yupaopao.animation.decode.Frame;
+import com.yupaopao.animation.webp.io.StreamReader;
+import com.yupaopao.animation.webp.io.ByteBufferWriter;
 
 import java.io.IOException;
 
@@ -17,7 +18,7 @@ import java.io.IOException;
  * @Author: pengfei.zhou
  * @CreateDate: 2019-05-12
  */
-public class AnimationFrame extends Frame {
+public class AnimationFrame extends Frame<StreamReader, ByteBufferWriter> {
     final int imagePayloadOffset;
     final int imagePayloadSize;
     final boolean blendingMethod;
@@ -25,7 +26,7 @@ public class AnimationFrame extends Frame {
     private final boolean useAlpha;
     private static final PorterDuffXfermode PORTERDUFF_XFERMODE_SRC_OVER = new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER);
 
-    public AnimationFrame(Reader reader, ANMFChunk anmfChunk) {
+    public AnimationFrame(StreamReader reader, ANMFChunk anmfChunk) {
         super(reader);
         this.frameWidth = anmfChunk.frameWidth;
         this.frameHeight = anmfChunk.frameHeight;
@@ -39,7 +40,7 @@ public class AnimationFrame extends Frame {
         this.useAlpha = anmfChunk.alphChunk != null;
     }
 
-    private int encode(Writer writer) {
+    private int encode(ByteBufferWriter writer) {
         int vp8xPayloadSize = 10;
         int size = 12 + (BaseChunk.CHUNCK_HEADER_OFFSET + vp8xPayloadSize) + this.imagePayloadSize;
         writer.reset(size);
@@ -67,7 +68,7 @@ public class AnimationFrame extends Frame {
         return size;
     }
 
-    public Bitmap draw(Canvas canvas, Paint paint, int sampleSize, Bitmap reusedBitmap, Writer writer) {
+    public Bitmap draw(Canvas canvas, Paint paint, int sampleSize, Bitmap reusedBitmap, ByteBufferWriter writer) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = false;
         options.inSampleSize = sampleSize;

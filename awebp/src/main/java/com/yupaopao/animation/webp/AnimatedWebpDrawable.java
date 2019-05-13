@@ -15,6 +15,7 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.graphics.drawable.Animatable2Compat;
 
+import com.yupaopao.animation.loader.StreamLoader;
 import com.yupaopao.animation.webp.decode.AnimatedWebpDecoder;
 
 import java.nio.ByteBuffer;

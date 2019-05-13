@@ -5,8 +5,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 
-import com.yupaopao.animation.webp.reader.Reader;
-import com.yupaopao.animation.webp.writer.Writer;
+import com.yupaopao.animation.decode.Frame;
+import com.yupaopao.animation.io.Reader;
+import com.yupaopao.animation.io.Writer;
 
 import java.io.IOException;
 

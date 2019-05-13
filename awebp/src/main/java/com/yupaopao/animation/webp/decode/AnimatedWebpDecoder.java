@@ -9,13 +9,14 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 
-import com.yupaopao.animation.webp.StreamLoader;
-import com.yupaopao.animation.webp.reader.Reader;
-import com.yupaopao.animation.webp.reader.StreamReader;
-import com.yupaopao.animation.webp.writer.ByteBufferWriter;
-import com.yupaopao.animation.webp.writer.Writer;
+import com.yupaopao.animation.decode.Frame;
+import com.yupaopao.animation.decode.FrameSeqDecoder;
+import com.yupaopao.animation.loader.StreamLoader;
+import com.yupaopao.animation.webp.io.StreamReader;
+import com.yupaopao.animation.webp.io.ByteBufferWriter;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -23,7 +24,7 @@ import java.util.List;
  * @Author: pengfei.zhou
  * @CreateDate: 2019/3/27
  */
-public class AnimatedWebpDecoder extends FrameSeqDecoder {
+public class AnimatedWebpDecoder extends FrameSeqDecoder<StreamReader, ByteBufferWriter> {
     private static final String TAG = AnimatedWebpDecoder.class.getSimpleName();
     private final Paint mTransparentFillPaint;
     private Paint paint;
@@ -32,8 +33,7 @@ public class AnimatedWebpDecoder extends FrameSeqDecoder {
     private int canvasWidth;
     private int canvasHeight;
     private int backgroundColor;
-    private Writer mWriter = new ByteBufferWriter();
-
+    private ByteBufferWriter mWriter;
 
     /**
      * @param loader         webp stream loader
@@ -48,14 +48,25 @@ public class AnimatedWebpDecoder extends FrameSeqDecoder {
     }
 
     @Override
+    protected ByteBufferWriter getWriter() {
+        if (mWriter == null) {
+            mWriter = new ByteBufferWriter();
+        }
+        return mWriter;
+    }
+
+    @Override
+    protected StreamReader getReader(InputStream inputStream) {
+        return new StreamReader(inputStream);
+    }
+
+    @Override
     protected int getLoopCount() {
         return loopCount;
     }
 
     @Override
-    protected Rect read() throws IOException {
-
-        StreamReader reader = new StreamReader(mLoader.obtain());
+    protected Rect read(StreamReader reader) throws IOException {
         List<BaseChunk> chunks = WebPParser.parse(reader);
         boolean anim = false;
         boolean vp8x = false;
@@ -120,7 +131,7 @@ public class AnimatedWebpDecoder extends FrameSeqDecoder {
             }
         }
         Bitmap inBitmap = obtainBitmap(frame.frameWidth / sampleSize, frame.frameHeight / sampleSize);
-        recycleBitmap(frame.draw(canvas, paint, sampleSize, inBitmap, mWriter));
+        recycleBitmap(frame.draw(canvas, paint, sampleSize, inBitmap, getWriter()));
         recycleBitmap(inBitmap);
         frameBuffer.rewind();
         bitmap.copyPixelsToBuffer(frameBuffer);

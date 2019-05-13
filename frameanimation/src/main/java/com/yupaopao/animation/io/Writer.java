@@ -1,4 +1,4 @@
-package com.yupaopao.animation.webp.writer;
+package com.yupaopao.animation.io;
 
 import java.io.IOException;
 
@@ -13,16 +13,6 @@ public interface Writer {
     void putByte(byte b);
 
     void putBytes(byte[] b);
-
-    void putUInt16(int i);
-
-    void putUInt24(int i);
-
-    void putUInt32(int i);
-
-    void put1Based(int i);
-
-    void putFourCC(String v);
 
     int position();
 

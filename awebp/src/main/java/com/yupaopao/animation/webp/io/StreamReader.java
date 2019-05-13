@@ -1,6 +1,8 @@
-package com.yupaopao.animation.webp.reader;
+package com.yupaopao.animation.webp.io;
 
 import android.text.TextUtils;
+
+import com.yupaopao.animation.io.Reader;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
