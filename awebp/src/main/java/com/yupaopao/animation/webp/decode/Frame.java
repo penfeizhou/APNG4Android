@@ -4,7 +4,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Rect;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 
 import com.yupaopao.animation.webp.reader.Reader;
 import com.yupaopao.animation.webp.writer.Writer;
@@ -28,6 +29,7 @@ public class Frame {
     final boolean blendingMethod;
     final boolean disposalMethod;
     private final boolean useAlpha;
+    private static final PorterDuffXfermode PORTER_DUFF_XFERMODE_SRC_OVER = new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER);
 
     public Frame(Reader reader, ANMFChunk anmfChunk) {
         this.reader = reader;
@@ -81,7 +83,12 @@ public class Frame {
         byte[] bytes = writer.toByteArray();
         Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, length, options);
         assert bitmap != null;
-        canvas.drawBitmap(bitmap, (float) frameX / sampleSize, (float) frameY / sampleSize, paint);
+        if (blendingMethod) {
+            paint.setXfermode(null);
+        } else {
+            paint.setXfermode(PORTER_DUFF_XFERMODE_SRC_OVER);
+        }
+        canvas.drawBitmap(bitmap, (float) frameX * 2 / sampleSize, (float) frameY * 2 / sampleSize, paint);
         return bitmap;
     }
 }
