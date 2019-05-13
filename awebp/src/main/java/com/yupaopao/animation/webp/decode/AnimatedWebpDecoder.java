@@ -12,7 +12,7 @@ import android.util.Log;
 
 import com.yupaopao.animation.webp.StreamLoader;
 import com.yupaopao.animation.webp.reader.Reader;
-import com.yupaopao.animation.webp.writer.ByteStreamWriter;
+import com.yupaopao.animation.webp.writer.ByteBufferWriter;
 import com.yupaopao.animation.webp.writer.Writer;
 
 import java.io.IOException;
@@ -77,7 +77,7 @@ public class AnimatedWebpDecoder {
     private int canvasWidth;
     private int canvasHeight;
     private int backgroundColor;
-    private Writer mWriter = new ByteStreamWriter();
+    private Writer mWriter = new ByteBufferWriter();
 
     private Bitmap obtainBitmap(int width, int height) {
         Bitmap ret = null;

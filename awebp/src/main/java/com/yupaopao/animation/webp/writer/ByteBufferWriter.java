@@ -12,11 +12,10 @@ import java.nio.ByteOrder;
  */
 public class ByteBufferWriter implements Writer {
 
-    private final ByteBuffer byteBuffer;
+    private ByteBuffer byteBuffer;
 
-    public ByteBufferWriter(ByteBuffer byteBuffer) {
-        this.byteBuffer = byteBuffer;
-        this.byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+    public ByteBufferWriter() {
+        reset(10 * 1024);
     }
 
     @Override
@@ -69,7 +68,11 @@ public class ByteBufferWriter implements Writer {
     }
 
     @Override
-    public void reset() {
-        byteBuffer.reset();
+    public void reset(int size) {
+        if (byteBuffer == null || size > byteBuffer.limit()) {
+            byteBuffer = ByteBuffer.allocate(size);
+            this.byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+        }
+        byteBuffer.clear();
     }
 }
