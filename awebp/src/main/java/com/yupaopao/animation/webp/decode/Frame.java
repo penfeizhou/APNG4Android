@@ -8,7 +8,7 @@ import com.yupaopao.animation.webp.reader.Reader;
 import com.yupaopao.animation.webp.writer.Writer;
 
 /**
- * @Description: APNG4Android
+ * @Description: One frame in an animation
  * @Author: pengfei.zhou
  * @CreateDate: 2019-05-13
  */
@@ -20,9 +20,9 @@ public abstract class Frame {
     int frameY;
     int frameDuration;
 
-    protected Frame(Reader reader) {
+    public Frame(Reader reader) {
         this.reader = reader;
     }
 
-    abstract Bitmap draw(Canvas canvas, Paint paint, int sampleSize, Bitmap reusedBitmap, Writer writer);
+    public abstract Bitmap draw(Canvas canvas, Paint paint, int sampleSize, Bitmap reusedBitmap, Writer writer);
 }
