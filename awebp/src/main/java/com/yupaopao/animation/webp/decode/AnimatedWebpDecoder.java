@@ -1,6 +1,7 @@
 package com.yupaopao.animation.webp.decode;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -310,16 +311,32 @@ public class AnimatedWebpDecoder {
     private void read() throws IOException {
         Reader reader = mLoader.obtain();
         List<BaseChunk> chunks = WebPParser.parse(reader);
+        boolean anim = false;
+        boolean vp8x = false;
         for (BaseChunk chunk : chunks) {
             if (chunk instanceof VP8XChunk) {
                 this.canvasWidth = ((VP8XChunk) chunk).canvasWidth;
                 this.canvasHeight = ((VP8XChunk) chunk).canvasHeight;
+                vp8x = true;
             } else if (chunk instanceof ANIMChunk) {
+                anim = true;
                 this.backgroundColor = ((ANIMChunk) chunk).backgroundColor;
                 this.loopCount = ((ANIMChunk) chunk).loopCount;
             } else if (chunk instanceof ANMFChunk) {
-                frames.add(new Frame(reader, (ANMFChunk) chunk));
+                frames.add(new AnimationFrame(reader, (ANMFChunk) chunk));
             }
+        }
+        if (!anim) {
+            //静态图
+            if (!vp8x) {
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeStream(reader.toInputStream(), null, options);
+                canvasWidth = options.outWidth;
+                canvasHeight = options.outHeight;
+            }
+            frames.add(new StillFrame(reader, canvasWidth, canvasHeight));
+            this.loopCount = 1;
         }
         this.num_frames = frames.size();
         createCanvas();
@@ -381,7 +398,8 @@ public class AnimatedWebpDecoder {
         } else {
             Frame preFrame = frames.get(this.frameIndex - 1);
             //Dispose to background color. Fill the rectangle on the canvas covered by the current frame with background color specified in the ANIM chunk.
-            if (preFrame.disposalMethod) {
+            if (preFrame instanceof AnimationFrame
+                    && ((AnimationFrame) preFrame).disposalMethod) {
                 final float left = (float) preFrame.frameX / (float) sampleSize;
                 final float top = (float) preFrame.frameY / (float) sampleSize;
                 final float right = (float) (preFrame.frameX + preFrame.frameWidth) / (float) sampleSize;

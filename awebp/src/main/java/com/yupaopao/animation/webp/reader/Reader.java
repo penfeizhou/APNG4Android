@@ -1,6 +1,7 @@
 package com.yupaopao.animation.webp.reader;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * @link {https://developers.google.com/speed/webp/docs/riff_container#terminology_basics}
@@ -54,4 +55,6 @@ public interface Reader {
      * close io
      */
     void close() throws IOException;
+
+    InputStream toInputStream() throws IOException;
 }
