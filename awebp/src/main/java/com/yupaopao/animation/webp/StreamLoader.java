@@ -1,6 +1,5 @@
 package com.yupaopao.animation.webp;
 
-import com.yupaopao.animation.webp.reader.Reader;
 import com.yupaopao.animation.webp.reader.StreamReader;
 
 import java.io.IOException;
@@ -11,66 +10,21 @@ import java.io.InputStream;
  * @CreateDate: 2019/3/28
  */
 public abstract class StreamLoader {
-    public abstract InputStream getInputStream() throws IOException;
+    protected abstract InputStream getInputStream() throws IOException;
 
-    private Reader mReader;
+    private InputStream in;
 
-    public synchronized Reader obtain() throws IOException {
-        if (mReader == null) {
-            mReader = new StreamReader(getInputStream());
+    public synchronized InputStream obtain() throws IOException {
+        if (in == null) {
+            in = new StreamReader(getInputStream());
         }
-        return mReader;
+        return in;
     }
 
     public synchronized void release() throws IOException {
-        if (mReader != null) {
-            mReader.close();
-            mReader = null;
+        if (in != null) {
+            in.close();
+            in = null;
         }
-    }
-
-    /**
-     * @return is webp format
-     * @link {https://developers.google.com/speed/webp/docs/riff_container#webp_file_header}
-     */
-    public boolean isWebp() {
-        try {
-            Reader reader = obtain();
-            return reader.matchFourCC("RIFF") && reader.skip(4) == 4 && reader.matchFourCC("WEBP");
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                release();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return false;
-    }
-
-    /**
-     * @return is animated webp format
-     * @link {https://developers.google.com/speed/webp/docs/riff_container#extended_file_format}
-     */
-    public boolean isAnimatedWebp() {
-        try {
-            Reader reader = obtain();
-            return reader.matchFourCC("RIFF")
-                    && reader.skip(4) == 4
-                    && reader.matchFourCC("WEBP")
-                    && reader.matchFourCC("VP8X")
-                    && (reader.peek() & 0x2) == 0x2
-                    ;
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                release();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return false;
     }
 }

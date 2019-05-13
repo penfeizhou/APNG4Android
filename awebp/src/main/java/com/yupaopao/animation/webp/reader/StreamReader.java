@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * @link {https://developers.google.com/speed/webp/docs/riff_container#terminology_basics}
  * @Author: pengfei.zhou
  * @CreateDate: 2019-05-11
  */
@@ -69,40 +68,53 @@ public class StreamReader extends FilterInputStream implements Reader {
         return position;
     }
 
-    @Override
+    /**
+     * @return uint16 A 16-bit, little-endian, unsigned integer.
+     */
     public int getUInt16() throws IOException {
         byte[] buf = ensureBytes();
         read(buf, 0, 2);
         return buf[0] & 0xff | (buf[1] & 0xff) << 8;
     }
 
-    @Override
+    /**
+     * @return uint24 A 24-bit, little-endian, unsigned integer.
+     */
     public int getUInt24() throws IOException {
         byte[] buf = ensureBytes();
         read(buf, 0, 3);
         return buf[0] & 0xff | (buf[1] & 0xff) << 8 | (buf[2] & 0xff) << 16;
     }
 
-    @Override
+    /**
+     * @return uint32 A 32-bit, little-endian, unsigned integer.
+     */
     public int getUInt32() throws IOException {
         byte[] buf = ensureBytes();
         read(buf, 0, 4);
         return buf[0] & 0xff | (buf[1] & 0xff) << 8 | (buf[2] & 0xff) << 16 | (buf[3] & 0xff) << 24;
     }
 
-    @Override
+    /**
+     * @return FourCC A FourCC (four-character code) is a uint32 created by concatenating four ASCII characters in little-endian order.
+     */
     public int getFourCC() throws IOException {
         byte[] buf = ensureBytes();
         read(buf, 0, 4);
         return buf[0] & 0xff | (buf[1] & 0xff) << 8 | (buf[2] & 0xff) << 16 | (buf[3] & 0xff) << 24;
     }
 
-    @Override
+
+    /**
+     * @return 1-based An unsigned integer field storing values offset by -1. e.g., Such a field would store value 25 as 24.
+     */
     public int get1Based() throws IOException {
         return getUInt24() + 1;
     }
 
-    @Override
+    /**
+     * @return read FourCC and match chars
+     */
     public boolean matchFourCC(String chars) throws IOException {
         if (TextUtils.isEmpty(chars) || chars.length() != 4) {
             return false;

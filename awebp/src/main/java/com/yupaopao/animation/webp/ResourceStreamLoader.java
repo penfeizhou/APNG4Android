@@ -22,7 +22,7 @@ public class ResourceStreamLoader extends StreamLoader {
     }
 
     @Override
-    public InputStream getInputStream() throws IOException {
+    protected InputStream getInputStream() throws IOException {
         return mContext.getResources().openRawResource(mResId);
     }
 }
