@@ -8,7 +8,7 @@ import java.io.IOException;
  * @CreateDate: 2019-05-12
  */
 public interface Writer {
-    void reset();
+    void reset(int size);
 
     void putByte(byte b);
 

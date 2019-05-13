@@ -39,13 +39,14 @@ public class Frame {
         this.blendingMethod = anmfChunk.blendingMethod();
         this.disposalMethod = anmfChunk.disposalMethod();
         this.imagePayloadOffset = anmfChunk.offset + BaseChunk.CHUNCK_HEADER_OFFSET + 16;
-        this.imagePayloadSize = anmfChunk.payloadSize - 16 + anmfChunk.payloadSize & 1;
+        this.imagePayloadSize = anmfChunk.payloadSize - 16 + (anmfChunk.payloadSize & 1);
         this.useAlpha = anmfChunk.alphChunk != null;
     }
 
     private int encode(Writer writer) {
         int vp8xPayloadSize = 10;
         int size = 12 + (BaseChunk.CHUNCK_HEADER_OFFSET + vp8xPayloadSize) + this.imagePayloadSize;
+        writer.reset(size);
         // Webp Header
         writer.putFourCC("RIFF");
         writer.putUInt32(size);
@@ -76,7 +77,6 @@ public class Frame {
         options.inSampleSize = sampleSize;
         options.inMutable = true;
         options.inBitmap = reusedBitmap;
-        writer.reset();
         int length = encode(writer);
         byte[] bytes = writer.toByteArray();
         Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, length, options);
