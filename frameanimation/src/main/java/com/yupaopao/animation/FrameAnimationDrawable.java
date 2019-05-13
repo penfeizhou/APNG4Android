@@ -1,4 +1,4 @@
-package com.yupaopao.animation.webp;
+package com.yupaopao.animation;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -15,22 +15,22 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.graphics.drawable.Animatable2Compat;
 
+import com.yupaopao.animation.decode.FrameSeqDecoder;
 import com.yupaopao.animation.loader.StreamLoader;
-import com.yupaopao.animation.webp.decode.AnimatedWebpDecoder;
 
 import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @Description: Animated webp drawable
+ * @Description: Frame animation drawable
  * @Author: pengfei.zhou
  * @CreateDate: 2019/3/27
  */
-public class AnimatedWebpDrawable extends Drawable implements Animatable2Compat, AnimatedWebpDecoder.RenderListener {
-    private static final String TAG = AnimatedWebpDrawable.class.getSimpleName();
+public abstract class FrameAnimationDrawable extends Drawable implements Animatable2Compat, FrameSeqDecoder.RenderListener {
+    private static final String TAG = FrameAnimationDrawable.class.getSimpleName();
     private final Paint paint = new Paint();
-    private final AnimatedWebpDecoder animatedWebpDecoder;
+    private final FrameSeqDecoder frameSeqDecoder;
     private DrawFilter drawFilter = new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
     private Matrix matrix = new Matrix();
     private Set<AnimationCallback> animationCallbacks = new HashSet<>();
@@ -43,12 +43,12 @@ public class AnimatedWebpDrawable extends Drawable implements Animatable2Compat,
             switch (msg.what) {
                 case MSG_ANIMATION_START:
                     for (AnimationCallback animationCallback : animationCallbacks) {
-                        animationCallback.onAnimationStart(AnimatedWebpDrawable.this);
+                        animationCallback.onAnimationStart(FrameAnimationDrawable.this);
                     }
                     break;
                 case MSG_ANIMATION_END:
                     for (AnimationCallback animationCallback : animationCallbacks) {
-                        animationCallback.onAnimationEnd(AnimatedWebpDrawable.this);
+                        animationCallback.onAnimationEnd(FrameAnimationDrawable.this);
                     }
                     break;
             }
@@ -61,42 +61,44 @@ public class AnimatedWebpDrawable extends Drawable implements Animatable2Compat,
         }
     };
 
-    public AnimatedWebpDrawable(StreamLoader provider) {
+    public FrameAnimationDrawable(StreamLoader provider) {
         paint.setAntiAlias(true);
-        animatedWebpDecoder = new AnimatedWebpDecoder(provider, this);
+        frameSeqDecoder = createFrameSeqDecoder(provider, this);
     }
+
+    protected abstract FrameSeqDecoder createFrameSeqDecoder(StreamLoader streamLoader, FrameSeqDecoder.RenderListener listener);
 
     /**
      * @param loopLimit <=0为无限播放,>0为实际播放次数
      */
     public void setLoopLimit(int loopLimit) {
-        animatedWebpDecoder.setLoopLimit(loopLimit);
+        frameSeqDecoder.setLoopLimit(loopLimit);
     }
 
     public void reset() {
-        animatedWebpDecoder.reset();
+        frameSeqDecoder.reset();
     }
 
     public void pause() {
-        animatedWebpDecoder.pause();
+        frameSeqDecoder.pause();
     }
 
     public void resume() {
-        animatedWebpDecoder.resume();
+        frameSeqDecoder.resume();
     }
 
     public boolean isPaused() {
-        return animatedWebpDecoder.isPaused();
+        return frameSeqDecoder.isPaused();
     }
 
     @Override
     public void start() {
-        animatedWebpDecoder.start();
+        frameSeqDecoder.start();
     }
 
     @Override
     public void stop() {
-        animatedWebpDecoder.stop();
+        frameSeqDecoder.stop();
         if (bitmap != null && !bitmap.isRecycled()) {
             bitmap.recycle();
             bitmap = null;
@@ -105,7 +107,7 @@ public class AnimatedWebpDrawable extends Drawable implements Animatable2Compat,
 
     @Override
     public boolean isRunning() {
-        return animatedWebpDecoder.isRunning();
+        return frameSeqDecoder.isRunning();
     }
 
     @Override
@@ -120,10 +122,10 @@ public class AnimatedWebpDrawable extends Drawable implements Animatable2Compat,
     @Override
     public void setBounds(int left, int top, int right, int bottom) {
         super.setBounds(left, top, right, bottom);
-        animatedWebpDecoder.setDesiredSize(getBounds().width(), getBounds().height());
+        frameSeqDecoder.setDesiredSize(getBounds().width(), getBounds().height());
         matrix.setScale(
-                1.0f * getBounds().width() * animatedWebpDecoder.getSampleSize() / animatedWebpDecoder.getBounds().width(),
-                1.0f * getBounds().height() * animatedWebpDecoder.getSampleSize() / animatedWebpDecoder.getBounds().height());
+                1.0f * getBounds().width() * frameSeqDecoder.getSampleSize() / frameSeqDecoder.getBounds().width(),
+                1.0f * getBounds().height() * frameSeqDecoder.getSampleSize() / frameSeqDecoder.getBounds().height());
         if (!isRunning()) {
             start();
         }
@@ -156,8 +158,8 @@ public class AnimatedWebpDrawable extends Drawable implements Animatable2Compat,
         }
         if (this.bitmap == null || this.bitmap.isRecycled()) {
             this.bitmap = Bitmap.createBitmap(
-                    animatedWebpDecoder.getBounds().width() / animatedWebpDecoder.getSampleSize(),
-                    animatedWebpDecoder.getBounds().height() / animatedWebpDecoder.getSampleSize(),
+                    frameSeqDecoder.getBounds().width() / frameSeqDecoder.getSampleSize(),
+                    frameSeqDecoder.getBounds().height() / frameSeqDecoder.getSampleSize(),
                     Bitmap.Config.ARGB_8888);
         }
         byteBuffer.rewind();
@@ -182,12 +184,12 @@ public class AnimatedWebpDrawable extends Drawable implements Animatable2Compat,
 
     @Override
     public int getIntrinsicWidth() {
-        return animatedWebpDecoder.getBounds().width();
+        return frameSeqDecoder.getBounds().width();
     }
 
     @Override
     public int getIntrinsicHeight() {
-        return animatedWebpDecoder.getBounds().height();
+        return frameSeqDecoder.getBounds().height();
     }
 
     @Override

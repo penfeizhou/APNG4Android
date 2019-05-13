@@ -7,7 +7,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.yupaopao.animation.loader.AssetStreamLoader;
-import com.yupaopao.animation.webp.AnimatedWebpDrawable;
+import com.yupaopao.animation.webp.AnimatedWebPDrawable;
 
 
 /**
@@ -51,7 +51,7 @@ public class APNGLibActivity extends Activity {
 //        }
         {
             AssetStreamLoader loader = new AssetStreamLoader(this, "1.webp");
-            AnimatedWebpDrawable webpDrawable = new AnimatedWebpDrawable(loader);
+            AnimatedWebPDrawable webpDrawable = new AnimatedWebPDrawable(loader);
             ImageView imageView = new ImageView(this);
             imageView.setImageDrawable(webpDrawable);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -61,7 +61,7 @@ public class APNGLibActivity extends Activity {
         }
         {
             AssetStreamLoader loader = new AssetStreamLoader(this, "2.webp");
-            AnimatedWebpDrawable webpDrawable = new AnimatedWebpDrawable(loader);
+            AnimatedWebPDrawable webpDrawable = new AnimatedWebPDrawable(loader);
             ImageView imageView = new ImageView(this);
             imageView.setImageDrawable(webpDrawable);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -71,7 +71,7 @@ public class APNGLibActivity extends Activity {
         }
         {
             AssetStreamLoader loader = new AssetStreamLoader(this, "animation.webp");
-            AnimatedWebpDrawable webpDrawable = new AnimatedWebpDrawable(loader);
+            AnimatedWebPDrawable webpDrawable = new AnimatedWebPDrawable(loader);
             ImageView imageView = new ImageView(this);
             imageView.setImageDrawable(webpDrawable);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -81,7 +81,7 @@ public class APNGLibActivity extends Activity {
         }
         {
             AssetStreamLoader loader = new AssetStreamLoader(this, "example.webp");
-            AnimatedWebpDrawable webpDrawable = new AnimatedWebpDrawable(loader);
+            AnimatedWebPDrawable webpDrawable = new AnimatedWebPDrawable(loader);
             ImageView imageView = new ImageView(this);
             imageView.setImageDrawable(webpDrawable);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);

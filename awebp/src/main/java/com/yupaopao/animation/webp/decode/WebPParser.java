@@ -12,10 +12,13 @@ import java.util.List;
  * @CreateDate: 2019-05-11
  */
 public class WebPParser {
-    public static class FormatException extends IOException {
+    static class FormatException extends IOException {
+        FormatException() {
+            super("WebPFormat error");
+        }
     }
 
-    public static List<BaseChunk> parse(StreamReader reader) throws IOException {
+    static List<BaseChunk> parse(StreamReader reader) throws IOException {
         //@link {https://developers.google.com/speed/webp/docs/riff_container#webp_file_header}
         if (!reader.matchFourCC("RIFF")) {
             throw new FormatException();
