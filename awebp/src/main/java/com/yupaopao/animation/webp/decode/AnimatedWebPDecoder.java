@@ -24,8 +24,8 @@ import java.util.List;
  * @Author: pengfei.zhou
  * @CreateDate: 2019/3/27
  */
-public class AnimatedWebpDecoder extends FrameSeqDecoder<StreamReader, ByteBufferWriter> {
-    private static final String TAG = AnimatedWebpDecoder.class.getSimpleName();
+public class AnimatedWebPDecoder extends FrameSeqDecoder<StreamReader, ByteBufferWriter> {
+    private static final String TAG = AnimatedWebPDecoder.class.getSimpleName();
     private final Paint mTransparentFillPaint;
     private Paint paint;
     private int loopCount;
@@ -39,7 +39,7 @@ public class AnimatedWebpDecoder extends FrameSeqDecoder<StreamReader, ByteBuffe
      * @param loader         webp stream loader
      * @param renderListener callback for rendering
      */
-    public AnimatedWebpDecoder(StreamLoader loader, RenderListener renderListener) {
+    public AnimatedWebPDecoder(StreamLoader loader, RenderListener renderListener) {
         super(loader, renderListener);
         mTransparentFillPaint = new Paint();
         mTransparentFillPaint.setColor(Color.TRANSPARENT);
