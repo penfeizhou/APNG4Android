@@ -13,8 +13,20 @@ import java.io.InputStream;
 public abstract class StreamLoader {
     public abstract InputStream getInputStream() throws IOException;
 
-    public Reader obtain() throws IOException {
-        return new StreamReader(getInputStream());
+    private Reader mReader;
+
+    public synchronized Reader obtain() throws IOException {
+        if (mReader == null) {
+            mReader = new StreamReader(getInputStream());
+        }
+        return mReader;
+    }
+
+    public synchronized void release() throws IOException {
+        if (mReader != null) {
+            mReader.close();
+            mReader = null;
+        }
     }
 
     /**
@@ -22,19 +34,16 @@ public abstract class StreamLoader {
      * @link {https://developers.google.com/speed/webp/docs/riff_container#webp_file_header}
      */
     public boolean isWebp() {
-        Reader reader = null;
         try {
-            reader = obtain();
+            Reader reader = obtain();
             return reader.matchFourCC("RIFF") && reader.skip(4) == 4 && reader.matchFourCC("WEBP");
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            try {
+                release();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
         return false;
@@ -45,9 +54,8 @@ public abstract class StreamLoader {
      * @link {https://developers.google.com/speed/webp/docs/riff_container#extended_file_format}
      */
     public boolean isAnimatedWebp() {
-        Reader reader = null;
         try {
-            reader = obtain();
+            Reader reader = obtain();
             return reader.matchFourCC("RIFF")
                     && reader.skip(4) == 4
                     && reader.matchFourCC("WEBP")
@@ -57,12 +65,10 @@ public abstract class StreamLoader {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            try {
+                release();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
         return false;
