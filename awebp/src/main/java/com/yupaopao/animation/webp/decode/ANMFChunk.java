@@ -1,7 +1,7 @@
 package com.yupaopao.animation.webp.decode;
 
 import com.yupaopao.animation.webp.io.DataUtil;
-import com.yupaopao.animation.webp.io.StreamReader;
+import com.yupaopao.animation.webp.io.WebPReader;
 
 import java.io.IOException;
 
@@ -92,7 +92,7 @@ public class ANMFChunk extends BaseChunk {
     VP8LChunk vp8LChunk;
 
     @Override
-    void innerParse(StreamReader reader) throws IOException {
+    void innerParse(WebPReader reader) throws IOException {
         int available = reader.available();
         this.frameX = reader.getUInt24();
         this.frameY = reader.getUInt24();

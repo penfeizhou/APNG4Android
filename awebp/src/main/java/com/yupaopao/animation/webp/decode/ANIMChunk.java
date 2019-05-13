@@ -1,7 +1,7 @@
 package com.yupaopao.animation.webp.decode;
 
 import com.yupaopao.animation.webp.io.DataUtil;
-import com.yupaopao.animation.webp.io.StreamReader;
+import com.yupaopao.animation.webp.io.WebPReader;
 
 import java.io.IOException;
 
@@ -34,7 +34,7 @@ public class ANIMChunk extends BaseChunk {
     int loopCount;
 
     @Override
-    void innerParse(StreamReader reader) throws IOException {
+    void innerParse(WebPReader reader) throws IOException {
         this.backgroundColor = reader.getUInt32();
         this.loopCount = reader.getUInt16();
     }

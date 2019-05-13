@@ -2,7 +2,7 @@ package com.yupaopao.animation.webp.decode;
 
 
 import com.yupaopao.animation.webp.io.DataUtil;
-import com.yupaopao.animation.webp.io.StreamReader;
+import com.yupaopao.animation.webp.io.WebPReader;
 
 import java.io.IOException;
 
@@ -59,7 +59,7 @@ class VP8XChunk extends BaseChunk {
      */
     int canvasHeight;
 
-    void innerParse(StreamReader reader) throws IOException {
+    void innerParse(WebPReader reader) throws IOException {
         flags = reader.peek();
         reader.skip(3);
         canvasWidth = reader.get1Based();

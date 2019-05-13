@@ -12,8 +12,8 @@ import android.graphics.Rect;
 import com.yupaopao.animation.decode.Frame;
 import com.yupaopao.animation.decode.FrameSeqDecoder;
 import com.yupaopao.animation.loader.StreamLoader;
-import com.yupaopao.animation.webp.io.StreamReader;
-import com.yupaopao.animation.webp.io.ByteBufferWriter;
+import com.yupaopao.animation.webp.io.WebPReader;
+import com.yupaopao.animation.webp.io.WebPWriter;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,7 +24,7 @@ import java.util.List;
  * @Author: pengfei.zhou
  * @CreateDate: 2019/3/27
  */
-public class AnimatedWebPDecoder extends FrameSeqDecoder<StreamReader, ByteBufferWriter> {
+public class AnimatedWebPDecoder extends FrameSeqDecoder<WebPReader, WebPWriter> {
     private static final String TAG = AnimatedWebPDecoder.class.getSimpleName();
     private final Paint mTransparentFillPaint;
     private Paint paint;
@@ -33,7 +33,7 @@ public class AnimatedWebPDecoder extends FrameSeqDecoder<StreamReader, ByteBuffe
     private int canvasWidth;
     private int canvasHeight;
     private int backgroundColor;
-    private ByteBufferWriter mWriter;
+    private WebPWriter mWriter;
 
     /**
      * @param loader         webp stream loader
@@ -48,16 +48,16 @@ public class AnimatedWebPDecoder extends FrameSeqDecoder<StreamReader, ByteBuffe
     }
 
     @Override
-    protected ByteBufferWriter getWriter() {
+    protected WebPWriter getWriter() {
         if (mWriter == null) {
-            mWriter = new ByteBufferWriter();
+            mWriter = new WebPWriter();
         }
         return mWriter;
     }
 
     @Override
-    protected StreamReader getReader(InputStream inputStream) {
-        return new StreamReader(inputStream);
+    protected WebPReader getReader(InputStream inputStream) {
+        return new WebPReader(inputStream);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class AnimatedWebPDecoder extends FrameSeqDecoder<StreamReader, ByteBuffe
     }
 
     @Override
-    protected Rect read(StreamReader reader) throws IOException {
+    protected Rect read(WebPReader reader) throws IOException {
         List<BaseChunk> chunks = WebPParser.parse(reader);
         boolean anim = false;
         boolean vp8x = false;
