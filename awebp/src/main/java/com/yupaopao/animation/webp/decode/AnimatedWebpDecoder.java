@@ -38,6 +38,7 @@ import java.util.concurrent.TimeUnit;
 public class AnimatedWebpDecoder {
     private static final String TAG = AnimatedWebpDecoder.class.getSimpleName();
     private final Paint mTransparentFillPaint;
+    private final StreamLoader mLoader;
     private List<Frame> frames = new ArrayList<>();
     private int frameIndex = -1;
     private int playCount;
@@ -48,7 +49,6 @@ public class AnimatedWebpDecoder {
     private final RenderListener renderListener;
     private boolean running;
     private boolean paused;
-    private Reader mReader;
     private Runnable renderTask = new Runnable() {
         @Override
         public void run() {
@@ -136,11 +136,7 @@ public class AnimatedWebpDecoder {
      * @param renderListener 渲染的回调
      */
     public AnimatedWebpDecoder(StreamLoader loader, RenderListener renderListener) {
-        try {
-            this.mReader = loader.obtain();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.mLoader = loader;
         this.renderListener = renderListener;
         mTransparentFillPaint = new Paint();
         mTransparentFillPaint.setColor(Color.TRANSPARENT);
@@ -226,7 +222,7 @@ public class AnimatedWebpDecoder {
                 }
                 cachedCanvas.clear();
                 try {
-                    mReader.close();
+                    mLoader.release();
                     mWriter.close();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -312,7 +308,8 @@ public class AnimatedWebpDecoder {
     }
 
     private void read() throws IOException {
-        List<BaseChunk> chunks = WebPParser.parse(mReader);
+        Reader reader = mLoader.obtain();
+        List<BaseChunk> chunks = WebPParser.parse(reader);
         for (BaseChunk chunk : chunks) {
             if (chunk instanceof VP8XChunk) {
                 this.canvasWidth = ((VP8XChunk) chunk).canvasWidth;
@@ -321,7 +318,7 @@ public class AnimatedWebpDecoder {
                 this.backgroundColor = ((ANIMChunk) chunk).backgroundColor;
                 this.loopCount = ((ANIMChunk) chunk).loopCount;
             } else if (chunk instanceof ANMFChunk) {
-                frames.add(new Frame(mReader, (ANMFChunk) chunk));
+                frames.add(new Frame(reader, (ANMFChunk) chunk));
             }
         }
         this.num_frames = frames.size();
