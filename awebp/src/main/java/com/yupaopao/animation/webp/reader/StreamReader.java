@@ -115,4 +115,10 @@ public class StreamReader extends FilterInputStream implements Reader {
         }
         return true;
     }
+
+    @Override
+    public InputStream toInputStream() throws IOException {
+        reset();
+        return this;
+    }
 }

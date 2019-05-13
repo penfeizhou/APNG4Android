@@ -37,42 +37,28 @@ public class APNGLibActivity extends Activity {
                 "test5.png",
                 "wheel.png",
         };
-        for (String assetFile : assetFiles) {
-            APNGAssetLoader loader = new APNGAssetLoader(this, assetFile);
-            APNGDrawable apngDrawable = new APNGDrawable(loader);
-            ImageView imageView = new ImageView(this);
-            imageView.setImageDrawable(apngDrawable);
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            layoutParams.bottomMargin = 50;
-            layoutParams.topMargin = 50;
-            linearLayout.addView(imageView, layoutParams);
-        }
+//        for (String assetFile : assetFiles) {
+//            APNGAssetLoader loader = new APNGAssetLoader(this, assetFile);
+//            APNGDrawable apngDrawable = new APNGDrawable(loader);
+//            ImageView imageView = new ImageView(this);
+//            imageView.setImageDrawable(apngDrawable);
+//            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+//            layoutParams.bottomMargin = 50;
+//            layoutParams.topMargin = 50;
+//            linearLayout.addView(imageView, layoutParams);
+//        }
+//        {
+//            AssetStreamLoader loader = new AssetStreamLoader(this, "animation.webp");
+//            AnimatedWebpDrawable webpDrawable = new AnimatedWebpDrawable(loader);
+//            ImageView imageView = new ImageView(this);
+//            imageView.setImageDrawable(webpDrawable);
+//            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+//            layoutParams.bottomMargin = 50;
+//            layoutParams.topMargin = 50;
+//            linearLayout.addView(imageView, layoutParams);
+//        }
         {
-            ImageView imageView = new ImageView(this);
-            InputStream inputStream = null;
-            try {
-                inputStream = getAssets().open("example.webp");
-                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-                imageView.setImageBitmap(bitmap);
-                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                layoutParams.bottomMargin = 50;
-                layoutParams.topMargin = 50;
-                linearLayout.addView(imageView, layoutParams);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (inputStream != null) {
-                    try {
-                        inputStream.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-        {
-            AssetStreamLoader loader = new AssetStreamLoader(this, "animation.webp");
-            Log.d("test", "" + loader.isAnimatedWebp());
+            AssetStreamLoader loader = new AssetStreamLoader(this, "1.webp");
             AnimatedWebpDrawable webpDrawable = new AnimatedWebpDrawable(loader);
             ImageView imageView = new ImageView(this);
             imageView.setImageDrawable(webpDrawable);
@@ -81,7 +67,35 @@ public class APNGLibActivity extends Activity {
             layoutParams.topMargin = 50;
             linearLayout.addView(imageView, layoutParams);
         }
-        //https://yphoto.eryufm.cn/upload/86ced8c0-4cd5-4080-abc7-96a45a150f9c.jpg?imageView2/format/webp
-        //https://yvideo.eryufm.cn/video/gif/26f3ff37-4db3-4666-8001-6acaaee1a13c.gif?imageView2/0/format/webp
+        {
+            AssetStreamLoader loader = new AssetStreamLoader(this, "2.webp");
+            AnimatedWebpDrawable webpDrawable = new AnimatedWebpDrawable(loader);
+            ImageView imageView = new ImageView(this);
+            imageView.setImageDrawable(webpDrawable);
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            layoutParams.bottomMargin = 50;
+            layoutParams.topMargin = 50;
+            linearLayout.addView(imageView, layoutParams);
+        }
+        {
+            AssetStreamLoader loader = new AssetStreamLoader(this, "animation.webp");
+            AnimatedWebpDrawable webpDrawable = new AnimatedWebpDrawable(loader);
+            ImageView imageView = new ImageView(this);
+            imageView.setImageDrawable(webpDrawable);
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            layoutParams.bottomMargin = 50;
+            layoutParams.topMargin = 50;
+            linearLayout.addView(imageView, layoutParams);
+        }
+        {
+            AssetStreamLoader loader = new AssetStreamLoader(this, "example.webp");
+            AnimatedWebpDrawable webpDrawable = new AnimatedWebpDrawable(loader);
+            ImageView imageView = new ImageView(this);
+            imageView.setImageDrawable(webpDrawable);
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            layoutParams.bottomMargin = 50;
+            layoutParams.topMargin = 50;
+            linearLayout.addView(imageView, layoutParams);
+        }
     }
 }
