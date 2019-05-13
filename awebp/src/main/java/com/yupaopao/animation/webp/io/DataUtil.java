@@ -1,4 +1,4 @@
-package com.yupaopao.animation.webp;
+package com.yupaopao.animation.webp.io;
 
 import android.text.TextUtils;
 

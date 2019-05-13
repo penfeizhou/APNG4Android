@@ -1,6 +1,5 @@
-package com.yupaopao.animation.webp;
+package com.yupaopao.animation.loader;
 
-import com.yupaopao.animation.webp.reader.StreamReader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,14 +13,14 @@ public abstract class StreamLoader {
 
     private InputStream in;
 
-    public synchronized InputStream obtain() throws IOException {
+    public final synchronized InputStream obtain() throws IOException {
         if (in == null) {
-            in = new StreamReader(getInputStream());
+            in = getInputStream();
         }
         return in;
     }
 
-    public synchronized void release() throws IOException {
+    public final synchronized void release() throws IOException {
         if (in != null) {
             in.close();
             in = null;

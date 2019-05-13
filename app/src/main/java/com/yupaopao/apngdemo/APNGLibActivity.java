@@ -1,22 +1,14 @@
 package com.yupaopao.apngdemo;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import com.yupaopao.animation.apng.APNGAssetLoader;
-import com.yupaopao.animation.apng.APNGDrawable;
+import com.yupaopao.animation.loader.AssetStreamLoader;
 import com.yupaopao.animation.webp.AnimatedWebpDrawable;
-import com.yupaopao.animation.webp.AssetStreamLoader;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.stream.Stream;
 
 /**
  * @Description: 作用描述

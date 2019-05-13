@@ -1,28 +1,27 @@
-package com.yupaopao.animation.webp;
+package com.yupaopao.animation.loader;
 
 import android.content.Context;
-
 
 import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * @Description: 从Asset中读取流
+ * @Description: 从资源加载流
  * @Author: pengfei.zhou
  * @CreateDate: 2019/3/28
  */
-public class AssetStreamLoader extends StreamLoader {
-
+public class ResourceStreamLoader extends StreamLoader {
     private final Context mContext;
-    private final String mAssetName;
+    private final int mResId;
 
-    public AssetStreamLoader(Context context, String assetName) {
+
+    public ResourceStreamLoader(Context context, int resId) {
         mContext = context.getApplicationContext();
-        mAssetName = assetName;
+        mResId = resId;
     }
 
     @Override
     protected InputStream getInputStream() throws IOException {
-        return mContext.getAssets().open(mAssetName);
+        return mContext.getResources().openRawResource(mResId);
     }
 }

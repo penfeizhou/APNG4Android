@@ -1,7 +1,7 @@
 package com.yupaopao.animation.webp.decode;
 
-import com.yupaopao.animation.webp.DataUtil;
-import com.yupaopao.animation.webp.reader.StreamReader;
+import com.yupaopao.animation.webp.io.DataUtil;
+import com.yupaopao.animation.webp.io.StreamReader;
 
 import java.io.IOException;
 

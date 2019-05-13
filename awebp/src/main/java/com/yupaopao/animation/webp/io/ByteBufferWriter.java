@@ -1,6 +1,6 @@
-package com.yupaopao.animation.webp.writer;
+package com.yupaopao.animation.webp.io;
 
-import com.yupaopao.animation.webp.DataUtil;
+import com.yupaopao.animation.io.Writer;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -28,27 +28,22 @@ public class ByteBufferWriter implements Writer {
         byteBuffer.put(b);
     }
 
-    @Override
     public void putUInt16(int i) {
         byteBuffer.put(DataUtil.uInt16ToByte(i));
     }
 
-    @Override
     public void putUInt24(int i) {
         byteBuffer.put(DataUtil.uInt24ToByte(i));
     }
 
-    @Override
     public void putUInt32(int i) {
         byteBuffer.put(DataUtil.uInt32ToByte(i));
     }
 
-    @Override
     public void put1Based(int i) {
         byteBuffer.put(DataUtil.oneBasedToByte(i));
     }
 
-    @Override
     public void putFourCC(String v) {
         byteBuffer.put(DataUtil.fourCCToByte(v));
     }
