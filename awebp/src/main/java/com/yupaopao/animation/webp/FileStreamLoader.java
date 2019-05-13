@@ -20,7 +20,7 @@ public class FileStreamLoader extends StreamLoader {
     }
 
     @Override
-    public InputStream getInputStream() throws IOException {
+    protected InputStream getInputStream() throws IOException {
         return new FileInputStream(mFile);
     }
 }

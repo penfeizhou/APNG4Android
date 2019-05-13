@@ -1,6 +1,6 @@
 package com.yupaopao.animation.webp.decode;
 
-import com.yupaopao.animation.webp.reader.Reader;
+import com.yupaopao.animation.webp.reader.StreamReader;
 
 import java.io.IOException;
 
@@ -15,7 +15,7 @@ public class BaseChunk {
     public int offset;
     public static final int CHUNCK_HEADER_OFFSET = 8;
 
-    final void parse(Reader reader) throws IOException {
+    final void parse(StreamReader reader) throws IOException {
         int available = reader.available();
         innerParse(reader);
         int offset = available - reader.available();
@@ -36,10 +36,6 @@ public class BaseChunk {
      *
      * @param reader current reader
      */
-    void innerParse(Reader reader) throws IOException {
-    }
-
-    int getContentLength() {
-        return payloadSize + CHUNCK_HEADER_OFFSET + (payloadSize & 1);
+    void innerParse(StreamReader reader) throws IOException {
     }
 }

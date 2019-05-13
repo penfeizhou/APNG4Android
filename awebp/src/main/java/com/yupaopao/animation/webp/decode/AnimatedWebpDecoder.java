@@ -11,6 +11,7 @@ import android.graphics.Rect;
 
 import com.yupaopao.animation.webp.StreamLoader;
 import com.yupaopao.animation.webp.reader.Reader;
+import com.yupaopao.animation.webp.reader.StreamReader;
 import com.yupaopao.animation.webp.writer.ByteBufferWriter;
 import com.yupaopao.animation.webp.writer.Writer;
 
@@ -53,7 +54,8 @@ public class AnimatedWebpDecoder extends FrameSeqDecoder {
 
     @Override
     protected Rect read() throws IOException {
-        Reader reader = mLoader.obtain();
+
+        StreamReader reader = new StreamReader(mLoader.obtain());
         List<BaseChunk> chunks = WebPParser.parse(reader);
         boolean anim = false;
         boolean vp8x = false;

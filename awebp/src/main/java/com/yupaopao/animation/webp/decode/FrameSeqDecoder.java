@@ -2,7 +2,6 @@ package com.yupaopao.animation.webp.decode;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.Rect;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
