@@ -1,6 +1,6 @@
 package com.yupaopao.animation.webp.decode;
 
-import com.yupaopao.animation.webp.io.StreamReader;
+import com.yupaopao.animation.webp.io.WebPReader;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ public class WebPParser {
         }
     }
 
-    static List<BaseChunk> parse(StreamReader reader) throws IOException {
+    static List<BaseChunk> parse(WebPReader reader) throws IOException {
         //@link {https://developers.google.com/speed/webp/docs/riff_container#webp_file_header}
         if (!reader.matchFourCC("RIFF")) {
             throw new FormatException();
@@ -34,7 +34,7 @@ public class WebPParser {
         return chunks;
     }
 
-    static BaseChunk parseChunk(StreamReader reader) throws IOException {
+    static BaseChunk parseChunk(WebPReader reader) throws IOException {
         //@link {https://developers.google.com/speed/webp/docs/riff_container#riff_file_format}
         int offset = reader.position();
         int chunkFourCC = reader.getFourCC();

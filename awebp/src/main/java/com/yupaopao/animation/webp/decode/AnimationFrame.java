@@ -8,8 +8,8 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 
 import com.yupaopao.animation.decode.Frame;
-import com.yupaopao.animation.webp.io.StreamReader;
-import com.yupaopao.animation.webp.io.ByteBufferWriter;
+import com.yupaopao.animation.webp.io.WebPReader;
+import com.yupaopao.animation.webp.io.WebPWriter;
 
 import java.io.IOException;
 
@@ -18,7 +18,7 @@ import java.io.IOException;
  * @Author: pengfei.zhou
  * @CreateDate: 2019-05-12
  */
-public class AnimationFrame extends Frame<StreamReader, ByteBufferWriter> {
+public class AnimationFrame extends Frame<WebPReader, WebPWriter> {
     final int imagePayloadOffset;
     final int imagePayloadSize;
     final boolean blendingMethod;
@@ -26,7 +26,7 @@ public class AnimationFrame extends Frame<StreamReader, ByteBufferWriter> {
     private final boolean useAlpha;
     private static final PorterDuffXfermode PORTERDUFF_XFERMODE_SRC_OVER = new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER);
 
-    public AnimationFrame(StreamReader reader, ANMFChunk anmfChunk) {
+    public AnimationFrame(WebPReader reader, ANMFChunk anmfChunk) {
         super(reader);
         this.frameWidth = anmfChunk.frameWidth;
         this.frameHeight = anmfChunk.frameHeight;
@@ -40,7 +40,7 @@ public class AnimationFrame extends Frame<StreamReader, ByteBufferWriter> {
         this.useAlpha = anmfChunk.alphChunk != null;
     }
 
-    private int encode(ByteBufferWriter writer) {
+    private int encode(WebPWriter writer) {
         int vp8xPayloadSize = 10;
         int size = 12 + (BaseChunk.CHUNCK_HEADER_OFFSET + vp8xPayloadSize) + this.imagePayloadSize;
         writer.reset(size);
@@ -68,7 +68,7 @@ public class AnimationFrame extends Frame<StreamReader, ByteBufferWriter> {
         return size;
     }
 
-    public Bitmap draw(Canvas canvas, Paint paint, int sampleSize, Bitmap reusedBitmap, ByteBufferWriter writer) {
+    public Bitmap draw(Canvas canvas, Paint paint, int sampleSize, Bitmap reusedBitmap, WebPWriter writer) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = false;
         options.inSampleSize = sampleSize;
