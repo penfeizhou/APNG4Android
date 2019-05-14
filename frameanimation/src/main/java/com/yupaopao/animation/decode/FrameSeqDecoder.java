@@ -41,6 +41,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     private final RenderListener renderListener;
     private boolean running;
     private boolean paused;
+    private static final Rect RECT_EMPTY = new Rect();
     private Runnable renderTask = new Runnable() {
         @Override
         public void run() {
@@ -152,6 +153,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
                 fullRect = futureTask.get();
             } catch (Exception e) {
                 e.printStackTrace();
+                fullRect = RECT_EMPTY;
             }
             return fullRect;
         }
@@ -170,6 +172,9 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     }
 
     public void start() {
+        if (fullRect == RECT_EMPTY) {
+            return;
+        }
         getExecutor().execute(new Runnable() {
             @Override
             public void run() {
@@ -207,6 +212,9 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     protected abstract int getLoopCount();
 
     public void stop() {
+        if (fullRect == RECT_EMPTY) {
+            return;
+        }
         boolean tempRunning = running;
         running = false;
         getExecutor().remove(renderTask);
