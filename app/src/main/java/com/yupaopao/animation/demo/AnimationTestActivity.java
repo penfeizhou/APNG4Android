@@ -9,7 +9,7 @@ import android.widget.LinearLayout;
 
 import com.yupaopao.animation.apng.APNGDrawable;
 import com.yupaopao.animation.loader.AssetStreamLoader;
-import com.yupaopao.animation.webp.AnimatedWebPDrawable;
+import com.yupaopao.animation.webp.WebPDrawable;
 
 
 /**
@@ -32,7 +32,7 @@ public class AnimationTestActivity extends Activity {
                 drawable = new APNGDrawable(loader);
             }
             if (assetFile.endsWith("webp")) {
-                drawable = new AnimatedWebPDrawable(loader);
+                drawable = new WebPDrawable(loader);
             }
             imageView.setImageDrawable(drawable);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
