@@ -1,0 +1,42 @@
+apply plugin: 'maven'
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            Properties pomProps = new Properties()
+            pomProps.load(new FileInputStream("${projectDir}/pom.properties"))
+            pom.groupId = pomProps.groupId
+            pom.artifactId = pomProps.artifactId
+            pom.version = pomProps.version
+
+            pom.project {
+                description 'git rev-parse HEAD'.execute([], projectDir).text.trim()
+                // 最后一次git提交的hash
+            }
+
+            Properties mavenProps = new Properties()
+            mavenProps.load(new FileInputStream(rootProject.file('gradles/maven.properties')))
+            def url = mavenProps.releasesRepository
+            if (pomProps.version.endsWith("-SNAPSHOT")) {
+                url = mavenProps.snapshotsRepository
+            }
+            repository(url: url) {
+                authentication(userName: mavenProps.mavenUsername, password: mavenProps.mavenPassword)
+            }
+        }
+    }
+}
+
+task uploadAar {
+    dependsOn clean, uploadArchives
+}
+
+// 打包时上传源码，可选
+task androidSourcesJar(type: Jar) {
+    classifier = "sources"
+    from android.sourceSets.main.java.sourceFiles
+}
+
+artifacts {
+    archives androidSourcesJar
+}
