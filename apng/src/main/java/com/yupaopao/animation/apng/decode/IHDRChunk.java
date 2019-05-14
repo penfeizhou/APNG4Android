@@ -36,6 +36,6 @@ class IHDRChunk extends Chunk {
     void innerParse(APNGReader reader) throws IOException {
         width = reader.readInt();
         height = reader.readInt();
-        assert data.length == reader.read(data, 0, data.length);
+        reader.read(data, 0, data.length);
     }
 }
