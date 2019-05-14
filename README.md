@@ -6,7 +6,18 @@
 * No temporary files generated
 * Support still image
 * Lightweight implementation
-## 使用示例
+## Usages
+```gradle
+repositories {
+        maven {
+            url "https://dl.bintray.com/osborn/Android"
+        }
+}
+dependencies {
+    implementation 'com.yupaopao.android.animation:awebp:0.1.1'
+    implementation 'com.yupaopao.android.animation:apng:0.1.2'
+}
+```
 ```java
 // Load from asset file
 AssetStreamLoader assetLoader = new AssetStreamLoader(context, "wheel.png");
