@@ -31,6 +31,7 @@ public class StillFrame extends Frame<APNGReader, APNGWriter> {
         options.inBitmap = reusedBitmap;
         Bitmap bitmap = null;
         try {
+            reader.reset();
             bitmap = BitmapFactory.decodeStream(reader.toInputStream(), null, options);
             assert bitmap != null;
             paint.setXfermode(null);

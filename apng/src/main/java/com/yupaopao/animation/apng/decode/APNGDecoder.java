@@ -92,9 +92,12 @@ public class APNGDecoder extends FrameSeqDecoder<APNGReader, APNGWriter> {
             } else if (chunk instanceof IDATChunk) {
                 if (!actl) {
                     //如果为非APNG图片，则只解码PNG
-                    frames.add(new StillFrame(reader));
+                    Frame frame = new StillFrame(reader);
+                    frame.frameWidth = canvasWidth;
+                    frame.frameHeight = canvasHeight;
+                    frames.add(frame);
                     mLoopCount = 1;
-                    continue;
+                    break;
                 }
                 if (lastFrame != null) {
                     lastFrame.imageChunks.add(chunk);
