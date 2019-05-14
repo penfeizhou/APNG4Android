@@ -10,6 +10,8 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/apng" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/awebp" />
+            <option value="$PROJECT_DIR$/frameanimation" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
