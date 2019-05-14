@@ -81,7 +81,7 @@ public class APNGDecoder extends FrameSeqDecoder<APNGReader, APNGWriter> {
                 actl = true;
             } else if (chunk instanceof FCTLChunk) {
                 APNGFrame frame = new APNGFrame(reader, (FCTLChunk) chunk);
-                frame.otherChunks = otherChunks;
+                frame.prefixChunks = otherChunks;
                 frame.ihdrData = ihdrData;
                 frames.add(frame);
                 lastFrame = frame;
@@ -104,7 +104,7 @@ public class APNGDecoder extends FrameSeqDecoder<APNGReader, APNGWriter> {
                 canvasWidth = ((IHDRChunk) chunk).width;
                 canvasHeight = ((IHDRChunk) chunk).height;
                 ihdrData = ((IHDRChunk) chunk).data;
-            } else {
+            } else if (!(chunk instanceof IENDChunk)) {
                 otherChunks.add(chunk);
             }
         }

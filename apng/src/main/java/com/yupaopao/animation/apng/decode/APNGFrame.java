@@ -25,8 +25,10 @@ public class APNGFrame extends Frame<APNGReader, APNGWriter> {
     public final byte dispose_op;
     byte[] ihdrData;
     List<Chunk> imageChunks = new ArrayList<>();
-    List<Chunk> otherChunks = new ArrayList<>();
+    List<Chunk> prefixChunks = new ArrayList<>();
     private static final byte[] sPNGSignatures = {(byte) 137, 80, 78, 71, 13, 10, 26, 10};
+    private static final byte[] sPNGEndChunk = {0, 0, 0, 0, 0x49, 0x45, 0x4E, 0x44, (byte) 0xAE, 0x42, 0x60, (byte) 0x82};
+
     private static CRC32 crc32 = new CRC32();
 
     public APNGFrame(APNGReader reader, FCTLChunk fctlChunk) {
@@ -43,8 +45,8 @@ public class APNGFrame extends Frame<APNGReader, APNGWriter> {
     private int encode(APNGWriter apngWriter) throws IOException {
         int fileSize = 8 + 13 + 12;
 
-        //otherChunks
-        for (Chunk chunk : otherChunks) {
+        //prefixChunks
+        for (Chunk chunk : prefixChunks) {
             fileSize += chunk.length + 12;
         }
 
@@ -56,7 +58,7 @@ public class APNGFrame extends Frame<APNGReader, APNGWriter> {
                 fileSize += chunk.length + 8;
             }
         }
-
+        fileSize += sPNGEndChunk.length;
         apngWriter.reset(fileSize);
         apngWriter.putBytes(sPNGSignatures);
         //IHDR Chunk
@@ -70,8 +72,8 @@ public class APNGFrame extends Frame<APNGReader, APNGWriter> {
         crc32.update(apngWriter.toByteArray(), start, 17);
         apngWriter.writeInt((int) crc32.getValue());
 
-        //otherChunks
-        for (Chunk chunk : otherChunks) {
+        //prefixChunks
+        for (Chunk chunk : prefixChunks) {
             if (chunk instanceof IENDChunk) {
                 continue;
             }
@@ -101,14 +103,7 @@ public class APNGFrame extends Frame<APNGReader, APNGWriter> {
             }
         }
         //endChunk
-        for (Chunk chunk : otherChunks) {
-            if (chunk instanceof IENDChunk) {
-                reader.reset();
-                reader.skip(chunk.offset);
-                reader.read(apngWriter.toByteArray(), apngWriter.position(), chunk.length + 12);
-                break;
-            }
-        }
+        apngWriter.putBytes(sPNGEndChunk);
         return fileSize;
     }
 
@@ -123,13 +118,6 @@ public class APNGFrame extends Frame<APNGReader, APNGWriter> {
             options.inMutable = true;
             options.inBitmap = reusedBitmap;
             byte[] bytes = writer.toByteArray();
-            APNGReader apngReader = new APNGReader(new ByteArrayInputStream(bytes));
-            APNGParser.parse(apngReader);
-            try {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, length, options);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
             Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, length, options);
             assert bitmap != null;
             canvas.drawBitmap(bitmap, (float) frameX * 2 / sampleSize, (float) frameY * 2 / sampleSize, paint);
