@@ -161,16 +161,15 @@ public class APNGDecoder extends FrameSeqDecoder<APNGReader, APNGWriter> {
                     break;
             }
             canvas.save();
+            canvas.clipRect(
+                    frame.frameX / sampleSize,
+                    frame.frameY / sampleSize,
+                    (frame.frameX + frame.frameWidth) / sampleSize,
+                    (frame.frameY + frame.frameHeight) / sampleSize);
             if (((APNGFrame) frame).blend_op == FCTLChunk.APNG_BLEND_OP_SOURCE) {
                 canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
             }
         }
-
-        canvas.clipRect(
-                frame.frameX / sampleSize,
-                frame.frameY / sampleSize,
-                (frame.frameX + frame.frameWidth) / sampleSize,
-                (frame.frameY + frame.frameHeight) / sampleSize);
 
         //开始真正绘制当前帧的内容
         Bitmap inBitmap = obtainBitmap(frame.frameWidth, frame.frameHeight);
