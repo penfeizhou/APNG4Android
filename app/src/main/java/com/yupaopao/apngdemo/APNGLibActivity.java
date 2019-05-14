@@ -22,73 +22,47 @@ public class APNGLibActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_apnglib);
         LinearLayout linearLayout = findViewById(R.id.layout);
-        String[] assetFiles = {
-                "test.png",
-                "test2.png",
-                "test3.png",
-                "test4.png",
-                "test5.png",
-                "wheel.png",
-        };
-        for (String assetFile : assetFiles) {
-            AssetStreamLoader loader = new AssetStreamLoader(this, assetFile);
-            APNGDrawable apngDrawable = new APNGDrawable(loader);
-            ImageView imageView = new ImageView(this);
-            imageView.setImageDrawable(apngDrawable);
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            layoutParams.bottomMargin = 50;
-            layoutParams.topMargin = 50;
-            linearLayout.addView(imageView, layoutParams);
+        {
+            String[] assetFiles = {
+                    "test.png",
+                    "test2.png",
+                    "test3.png",
+                    "test4.png",
+                    "test5.png",
+                    "wheel.png",
+                    "png.png"
+            };
+            for (String assetFile : assetFiles) {
+                AssetStreamLoader loader = new AssetStreamLoader(this, assetFile);
+                APNGDrawable apngDrawable = new APNGDrawable(loader);
+                ImageView imageView = new ImageView(this);
+                imageView.setImageDrawable(apngDrawable);
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                layoutParams.bottomMargin = 50;
+                layoutParams.topMargin = 50;
+                linearLayout.addView(imageView, layoutParams);
+            }
         }
         {
-            AssetStreamLoader loader = new AssetStreamLoader(this, "animation.webp");
-            AnimatedWebPDrawable webpDrawable = new AnimatedWebPDrawable(loader);
-            ImageView imageView = new ImageView(this);
-            imageView.setImageDrawable(webpDrawable);
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            layoutParams.bottomMargin = 50;
-            layoutParams.topMargin = 50;
-            linearLayout.addView(imageView, layoutParams);
-        }
-        {
-            AssetStreamLoader loader = new AssetStreamLoader(this, "1.webp");
-            AnimatedWebPDrawable webpDrawable = new AnimatedWebPDrawable(loader);
-            ImageView imageView = new ImageView(this);
-            imageView.setImageDrawable(webpDrawable);
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            layoutParams.bottomMargin = 50;
-            layoutParams.topMargin = 50;
-            linearLayout.addView(imageView, layoutParams);
-        }
-        {
-            AssetStreamLoader loader = new AssetStreamLoader(this, "2.webp");
-            AnimatedWebPDrawable webpDrawable = new AnimatedWebPDrawable(loader);
-            ImageView imageView = new ImageView(this);
-            imageView.setImageDrawable(webpDrawable);
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            layoutParams.bottomMargin = 50;
-            layoutParams.topMargin = 50;
-            linearLayout.addView(imageView, layoutParams);
-        }
-        {
-            AssetStreamLoader loader = new AssetStreamLoader(this, "animation.webp");
-            AnimatedWebPDrawable webpDrawable = new AnimatedWebPDrawable(loader);
-            ImageView imageView = new ImageView(this);
-            imageView.setImageDrawable(webpDrawable);
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            layoutParams.bottomMargin = 50;
-            layoutParams.topMargin = 50;
-            linearLayout.addView(imageView, layoutParams);
-        }
-        {
-            AssetStreamLoader loader = new AssetStreamLoader(this, "example.webp");
-            AnimatedWebPDrawable webpDrawable = new AnimatedWebPDrawable(loader);
-            ImageView imageView = new ImageView(this);
-            imageView.setImageDrawable(webpDrawable);
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            layoutParams.bottomMargin = 50;
-            layoutParams.topMargin = 50;
-            linearLayout.addView(imageView, layoutParams);
+            {
+                String[] assetFiles = {
+                        "1.webp",
+                        "2.webp",
+                        "example.webp",
+                        "lossless.webp",
+                        "lossy.png",
+                };
+                for (String assetFile : assetFiles) {
+                    AssetStreamLoader loader = new AssetStreamLoader(this, assetFile);
+                    AnimatedWebPDrawable apngDrawable = new AnimatedWebPDrawable(loader);
+                    ImageView imageView = new ImageView(this);
+                    imageView.setImageDrawable(apngDrawable);
+                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                    layoutParams.bottomMargin = 50;
+                    layoutParams.topMargin = 50;
+                    linearLayout.addView(imageView, layoutParams);
+                }
+            }
         }
     }
 }
