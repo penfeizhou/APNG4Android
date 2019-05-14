@@ -9,7 +9,6 @@ import com.yupaopao.animation.apng.io.APNGReader;
 import com.yupaopao.animation.apng.io.APNGWriter;
 import com.yupaopao.animation.decode.Frame;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
