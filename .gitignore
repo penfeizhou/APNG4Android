@@ -1,5 +1,6 @@
 *.iml
 .gradle
+/scripts/maven.properties
 /local.properties
 /.idea/caches
 /.idea/libraries
