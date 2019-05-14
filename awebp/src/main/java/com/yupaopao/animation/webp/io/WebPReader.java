@@ -2,7 +2,7 @@ package com.yupaopao.animation.webp.io;
 
 import android.text.TextUtils;
 
-import com.yupaopao.animation.io.StreamReader;
+import com.yupaopao.animation.io.Reader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,10 +11,21 @@ import java.io.InputStream;
  * @Author: pengfei.zhou
  * @CreateDate: 2019-05-11
  */
-public class WebPReader extends StreamReader {
+public class WebPReader implements Reader {
+    private Reader reader;
+    private static ThreadLocal<byte[]> __intBytes = new ThreadLocal<>();
 
-    public WebPReader(InputStream in) {
-        super(in);
+    protected static byte[] ensureBytes() {
+        byte[] bytes = __intBytes.get();
+        if (bytes == null) {
+            bytes = new byte[4];
+            __intBytes.set(bytes);
+        }
+        return bytes;
+    }
+
+    public WebPReader(Reader reader) {
+        this.reader = reader;
     }
 
     /**
@@ -78,8 +89,43 @@ public class WebPReader extends StreamReader {
     }
 
     @Override
+    public long skip(long total) throws IOException {
+        return reader.skip(total);
+    }
+
+    @Override
+    public byte peek() throws IOException {
+        return reader.peek();
+    }
+
+    @Override
+    public void reset() throws IOException {
+        reader.reset();
+    }
+
+    @Override
+    public int position() {
+        return reader.position();
+    }
+
+    @Override
+    public int read(byte[] buffer, int start, int byteCount) throws IOException {
+        return reader.read(buffer, start, byteCount);
+    }
+
+    @Override
+    public int available() throws IOException {
+        return reader.available();
+    }
+
+    @Override
+    public void close() throws IOException {
+        reader.close();
+    }
+
+    @Override
     public InputStream toInputStream() throws IOException {
         reset();
-        return this;
+        return reader.toInputStream();
     }
 }

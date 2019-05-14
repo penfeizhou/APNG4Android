@@ -3,6 +3,7 @@ package com.yupaopao.animation.webp.decode;
 import com.yupaopao.animation.webp.io.WebPReader;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +17,27 @@ public class WebPParser {
         FormatException() {
             super("WebP Format error");
         }
+    }
+
+    public static boolean isAWebP(WebPReader reader) {
+        try {
+            if (!reader.matchFourCC("RIFF")) {
+                return false;
+            }
+            reader.skip(4);
+            if (!reader.matchFourCC("WEBP")) {
+                return false;
+            }
+            while (reader.available() > 0) {
+                BaseChunk chunk = parseChunk(reader);
+                if (chunk instanceof VP8XChunk) {
+                    return ((VP8XChunk) chunk).animation();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     static List<BaseChunk> parse(WebPReader reader) throws IOException {

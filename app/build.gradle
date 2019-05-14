@@ -25,9 +25,10 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    implementation 'com.yupaopao.android.animation:awebp:0.1.1'
-    implementation 'com.yupaopao.android.animation:apng:0.1.13'
     implementation project(':glide_awebp')
+    implementation project(':awebp')
+    implementation project(':apng')
     implementation 'com.github.bumptech.glide:glide:4.8.0'
+    implementation 'com.github.bumptech.glide:annotations:4.8.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.8.0'
 }
