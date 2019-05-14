@@ -1,2 +1,2 @@
-include ':app', ':apng'
+include ':app', ':apng', ':awebp', ':frameanimation'
 

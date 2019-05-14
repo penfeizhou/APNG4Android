@@ -1,36 +1,40 @@
-# APNG4Android
-* 实现APNG格式的解码与播放，
-* 实时解析，不产生临时文件
-* 加载速度快
-* 内存占用低
-* 支持PNG静态图片
+# APNG&Webp4Android
+* Support APNG & Animated Webp
+* Implement play control
+* Fast Decode
+* Low memory usage
+* No temporary files generated
+* Support still image
+* Lightweight implementation
 ## 使用示例
 ```java
-// 从Asset中加载
-APNGAssetLoader assetLoader = new APNGAssetLoader(context, "wheel.png");
+// Load from asset file
+AssetStreamLoader assetLoader = new AssetStreamLoader(context, "wheel.png");
  
  
-// 从Resource中加载
-APNGResourceLoader resourceLoader = new APNGResourceLoader(context, R.drawable.sample);
+// Load form Resource
+ResourceStreamLoader resourceLoader = new ResourceStreamLoader(context, R.drawable.sample);
  
  
-// 从文件系统加载
-APNGFileLoader fileLoader = new APNGFileLoader("/sdcard/Pictures/wheel.png");
+// Load from file
+FileStreamLoader fileLoader = new FileStreamLoader("/sdcard/Pictures/1.webp");
  
  
-// 创建Drawable
+// Create APNG Drawable
 APNGDrawable apngDrawable = new APNGDrawable(assetLoader);
+
+//Create Animated webp drawable
+WebPDrawable webpDrawable = new WebPDrawable(assetLoader);
  
- 
-// 设置后自动播放
+// Auto play
 imageView.setImageDrawable(apngDrawable);
  
  
-// 设置重复次数
+// Not needed.default controlled by content
 apngDrawable.setLoopLimit(10);
  
  
-// 已实现Animatable2Compat接口
+// Implement Animatable2Compat
 drawable.registerAnimationCallback(new Animatable2Compat.AnimationCallback() {
     @Override
     public void onAnimationStart(Drawable drawable) {

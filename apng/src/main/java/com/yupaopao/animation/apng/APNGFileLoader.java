@@ -1,27 +1,16 @@
 package com.yupaopao.animation.apng;
 
-import com.yupaopao.animation.apng.chunk.APNGStreamLoader;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import com.yupaopao.animation.loader.FileStreamLoader;
 
 /**
- * @Description: APNG文件加载器，从本地file中加载文件
  * @Author: pengfei.zhou
  * @CreateDate: 2019/3/28
+ * @see com.yupaopao.animation.loader.FileStreamLoader use this insted
  */
-public class APNGFileLoader extends APNGStreamLoader {
-
-    private final File mFile;
+@Deprecated
+public class APNGFileLoader extends FileStreamLoader {
 
     public APNGFileLoader(String path) {
-        mFile = new File(path);
-    }
-
-    @Override
-    public InputStream getInputStream() throws IOException {
-        return new FileInputStream(mFile);
+        super(path);
     }
 }

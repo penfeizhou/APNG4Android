@@ -1,29 +1,18 @@
 package com.yupaopao.animation.apng;
 
+
 import android.content.Context;
 
-import com.yupaopao.animation.apng.chunk.APNGStreamLoader;
-
-import java.io.IOException;
-import java.io.InputStream;
+import com.yupaopao.animation.loader.ResourceStreamLoader;
 
 /**
- * @Description: APNG 资源加载器，从res中加载APNG
  * @Author: pengfei.zhou
  * @CreateDate: 2019/3/28
+ * @see com.yupaopao.animation.loader.ResourceStreamLoader use this insted
  */
-public class APNGResourceLoader extends APNGStreamLoader {
-    private final Context mContext;
-    private final int mResId;
-
-
+@Deprecated
+public class APNGResourceLoader extends ResourceStreamLoader {
     public APNGResourceLoader(Context context, int resId) {
-        mContext = context.getApplicationContext();
-        mResId = resId;
-    }
-
-    @Override
-    public InputStream getInputStream() throws IOException {
-        return mContext.getResources().openRawResource(mResId);
+        super(context, resId);
     }
 }
