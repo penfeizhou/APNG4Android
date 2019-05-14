@@ -10,30 +10,31 @@
         android:layout_width="wrap_content"
         android:layout_height="100dp"
         android:layout_gravity="center"
-        android:text="多图加载"
-        android:textSize="20dp" />]
-
-    <TextView
-        android:id="@+id/tv_mode1"
-        android:layout_width="wrap_content"
-        android:layout_height="100dp"
-        android:layout_gravity="center"
-        android:text="测试模式1"
+        android:text="APNG"
         android:textSize="20dp" />
 
     <TextView
-        android:id="@+id/tv_mode2"
+        android:id="@+id/tv_2"
         android:layout_width="wrap_content"
         android:layout_height="100dp"
         android:layout_gravity="center"
-        android:text="测试模式2"
+        android:text="Still PNG"
         android:textSize="20dp" />
 
     <TextView
-        android:id="@+id/tv_mode3"
+        android:id="@+id/tv_3"
         android:layout_width="wrap_content"
         android:layout_height="100dp"
         android:layout_gravity="center"
-        android:text="测试模式3"
+        android:text="Animated WebP"
         android:textSize="20dp" />
+
+    <TextView
+        android:id="@+id/tv_4"
+        android:layout_width="wrap_content"
+        android:layout_height="100dp"
+        android:layout_gravity="center"
+        android:text="Still WebP"
+        android:textSize="20dp" />
+
 </LinearLayout>

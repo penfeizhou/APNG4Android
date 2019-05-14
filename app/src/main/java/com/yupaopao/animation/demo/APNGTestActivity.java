@@ -1,5 +1,4 @@
-package com.yupaopao.apngdemo;
-
+package com.yupaopao.animation.demo;
 
 import android.app.Activity;
 import android.os.Bundle;
