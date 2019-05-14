@@ -16,6 +16,8 @@ public interface Writer {
 
     int position();
 
+    void skip(int length);
+
     byte[] toByteArray();
 
     void close() throws IOException;

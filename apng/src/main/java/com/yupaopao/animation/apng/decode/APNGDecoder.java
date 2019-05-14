@@ -1,9 +1,192 @@
 package com.yupaopao.animation.apng.decode;
 
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.Rect;
+
+import com.yupaopao.animation.apng.io.APNGReader;
+import com.yupaopao.animation.apng.io.APNGWriter;
+import com.yupaopao.animation.decode.Frame;
+import com.yupaopao.animation.decode.FrameSeqDecoder;
+import com.yupaopao.animation.loader.StreamLoader;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @Description: APNG4Android
  * @Author: pengfei.zhou
  * @CreateDate: 2019-05-13
  */
-public class APNGDecoder {
+public class APNGDecoder extends FrameSeqDecoder<APNGReader, APNGWriter> {
+
+    private APNGWriter apngWriter;
+    private int mLoopCount;
+    private Paint paint;
+
+
+    private class SnapShot {
+        byte dispose_op;
+        Rect dstRect = new Rect();
+        ByteBuffer byteBuffer;
+    }
+
+    private SnapShot snapShot = new SnapShot();
+
+    /**
+     * @param loader         webp的reader
+     * @param renderListener 渲染的回调
+     */
+    public APNGDecoder(StreamLoader loader, RenderListener renderListener) {
+        super(loader, renderListener);
+    }
+
+    @Override
+    protected APNGWriter getWriter() {
+        if (apngWriter == null) {
+            apngWriter = new APNGWriter();
+        }
+        return apngWriter;
+    }
+
+    @Override
+    protected APNGReader getReader(InputStream inputStream) {
+        return new APNGReader(inputStream);
+    }
+
+    @Override
+    protected int getLoopCount() {
+        return mLoopCount;
+    }
+
+
+    @Override
+    protected Rect read(APNGReader reader) throws IOException {
+        List<Chunk> chunks = APNGParser.parse(reader);
+        List<Chunk> otherChunks = new ArrayList<>();
+
+        boolean actl = false;
+        APNGFrame lastFrame = null;
+        byte[] ihdrData = new byte[0];
+        int canvasWidth = 0, canvasHeight = 0;
+        for (Chunk chunk : chunks) {
+            if (chunk instanceof ACTLChunk) {
+                mLoopCount = ((ACTLChunk) chunk).num_plays;
+                actl = true;
+            } else if (chunk instanceof FCTLChunk) {
+                APNGFrame frame = new APNGFrame(reader, (FCTLChunk) chunk);
+                frame.otherChunks = otherChunks;
+                frame.ihdrData = ihdrData;
+                frames.add(frame);
+                lastFrame = frame;
+            } else if (chunk instanceof FDATChunk) {
+                if (lastFrame != null) {
+                    lastFrame.imageChunks.add(chunk);
+                }
+            } else if (chunk instanceof IDATChunk) {
+                if (!actl) {
+                    //如果为非APNG图片，则只解码PNG
+                    frames.add(new StillFrame(reader));
+                    mLoopCount = 1;
+                    continue;
+                }
+                if (lastFrame != null) {
+                    lastFrame.imageChunks.add(chunk);
+                }
+
+            } else if (chunk instanceof IHDRChunk) {
+                canvasWidth = ((IHDRChunk) chunk).width;
+                canvasHeight = ((IHDRChunk) chunk).height;
+                ihdrData = ((IHDRChunk) chunk).data;
+            } else {
+                otherChunks.add(chunk);
+            }
+        }
+        paint = new Paint();
+        paint.setAntiAlias(true);
+        frameBuffer = ByteBuffer.allocate((canvasWidth * canvasHeight / sampleSize ^ 2 + 1) * 4);
+        snapShot.byteBuffer = ByteBuffer.allocate((canvasWidth * canvasHeight / sampleSize ^ 2 + 1) * 4);
+        return new Rect(0, 0, canvasWidth, canvasHeight);
+    }
+
+    @Override
+    protected void renderFrame(Frame frame) {
+        if (frame == null) {
+            return;
+        }
+        Bitmap bitmap = obtainBitmap(fullRect.width() / sampleSize, fullRect.height() / sampleSize);
+        Canvas canvas = cachedCanvas.get(bitmap);
+        if (canvas == null) {
+            canvas = new Canvas(bitmap);
+            cachedCanvas.put(bitmap, canvas);
+        }
+        if (frame instanceof APNGFrame) {
+            // 从缓存中恢复当前帧
+            frameBuffer.rewind();
+            bitmap.copyPixelsFromBuffer(frameBuffer);
+            // 如果需要在下一帧渲染前恢复当前显示内容，需要在渲染前将当前显示内容保存到快照中
+            if (((APNGFrame) frame).dispose_op == FCTLChunk.APNG_DISPOSE_OP_PREVIOUS) {
+                frameBuffer.rewind();
+                snapShot.byteBuffer.rewind();
+                snapShot.byteBuffer.put(frameBuffer);
+            }
+
+
+            //开始绘制前，处理快照中的设定
+            switch (snapShot.dispose_op) {
+                // 从快照中恢复上一帧之前的显示内容
+                case FCTLChunk.APNG_DISPOSE_OP_PREVIOUS:
+                    snapShot.byteBuffer.rewind();
+                    bitmap.copyPixelsFromBuffer(snapShot.byteBuffer);
+                    break;
+                // 清空上一帧所画区域
+                case FCTLChunk.APNG_DISPOSE_OP_BACKGROUND:
+                    canvas.save();
+                    canvas.clipRect(snapShot.dstRect);
+                    canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+                    canvas.restore();
+                    break;
+                // 什么都不做
+                case FCTLChunk.APNG_DISPOSE_OP_NON:
+                default:
+                    break;
+            }
+            canvas.save();
+            if (((APNGFrame) frame).blend_op == FCTLChunk.APNG_BLEND_OP_SOURCE) {
+                canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+            }
+        }
+
+        canvas.clipRect(
+                frame.frameX / sampleSize,
+                frame.frameY / sampleSize,
+                (frame.frameX + frame.frameWidth) / sampleSize,
+                (frame.frameY + frame.frameHeight) / sampleSize);
+
+        //开始真正绘制当前帧的内容
+        Bitmap inBitmap = obtainBitmap(frame.frameWidth, frame.frameHeight);
+        recycleBitmap(frame.draw(canvas, paint, sampleSize, inBitmap, getWriter()));
+        recycleBitmap(inBitmap);
+        if (frame instanceof APNGFrame) {
+            canvas.restore();
+            //然后根据dispose设定传递到快照信息中
+            snapShot.dispose_op = ((APNGFrame) frame).dispose_op;
+            snapShot.dstRect.set(frame.frameX / sampleSize,
+                    frame.frameY / sampleSize,
+                    (frame.frameX + frame.frameWidth) / sampleSize,
+                    (frame.frameY + frame.frameHeight) / sampleSize);
+            if (((APNGFrame) frame).blend_op == FCTLChunk.APNG_DISPOSE_OP_PREVIOUS) {
+                snapShot.byteBuffer.rewind();
+            }
+        }
+        frameBuffer.rewind();
+        bitmap.copyPixelsToBuffer(frameBuffer);
+        recycleBitmap(bitmap);
+    }
 }
