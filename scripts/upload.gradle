@@ -1,42 +1,67 @@
-apply plugin: 'maven'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            Properties pomProps = new Properties()
-            pomProps.load(new FileInputStream("${projectDir}/pom.properties"))
-            pom.groupId = pomProps.groupId
-            pom.artifactId = pomProps.artifactId
-            pom.version = pomProps.version
-
-            pom.project {
-                description 'git rev-parse HEAD'.execute([], projectDir).text.trim()
-                // 最后一次git提交的hash
-            }
-
-            Properties mavenProps = new Properties()
-            mavenProps.load(new FileInputStream(rootProject.file('gradles/maven.properties')))
-            def url = mavenProps.releasesRepository
-            if (pomProps.version.endsWith("-SNAPSHOT")) {
-                url = mavenProps.snapshotsRepository
-            }
-            repository(url: url) {
-                authentication(userName: mavenProps.mavenUsername, password: mavenProps.mavenPassword)
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+properties.load(project.rootProject.file('scripts/maven.properties').newDataInputStream())
+properties.load(new FileInputStream("${projectDir}/pom.properties"))
+group = properties.groupId
+version = properties.version
+install {
+    repositories.mavenInstaller {
+        pom {
+            project {
+                packaging 'aar'
+                name properties.name
+                url properties.site
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'penfei.zhou'
+                        name 'penfei.zhou'
+                        email 'penfei.zhou@gmail.com'
+                    }
+                }
+                scm {
+                    connection properties.git
+                    developerConnection properties.git
+                    url properties.site
+                }
             }
         }
     }
 }
-
-task uploadAar {
-    dependsOn clean, uploadArchives
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
 }
-
-// 打包时上传源码，可选
-task androidSourcesJar(type: Jar) {
-    classifier = "sources"
-    from android.sourceSets.main.java.sourceFiles
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
 }
-
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
 artifacts {
-    archives androidSourcesJar
+    archives sourcesJar
+}
+bintray {
+    user = properties.user
+    key = properties.apiKey
+    configurations = ['archives']
+    pkg {
+        repo = "Android"
+        name = properties.name
+        websiteUrl = properties.site
+        vcsUrl = properties.git
+        licenses = ["Apache-2.0"]
+        publish = true
+        publicDownloadNumbers = true
+    }
 }
