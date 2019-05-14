@@ -90,12 +90,15 @@ public class APNGFrame extends Frame<APNGReader, APNGWriter> {
                 reader.read(apngWriter.toByteArray(), apngWriter.position(), chunk.length + 12);
                 apngWriter.skip(chunk.length + 12);
             } else if (chunk instanceof FDATChunk) {
-                reader.reset();
-                reader.skip(chunk.offset + 4);
                 apngWriter.writeInt(chunk.length - 4);
                 start = apngWriter.position();
                 apngWriter.writeFourCC(IDATChunk.ID);
+
+                reader.reset();
+                // skip to fdat data position
+                reader.skip(chunk.offset + 4 + 4 + 4);
                 reader.read(apngWriter.toByteArray(), apngWriter.position(), chunk.length - 4);
+
                 apngWriter.skip(chunk.length - 4);
                 crc32.reset();
                 crc32.update(apngWriter.toByteArray(), start, chunk.length);
@@ -120,7 +123,7 @@ public class APNGFrame extends Frame<APNGReader, APNGWriter> {
             byte[] bytes = writer.toByteArray();
             Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, length, options);
             assert bitmap != null;
-            canvas.drawBitmap(bitmap, (float) frameX * 2 / sampleSize, (float) frameY * 2 / sampleSize, paint);
+            canvas.drawBitmap(bitmap, (float) frameX / sampleSize, (float) frameY / sampleSize, paint);
             return bitmap;
         } catch (IOException e) {
             e.printStackTrace();
