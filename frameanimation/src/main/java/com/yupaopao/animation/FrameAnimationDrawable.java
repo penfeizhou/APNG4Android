@@ -17,7 +17,6 @@ import android.support.graphics.drawable.Animatable2Compat;
 
 import com.yupaopao.animation.decode.FrameSeqDecoder;
 import com.yupaopao.animation.loader.Loader;
-import com.yupaopao.animation.loader.StreamLoader;
 
 import java.nio.ByteBuffer;
 import java.util.HashSet;

@@ -16,7 +16,7 @@ public class ByteBufferReader implements Reader {
 
     public ByteBufferReader(ByteBuffer byteBuffer) {
         this.byteBuffer = byteBuffer;
-        byteBuffer.reset();
+        byteBuffer.position(0);
     }
 
     @Override
@@ -32,7 +32,7 @@ public class ByteBufferReader implements Reader {
 
     @Override
     public void reset() throws IOException {
-        byteBuffer.reset();
+        byteBuffer.position(0);
     }
 
     @Override
