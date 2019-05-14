@@ -3,6 +3,7 @@ package com.yupaopao.animation.webp;
 
 import com.yupaopao.animation.FrameAnimationDrawable;
 import com.yupaopao.animation.decode.FrameSeqDecoder;
+import com.yupaopao.animation.loader.Loader;
 import com.yupaopao.animation.loader.StreamLoader;
 import com.yupaopao.animation.webp.decode.WebPDecoder;
 
@@ -13,12 +14,12 @@ import com.yupaopao.animation.webp.decode.WebPDecoder;
  */
 public class WebPDrawable extends FrameAnimationDrawable {
 
-    public WebPDrawable(StreamLoader provider) {
+    public WebPDrawable(Loader provider) {
         super(provider);
     }
 
     @Override
-    protected FrameSeqDecoder createFrameSeqDecoder(StreamLoader streamLoader, FrameSeqDecoder.RenderListener listener) {
+    protected FrameSeqDecoder createFrameSeqDecoder(Loader streamLoader, FrameSeqDecoder.RenderListener listener) {
         return new WebPDecoder(streamLoader, listener);
     }
 }

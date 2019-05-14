@@ -16,6 +16,7 @@ import android.support.annotation.NonNull;
 import android.support.graphics.drawable.Animatable2Compat;
 
 import com.yupaopao.animation.decode.FrameSeqDecoder;
+import com.yupaopao.animation.loader.Loader;
 import com.yupaopao.animation.loader.StreamLoader;
 
 import java.nio.ByteBuffer;
@@ -61,12 +62,12 @@ public abstract class FrameAnimationDrawable extends Drawable implements Animata
         }
     };
 
-    public FrameAnimationDrawable(StreamLoader provider) {
+    public FrameAnimationDrawable(Loader provider) {
         paint.setAntiAlias(true);
         frameSeqDecoder = createFrameSeqDecoder(provider, this);
     }
 
-    protected abstract FrameSeqDecoder createFrameSeqDecoder(StreamLoader streamLoader, FrameSeqDecoder.RenderListener listener);
+    protected abstract FrameSeqDecoder createFrameSeqDecoder(Loader streamLoader, FrameSeqDecoder.RenderListener listener);
 
     /**
      * @param loopLimit <=0为无限播放,>0为实际播放次数

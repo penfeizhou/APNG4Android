@@ -11,7 +11,9 @@ import android.graphics.Rect;
 
 import com.yupaopao.animation.decode.Frame;
 import com.yupaopao.animation.decode.FrameSeqDecoder;
+import com.yupaopao.animation.io.Reader;
 import com.yupaopao.animation.io.StreamReader;
+import com.yupaopao.animation.loader.Loader;
 import com.yupaopao.animation.loader.StreamLoader;
 import com.yupaopao.animation.webp.io.WebPReader;
 import com.yupaopao.animation.webp.io.WebPWriter;
@@ -40,7 +42,7 @@ public class WebPDecoder extends FrameSeqDecoder<WebPReader, WebPWriter> {
      * @param loader         webp stream loader
      * @param renderListener callback for rendering
      */
-    public WebPDecoder(StreamLoader loader, RenderListener renderListener) {
+    public WebPDecoder(Loader loader, RenderListener renderListener) {
         super(loader, renderListener);
         mTransparentFillPaint = new Paint();
         mTransparentFillPaint.setColor(Color.TRANSPARENT);
@@ -57,8 +59,8 @@ public class WebPDecoder extends FrameSeqDecoder<WebPReader, WebPWriter> {
     }
 
     @Override
-    protected WebPReader getReader(InputStream inputStream) {
-        return new WebPReader(new StreamReader(inputStream));
+    protected WebPReader getReader(Reader reader) {
+        return new WebPReader(reader);
     }
 
     @Override

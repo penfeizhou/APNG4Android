@@ -4,6 +4,7 @@ package com.yupaopao.animation.apng;
 import com.yupaopao.animation.FrameAnimationDrawable;
 import com.yupaopao.animation.apng.decode.APNGDecoder;
 import com.yupaopao.animation.decode.FrameSeqDecoder;
+import com.yupaopao.animation.loader.Loader;
 import com.yupaopao.animation.loader.StreamLoader;
 
 /**
@@ -17,7 +18,7 @@ public class APNGDrawable extends FrameAnimationDrawable {
     }
 
     @Override
-    protected FrameSeqDecoder createFrameSeqDecoder(StreamLoader streamLoader, FrameSeqDecoder.RenderListener listener) {
+    protected FrameSeqDecoder createFrameSeqDecoder(Loader streamLoader, FrameSeqDecoder.RenderListener listener) {
         return new APNGDecoder(streamLoader, listener);
     }
 }

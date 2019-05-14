@@ -16,20 +16,11 @@ public class StreamReader extends FilterInputStream implements Reader {
         super(in);
     }
 
-    protected static byte[] ensureBytes() {
-        byte[] bytes = __intBytes.get();
-        if (bytes == null) {
-            bytes = new byte[4];
-            __intBytes.set(bytes);
-        }
-        return bytes;
-    }
-
     @Override
     public byte peek() throws IOException {
-        byte[] buf = ensureBytes();
-        read(buf, 0, 1);
-        return buf[0];
+        byte ret = (byte) read();
+        position++;
+        return ret;
     }
 
     @Override
