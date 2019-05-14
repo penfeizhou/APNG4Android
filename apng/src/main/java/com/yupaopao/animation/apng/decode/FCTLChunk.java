@@ -1,6 +1,9 @@
-package com.yupaopao.animation.apng.chunk;
+package com.yupaopao.animation.apng.decode;
 
-import java.nio.ByteBuffer;
+import com.yupaopao.animation.apng.io.APNGReader;
+import com.yupaopao.animation.apng.io.DataUtil;
+
+import java.io.IOException;
 
 /**
  * @Description: https://developer.mozilla.org/en-US/docs/Mozilla/Tech/APNG#.27fcTL.27:_The_Frame_Control_Chunk
@@ -8,10 +11,7 @@ import java.nio.ByteBuffer;
  * @CreateDate: 2019/3/27
  */
 class FCTLChunk extends Chunk {
-    static final int ID = ('f' & 0xFF) << 24
-            | ('c' & 0xFF) << 16
-            | ('T' & 0xFF) << 8
-            | ('L' & 0xFF);
+    static final int ID = DataUtil.fourCCToInt("fcTL");
     int sequence_number;
     /**
      * x_offset >= 0
@@ -103,16 +103,15 @@ class FCTLChunk extends Chunk {
     static final int APNG_BLEND_OP_OVER = 1;
 
     @Override
-    void parse() {
-        ByteBuffer byteBuffer = ByteBuffer.wrap(data);
-        sequence_number = byteBuffer.getInt();
-        width = byteBuffer.getInt();
-        height = byteBuffer.getInt();
-        x_offset = byteBuffer.getInt();
-        y_offset = byteBuffer.getInt();
-        delay_num = byteBuffer.getShort();
-        delay_den = byteBuffer.getShort();
-        dispose_op = byteBuffer.get();
-        blend_op = byteBuffer.get();
+    void innerParse(APNGReader reader) throws IOException {
+        sequence_number = reader.readInt();
+        width = reader.readInt();
+        height = reader.readInt();
+        x_offset = reader.readInt();
+        y_offset = reader.readInt();
+        delay_num = reader.readShort();
+        delay_den = reader.readShort();
+        dispose_op = reader.peek();
+        blend_op = reader.peek();
     }
 }

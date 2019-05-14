@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import com.yupaopao.animation.apng.APNGDrawable;
 import com.yupaopao.animation.loader.AssetStreamLoader;
 import com.yupaopao.animation.webp.AnimatedWebPDrawable;
 
@@ -29,26 +30,26 @@ public class APNGLibActivity extends Activity {
                 "test5.png",
                 "wheel.png",
         };
-//        for (String assetFile : assetFiles) {
-//            APNGAssetLoader loader = new APNGAssetLoader(this, assetFile);
-//            APNGDrawable apngDrawable = new APNGDrawable(loader);
-//            ImageView imageView = new ImageView(this);
-//            imageView.setImageDrawable(apngDrawable);
-//            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-//            layoutParams.bottomMargin = 50;
-//            layoutParams.topMargin = 50;
-//            linearLayout.addView(imageView, layoutParams);
-//        }
-//        {
-//            AssetStreamLoader loader = new AssetStreamLoader(this, "animation.webp");
-//            AnimatedWebpDrawable webpDrawable = new AnimatedWebpDrawable(loader);
-//            ImageView imageView = new ImageView(this);
-//            imageView.setImageDrawable(webpDrawable);
-//            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-//            layoutParams.bottomMargin = 50;
-//            layoutParams.topMargin = 50;
-//            linearLayout.addView(imageView, layoutParams);
-//        }
+        for (String assetFile : assetFiles) {
+            AssetStreamLoader loader = new AssetStreamLoader(this, assetFile);
+            APNGDrawable apngDrawable = new APNGDrawable(loader);
+            ImageView imageView = new ImageView(this);
+            imageView.setImageDrawable(apngDrawable);
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            layoutParams.bottomMargin = 50;
+            layoutParams.topMargin = 50;
+            linearLayout.addView(imageView, layoutParams);
+        }
+        {
+            AssetStreamLoader loader = new AssetStreamLoader(this, "animation.webp");
+            AnimatedWebPDrawable webpDrawable = new AnimatedWebPDrawable(loader);
+            ImageView imageView = new ImageView(this);
+            imageView.setImageDrawable(webpDrawable);
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            layoutParams.bottomMargin = 50;
+            layoutParams.topMargin = 50;
+            linearLayout.addView(imageView, layoutParams);
+        }
         {
             AssetStreamLoader loader = new AssetStreamLoader(this, "1.webp");
             AnimatedWebPDrawable webpDrawable = new AnimatedWebPDrawable(loader);

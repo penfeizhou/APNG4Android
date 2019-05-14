@@ -10,7 +10,7 @@ import java.nio.ByteOrder;
  */
 public class ByteBufferWriter implements Writer {
 
-    private ByteBuffer byteBuffer;
+    protected ByteBuffer byteBuffer;
 
     public ByteBufferWriter() {
         reset(10 * 1024);
@@ -29,6 +29,11 @@ public class ByteBufferWriter implements Writer {
     @Override
     public int position() {
         return byteBuffer.position();
+    }
+
+    @Override
+    public void skip(int length) {
+        byteBuffer.position(length + position());
     }
 
     @Override

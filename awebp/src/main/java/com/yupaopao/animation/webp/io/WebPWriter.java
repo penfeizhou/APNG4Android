@@ -2,9 +2,6 @@ package com.yupaopao.animation.webp.io;
 
 import com.yupaopao.animation.io.ByteBufferWriter;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-
 /**
  * @Description: WebPWriter
  * @Author: pengfei.zhou
@@ -12,32 +9,23 @@ import java.nio.ByteOrder;
  */
 public class WebPWriter extends ByteBufferWriter {
 
-    private ByteBuffer byteBuffer;
-
-    public WebPWriter() {
-        super();
+    public void putUInt16(int i) {
+        putBytes(DataUtil.uInt16ToByte(i));
     }
 
-    @Override
-    public int position() {
-        return byteBuffer.position();
+    public void putUInt24(int i) {
+        putBytes(DataUtil.uInt24ToByte(i));
     }
 
-    @Override
-    public byte[] toByteArray() {
-        return byteBuffer.array();
+    public void putUInt32(int i) {
+        putBytes(DataUtil.uInt32ToByte(i));
     }
 
-    @Override
-    public void close() {
+    public void put1Based(int i) {
+        putBytes(DataUtil.oneBasedToByte(i));
     }
 
-    @Override
-    public void reset(int size) {
-        if (byteBuffer == null || size > byteBuffer.limit()) {
-            byteBuffer = ByteBuffer.allocate(size);
-            this.byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-        }
-        byteBuffer.clear();
+    public void putFourCC(String v) {
+        putBytes(DataUtil.fourCCToByte(v));
     }
 }

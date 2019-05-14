@@ -14,7 +14,7 @@ import java.util.List;
 public class WebPParser {
     static class FormatException extends IOException {
         FormatException() {
-            super("WebPFormat error");
+            super("WebP Format error");
         }
     }
 
