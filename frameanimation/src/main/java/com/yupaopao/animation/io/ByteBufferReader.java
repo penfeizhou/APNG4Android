@@ -1,7 +1,9 @@
 package com.yupaopao.animation.io;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 
 /**
  * @Description: APNG4Android
@@ -10,44 +12,51 @@ import java.io.InputStream;
  */
 public class ByteBufferReader implements Reader {
 
+    private final ByteBuffer byteBuffer;
+
+    public ByteBufferReader(ByteBuffer byteBuffer) {
+        this.byteBuffer = byteBuffer;
+        byteBuffer.reset();
+    }
 
     @Override
     public long skip(long total) throws IOException {
-        return 0;
+        byteBuffer.position((int) (byteBuffer.position() + total));
+        return total;
     }
 
     @Override
     public byte peek() throws IOException {
-        return 0;
+        return byteBuffer.get();
     }
 
     @Override
     public void reset() throws IOException {
-
+        byteBuffer.reset();
     }
 
     @Override
     public int position() {
-        return 0;
+        return byteBuffer.position();
     }
 
     @Override
     public int read(byte[] buffer, int start, int byteCount) throws IOException {
-        return 0;
+        byteBuffer.get(buffer, start, byteCount);
+        return byteCount;
     }
 
     @Override
     public int available() throws IOException {
-        return 0;
+        return byteBuffer.limit() - byteBuffer.position();
     }
 
     @Override
     public void close() throws IOException {
-
     }
 
     @Override
     public InputStream toInputStream() throws IOException {
-        return null;
+        return new ByteArrayInputStream(byteBuffer.array());
     }
 }

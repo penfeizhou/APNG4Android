@@ -8,10 +8,9 @@ import android.util.Log;
 
 import com.yupaopao.animation.io.Reader;
 import com.yupaopao.animation.io.Writer;
-import com.yupaopao.animation.loader.StreamLoader;
+import com.yupaopao.animation.loader.Loader;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -33,7 +32,7 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     private static final String TAG = FrameSeqDecoder.class.getSimpleName();
-    protected final StreamLoader mLoader;
+    protected final Loader mLoader;
     protected List<Frame> frames = new ArrayList<>();
     protected int frameIndex = -1;
     private int playCount;
@@ -71,7 +70,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
 
     protected abstract W getWriter();
 
-    protected abstract R getReader(InputStream inputStream);
+    protected abstract R getReader(Reader reader);
 
     protected Bitmap obtainBitmap(int width, int height) {
         Bitmap ret = null;
@@ -129,7 +128,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
      * @param loader         webp的reader
      * @param renderListener 渲染的回调
      */
-    public FrameSeqDecoder(StreamLoader loader, RenderListener renderListener) {
+    public FrameSeqDecoder(Loader loader, RenderListener renderListener) {
         this.mLoader = loader;
         this.renderListener = renderListener;
     }

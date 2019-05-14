@@ -11,6 +11,8 @@ import com.yupaopao.animation.apng.io.APNGReader;
 import com.yupaopao.animation.apng.io.APNGWriter;
 import com.yupaopao.animation.decode.Frame;
 import com.yupaopao.animation.decode.FrameSeqDecoder;
+import com.yupaopao.animation.io.Reader;
+import com.yupaopao.animation.loader.Loader;
 import com.yupaopao.animation.loader.StreamLoader;
 
 import java.io.IOException;
@@ -43,7 +45,7 @@ public class APNGDecoder extends FrameSeqDecoder<APNGReader, APNGWriter> {
      * @param loader         webp的reader
      * @param renderListener 渲染的回调
      */
-    public APNGDecoder(StreamLoader loader, RenderListener renderListener) {
+    public APNGDecoder(Loader loader, RenderListener renderListener) {
         super(loader, renderListener);
     }
 
@@ -56,8 +58,8 @@ public class APNGDecoder extends FrameSeqDecoder<APNGReader, APNGWriter> {
     }
 
     @Override
-    protected APNGReader getReader(InputStream inputStream) {
-        return new APNGReader(inputStream);
+    protected APNGReader getReader(Reader reader) {
+        return new APNGReader(reader);
     }
 
     @Override

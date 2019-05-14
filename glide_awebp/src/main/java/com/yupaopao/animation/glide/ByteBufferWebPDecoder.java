@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.bumptech.glide.load.ImageHeaderParser;
-import com.bumptech.glide.load.ImageHeaderParserUtils;
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
@@ -14,13 +13,14 @@ import com.bumptech.glide.load.engine.bitmap_recycle.ArrayPool;
 import com.bumptech.glide.load.resource.drawable.DrawableResource;
 import com.bumptech.glide.load.resource.gif.GifOptions;
 import com.yupaopao.animation.FrameAnimationDrawable;
-import com.yupaopao.animation.loader.StreamLoader;
+import com.yupaopao.animation.io.ByteBufferReader;
+import com.yupaopao.animation.io.Reader;
+import com.yupaopao.animation.loader.Loader;
 import com.yupaopao.animation.webp.WebPDrawable;
 import com.yupaopao.animation.webp.decode.WebPParser;
+import com.yupaopao.animation.webp.io.WebPReader;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.List;
 
@@ -44,19 +44,26 @@ public class ByteBufferWebPDecoder implements ResourceDecoder<ByteBuffer, Drawab
 
     @Override
     public boolean handles(@NonNull ByteBuffer source, @NonNull Options options) throws IOException {
-        return false;
+        return !options.get(GifOptions.DISABLE_ANIMATION)
+                && WebPParser.isAWebP(new WebPReader(new ByteBufferReader(source)));
     }
 
     @Nullable
     @Override
     public Resource<Drawable> decode(@NonNull final ByteBuffer source, int width, int height, @NonNull Options options) throws IOException {
-        StreamLoader streamLoader = new StreamLoader() {
+        Loader loader = new Loader() {
             @Override
-            protected InputStream getInputStream() throws IOException {
-                return new ByteArrayInputStream(source.array());
+            public Reader obtain() throws IOException {
+                Reader reader = new ByteBufferReader(source);
+                return reader;
+            }
+
+            @Override
+            public void release() throws IOException {
+
             }
         };
-        FrameAnimationDrawable drawable = new WebPDrawable(streamLoader);
+        FrameAnimationDrawable drawable = new WebPDrawable(loader);
         final int size = source.limit();
         return new DrawableResource<Drawable>(drawable) {
             @NonNull
