@@ -1,5 +1,6 @@
 # APNG&Webp4Android
 * Support APNG & Animated Webp
+* Glide library module support
 * Implement play control
 * Fast Decode
 * Low memory usage
