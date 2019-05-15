@@ -35,8 +35,7 @@ public class APNGTestActivity extends Activity {
 //            }
 //        });
         Glide.with(imageView)
-                .load("https://isparta.github.io/compare-webp/image/gif_webp/webp/1.webp")
-                //.load("https://isparta.github.io/compare-webp/image/gif_webp/gif/2.gif")
+                .load("https://yvideo.eryufm.cn/video/gif2/50f0156c-c1b0-4c8e-a861-d177d8393c82.gif?imageview2/0/format/webp")
                 .into(imageView);
     }
 }

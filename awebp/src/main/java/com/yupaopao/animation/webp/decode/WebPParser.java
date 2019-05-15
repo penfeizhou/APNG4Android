@@ -1,9 +1,9 @@
 package com.yupaopao.animation.webp.decode;
 
+import com.yupaopao.animation.io.Reader;
 import com.yupaopao.animation.webp.io.WebPReader;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +19,8 @@ public class WebPParser {
         }
     }
 
-    public static boolean isAWebP(WebPReader reader) {
+    public static boolean isAWebP(Reader in) {
+        WebPReader reader = (in instanceof WebPReader) ? (WebPReader) in : new WebPReader(in);
         try {
             if (!reader.matchFourCC("RIFF")) {
                 return false;
