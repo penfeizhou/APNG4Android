@@ -1,5 +1,7 @@
 package com.yupaopao.animation.apng.decode;
 
+import android.text.TextUtils;
+
 import com.yupaopao.animation.apng.io.APNGReader;
 
 import java.io.IOException;
@@ -18,6 +20,17 @@ class Chunk {
     int fourcc;
     int crc;
     int offset;
+
+    static int fourCCToInt(String fourCC) {
+        if (TextUtils.isEmpty(fourCC) || fourCC.length() != 4) {
+            return 0xbadeffff;
+        }
+        return (fourCC.charAt(0) & 0xff)
+                | (fourCC.charAt(1) & 0xff) << 8
+                | (fourCC.charAt(2) & 0xff) << 16
+                | (fourCC.charAt(3) & 0xff) << 24
+                ;
+    }
 
     void parse(APNGReader reader) throws IOException {
         int available = reader.available();

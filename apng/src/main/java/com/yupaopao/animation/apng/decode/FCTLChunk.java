@@ -1,7 +1,6 @@
 package com.yupaopao.animation.apng.decode;
 
 import com.yupaopao.animation.apng.io.APNGReader;
-import com.yupaopao.animation.apng.io.DataUtil;
 
 import java.io.IOException;
 
@@ -11,7 +10,7 @@ import java.io.IOException;
  * @CreateDate: 2019/3/27
  */
 class FCTLChunk extends Chunk {
-    static final int ID = DataUtil.fourCCToInt("fcTL");
+    static final int ID = Chunk.fourCCToInt("fcTL");
     int sequence_number;
     /**
      * x_offset >= 0
