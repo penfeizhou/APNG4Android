@@ -1,9 +1,9 @@
 apply plugin: 'maven'
 
 Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
 properties.load(project.rootProject.file('scripts/maven.properties').newDataInputStream())
 properties.load(new FileInputStream("${projectDir}/pom.properties"))
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
 
 apply plugin: 'maven'
 
