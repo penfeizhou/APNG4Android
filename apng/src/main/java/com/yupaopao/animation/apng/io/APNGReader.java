@@ -3,13 +3,12 @@ package com.yupaopao.animation.apng.io;
 import android.text.TextUtils;
 
 import com.yupaopao.animation.io.Reader;
-import com.yupaopao.animation.io.StreamReader;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * @Description: APNG4Android
+ * @Description: APNGReader
  * @Author: pengfei.zhou
  * @CreateDate: 2019-05-13
  */

@@ -1,7 +1,5 @@
 package com.yupaopao.animation.webp.decode;
 
-import com.yupaopao.animation.webp.io.DataUtil;
-
 /**
  * Alpha
  * 0                   1                   2                   3
@@ -16,5 +14,5 @@ import com.yupaopao.animation.webp.io.DataUtil;
  * @CreateDate: 2019-05-11
  */
 public class ALPHChunk extends BaseChunk {
-    static final int ID = DataUtil.fourCCToInt("ALPH");
+    static final int ID = BaseChunk.fourCCToInt("ALPH");
 }

@@ -5,7 +5,7 @@ import com.yupaopao.animation.io.ByteBufferWriter;
 import java.nio.ByteOrder;
 
 /**
- * @Description: APNG4Android
+ * @Description: APNGWriter
  * @Author: pengfei.zhou
  * @CreateDate: 2019-05-13
  */
