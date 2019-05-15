@@ -7,7 +7,11 @@
 * No temporary files generated
 * Support still image
 * Lightweight implementation
+
 ## Usages
+
+### Add dependency in build.gradle
+
 ```gradle
 repositories {
         maven {
@@ -15,10 +19,13 @@ repositories {
         }
 }
 dependencies {
-    implementation 'com.yupaopao.android.animation:awebp:0.1.1'
-    implementation 'com.yupaopao.android.animation:apng:0.1.2'
+    implementation 'com.yupaopao.android.animation:awebp:0.2.0'
+    implementation 'com.yupaopao.android.animation:apng:0.2.0'
 }
 ```
+
+### Use
+
 ```java
 // Load from asset file
 AssetStreamLoader assetLoader = new AssetStreamLoader(context, "wheel.png");
@@ -53,4 +60,24 @@ drawable.registerAnimationCallback(new Animatable2Compat.AnimationCallback() {
         super.onAnimationStart(drawable);
     }
 });
+```
+## Glide support
+
+### Add dependency in build.gradle
+
+```gradle
+repositories {
+        maven {
+            url "https://dl.bintray.com/osborn/Android"
+        }
+}
+dependencies {
+    implementation 'com.yupaopao.android.animation:glide-plugin:0.2.0'
+}
+```
+### Direct use
+
+```java
+Glide.with(imageView).load("https://misc.aotu.io/ONE-SUNDAY/SteamEngine.png").into(imageView);
+Glide.with(imageView).load("https://isparta.github.io/compare-webp/image/gif_webp/webp/2.webp").into(imageView);
 ```
