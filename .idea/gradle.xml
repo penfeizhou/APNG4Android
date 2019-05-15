@@ -12,7 +12,7 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/awebp" />
             <option value="$PROJECT_DIR$/frameanimation" />
-            <option value="$PROJECT_DIR$/glide_awebp" />
+            <option value="$PROJECT_DIR$/plugin_glide" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

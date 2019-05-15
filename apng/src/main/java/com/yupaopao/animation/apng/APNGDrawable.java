@@ -13,7 +13,7 @@ import com.yupaopao.animation.loader.StreamLoader;
  * @CreateDate: 2019/3/27
  */
 public class APNGDrawable extends FrameAnimationDrawable {
-    public APNGDrawable(StreamLoader provider) {
+    public APNGDrawable(Loader provider) {
         super(provider);
     }
 

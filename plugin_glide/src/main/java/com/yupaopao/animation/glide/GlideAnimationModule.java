@@ -13,18 +13,18 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 /**
- * @Description: AnimationMoudle
+ * @Description: GlideAnimationModule
  * @Author: pengfei.zhou
  * @CreateDate: 2019-05-14
  */
 @GlideModule
-public class AnimationModule extends LibraryGlideModule {
+public class GlideAnimationModule extends LibraryGlideModule {
     @Override
     public void registerComponents(@NonNull Context context, @NonNull Glide glide, @NonNull Registry registry) {
         super.registerComponents(context, glide, registry);
         StreamAnimationDecoder streamAnimationDecoder = new StreamAnimationDecoder();
-        ByteBufferWebPDecoder byteBufferWebPDecoder = new ByteBufferWebPDecoder();
+        ByteBufferAnimationDecoder byteBufferAnimationDecoder = new ByteBufferAnimationDecoder();
         registry.prepend(InputStream.class, Drawable.class, streamAnimationDecoder);
-        registry.prepend(ByteBuffer.class, Drawable.class, byteBufferWebPDecoder);
+        registry.prepend(ByteBuffer.class, Drawable.class, byteBufferAnimationDecoder);
     }
 }

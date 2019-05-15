@@ -34,4 +34,5 @@ dependencies {
     implementation 'com.github.bumptech.glide:annotations:4.8.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.8.0'
     implementation project(':awebp')
+    implementation project(':apng')
 }
