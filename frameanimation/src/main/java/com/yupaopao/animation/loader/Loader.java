@@ -5,7 +5,7 @@ import com.yupaopao.animation.io.Reader;
 import java.io.IOException;
 
 /**
- * @Description: APNG4Android
+ * @Description: Loader
  * @Author: pengfei.zhou
  * @CreateDate: 2019-05-14
  */
