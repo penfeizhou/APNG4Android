@@ -1,5 +1,7 @@
 package com.yupaopao.animation.webp.decode;
 
+import android.text.TextUtils;
+
 import com.yupaopao.animation.webp.io.WebPReader;
 
 import java.io.IOException;
@@ -14,6 +16,17 @@ public class BaseChunk {
     public int payloadSize;
     public int offset;
     public static final int CHUNCK_HEADER_OFFSET = 8;
+
+    static int fourCCToInt(String fourCC) {
+        if (TextUtils.isEmpty(fourCC) || fourCC.length() != 4) {
+            return 0xbadeffff;
+        }
+        return (fourCC.charAt(0) & 0xff)
+                | (fourCC.charAt(1) & 0xff) << 8
+                | (fourCC.charAt(2) & 0xff) << 16
+                | (fourCC.charAt(3) & 0xff) << 24
+                ;
+    }
 
     final void parse(WebPReader reader) throws IOException {
         int available = reader.available();

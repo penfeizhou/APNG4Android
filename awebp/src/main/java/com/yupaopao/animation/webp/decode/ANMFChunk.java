@@ -1,6 +1,5 @@
 package com.yupaopao.animation.webp.decode;
 
-import com.yupaopao.animation.webp.io.DataUtil;
 import com.yupaopao.animation.webp.io.WebPReader;
 
 import java.io.IOException;
@@ -29,7 +28,7 @@ import java.io.IOException;
  * @CreateDate: 2019-05-11
  */
 public class ANMFChunk extends BaseChunk {
-    static final int ID = DataUtil.fourCCToInt("ANMF");
+    static final int ID = BaseChunk.fourCCToInt("ANMF");
     /**
      * Frame X: 24 bits (uint24)
      * The X coordinate of the upper left corner of the frame is Frame X * 2
