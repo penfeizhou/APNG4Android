@@ -2,12 +2,9 @@ package com.yupaopao.animation.demo;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
-import com.yupaopao.animation.apng.APNGDrawable;
-import com.yupaopao.animation.loader.AssetStreamLoader;
 
 /**
  * @Description: 作用描述
@@ -35,7 +32,7 @@ public class APNGTestActivity extends Activity {
 //            }
 //        });
         Glide.with(imageView)
-                .load("https://yvideo.eryufm.cn/video/gif2/50f0156c-c1b0-4c8e-a861-d177d8393c82.gif?imageview2/0/format/webp")
+                .load("https://yphoto.eryufm.cn/upload/45527d70ce6942d48518f44e6ba23757.gif?imageview2/0/format/webp")
                 .into(imageView);
     }
 }
