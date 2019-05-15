@@ -9,40 +9,41 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.drawable.DrawableResource;
 import com.bumptech.glide.load.resource.gif.GifOptions;
-import com.yupaopao.animation.FrameAnimationDrawable;
-import com.yupaopao.animation.io.ByteBufferReader;
-import com.yupaopao.animation.loader.ByteBufferLoader;
-import com.yupaopao.animation.loader.Loader;
+import com.yupaopao.animation.io.StreamReader;
+import com.yupaopao.animation.loader.StreamLoader;
 import com.yupaopao.animation.webp.WebPDrawable;
 import com.yupaopao.animation.webp.decode.WebPParser;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.io.InputStream;
 
 /**
- * @Description: ByteBufferWebPDecoder
+ * @Description: StreamAnimationDecoder
  * @Author: pengfei.zhou
  * @CreateDate: 2019-05-14
  */
-public class ByteBufferWebPDecoder implements ResourceDecoder<ByteBuffer, Drawable> {
+public class StreamAnimationDecoder implements ResourceDecoder<InputStream, Drawable> {
+
+    public StreamAnimationDecoder() {
+    }
 
     @Override
-    public boolean handles(@NonNull ByteBuffer source, @NonNull Options options) {
+    public boolean handles(@NonNull InputStream source, @NonNull Options options) {
         return !options.get(GifOptions.DISABLE_ANIMATION)
-                && WebPParser.isAWebP(new ByteBufferReader(source));
+                && (WebPParser.isAWebP(new StreamReader(source)));
     }
 
     @Nullable
     @Override
-    public Resource<Drawable> decode(@NonNull final ByteBuffer source, int width, int height, @NonNull Options options) throws IOException {
-        Loader loader = new ByteBufferLoader() {
+    public Resource<Drawable> decode(@NonNull final InputStream source, int width, int height, @NonNull Options options) throws IOException {
+        StreamLoader streamLoader = new StreamLoader() {
             @Override
-            public ByteBuffer getByteBuffer() {
+            protected InputStream getInputStream() {
                 return source;
             }
         };
-        FrameAnimationDrawable drawable = new WebPDrawable(loader);
-        final int size = source.limit();
+        Drawable drawable = new WebPDrawable(streamLoader);
+        final int size = source.available();
         return new DrawableResource<Drawable>(drawable) {
             @NonNull
             @Override

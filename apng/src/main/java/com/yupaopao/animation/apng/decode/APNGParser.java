@@ -1,6 +1,7 @@
 package com.yupaopao.animation.apng.decode;
 
 import com.yupaopao.animation.apng.io.APNGReader;
+import com.yupaopao.animation.io.Reader;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,6 +17,24 @@ public class APNGParser {
         FormatException() {
             super("APNG Format error");
         }
+    }
+
+    public static boolean isAPNG(Reader in) {
+        APNGReader reader = (in instanceof APNGReader) ? (APNGReader) in : new APNGReader(in);
+        try {
+            if (!reader.matchFourCC("\u0089PNG") || !reader.matchFourCC("\r\n\u001a\n")) {
+                throw new FormatException();
+            }
+            while (reader.available() > 0) {
+                Chunk chunk = parseChunk(reader);
+                if (chunk instanceof ACTLChunk) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public static List<Chunk> parse(APNGReader reader) throws IOException {
