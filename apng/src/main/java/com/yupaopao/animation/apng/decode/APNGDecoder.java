@@ -67,6 +67,11 @@ public class APNGDecoder extends FrameSeqDecoder<APNGReader, APNGWriter> {
         return mLoopCount;
     }
 
+    @Override
+    protected void release() {
+        snapShot = null;
+    }
+
 
     @Override
     protected Rect read(APNGReader reader) throws IOException {

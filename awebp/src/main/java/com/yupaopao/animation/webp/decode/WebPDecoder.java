@@ -69,6 +69,11 @@ public class WebPDecoder extends FrameSeqDecoder<WebPReader, WebPWriter> {
     }
 
     @Override
+    protected void release() {
+
+    }
+
+    @Override
     protected Rect read(WebPReader reader) throws IOException {
         List<BaseChunk> chunks = WebPParser.parse(reader);
         boolean anim = false;

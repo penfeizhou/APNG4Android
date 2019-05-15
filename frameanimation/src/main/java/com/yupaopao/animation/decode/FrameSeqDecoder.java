@@ -242,6 +242,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                release();
             }
         });
 
@@ -254,6 +255,8 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
             renderListener.onEnd();
         }
     }
+
+    protected abstract void release();
 
     public boolean isRunning() {
         return running;
