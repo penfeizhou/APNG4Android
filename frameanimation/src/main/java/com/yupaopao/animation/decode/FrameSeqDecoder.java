@@ -160,12 +160,17 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
 
     private void initCanvasBounds(Rect rect) {
         fullRect = rect;
-        frameBuffer = ByteBuffer.allocate((rect.width() * rect.height() / sampleSize ^ 2 + 1) * 4);
+        frameBuffer = ByteBuffer.allocate((rect.width() * rect.height() / (sampleSize * sampleSize) + 1) * 4);
     }
 
     private ScheduledThreadPoolExecutor getExecutor() {
         if (scheduledThreadPoolExecutor == null || scheduledThreadPoolExecutor.isShutdown()) {
-            scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1, new ThreadPoolExecutor.DiscardPolicy());
+            scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1, new ThreadPoolExecutor.DiscardPolicy() {
+                @Override
+                public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+                    super.rejectedExecution(r, e);
+                }
+            });
         }
         return scheduledThreadPoolExecutor;
     }
