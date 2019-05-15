@@ -14,12 +14,18 @@ public class APNGWriter extends ByteBufferWriter {
         super();
     }
 
-    public void writeFourCC(int fourcc) {
-        putBytes(DataUtil.fourCCToByte(fourcc));
+    public void writeFourCC(int val) {
+        putByte((byte) (val & 0xff));
+        putByte((byte) ((val >> 8) & 0xff));
+        putByte((byte) ((val >> 16) & 0xff));
+        putByte((byte) ((val >> 24) & 0xff));
     }
 
     public void writeInt(int val) {
-        putBytes(DataUtil.intToByte(val));
+        putByte((byte) ((val >> 24) & 0xff));
+        putByte((byte) ((val >> 16) & 0xff));
+        putByte((byte) ((val >> 8) & 0xff));
+        putByte((byte) (val & 0xff));
     }
 
     @Override

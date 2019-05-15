@@ -1,7 +1,6 @@
 package com.yupaopao.animation.apng.decode;
 
 import com.yupaopao.animation.apng.io.APNGReader;
-import com.yupaopao.animation.apng.io.DataUtil;
 
 import java.io.IOException;
 
@@ -20,7 +19,7 @@ import java.io.IOException;
  * @CreateDate: 2019/3/27
  */
 class IHDRChunk extends Chunk {
-    static final int ID = DataUtil.fourCCToInt("IHDR");
+    static final int ID = Chunk.fourCCToInt("IHDR");
     /**
      * 图像宽度，以像素为单位
      */
