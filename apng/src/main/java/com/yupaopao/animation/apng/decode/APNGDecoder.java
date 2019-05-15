@@ -69,7 +69,7 @@ public class APNGDecoder extends FrameSeqDecoder<APNGReader, APNGWriter> {
 
     @Override
     protected void release() {
-        snapShot = null;
+        snapShot.byteBuffer = null;
     }
 
 
