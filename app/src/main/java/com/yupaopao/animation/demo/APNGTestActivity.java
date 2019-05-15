@@ -22,7 +22,7 @@ public class APNGTestActivity extends Activity {
         LinearLayout linearLayout = findViewById(R.id.layout);
         String[] urls = new String[]{
                 "https://misc.aotu.io/ONE-SUNDAY/SteamEngine.png",
-                "https://yphoto.eryufm.cn/upload/45527d70ce6942d48518f44e6ba23757.gif?imageview2/0/format/webp",
+                "https://isparta.github.io/compare-webp/image/gif_webp/webp/2.webp",
         };
         for (String url : urls) {
             ImageView imageView = new ImageView(this);
