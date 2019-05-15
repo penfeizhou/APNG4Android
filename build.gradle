@@ -19,6 +19,16 @@ allprojects {
             url "https://dl.bintray.com/osborn/Android"
         }
     }
+    configurations.all {
+        resolutionStrategy {
+            dependencySubstitution {
+                substitute module('com.yupaopao.android.animation:frameanimation') with project(":frameanimation")
+                substitute module('com.yupaopao.android.animation:apng') with project(":apng")
+                substitute module('com.yupaopao.android.animation:awebp') with project(":awebp")
+                substitute module('com.yupaopao.android.animation:glide-plugin') with project(":plugin_glide")
+            }
+        }
+    }
 }
 
 task clean(type: Delete) {
