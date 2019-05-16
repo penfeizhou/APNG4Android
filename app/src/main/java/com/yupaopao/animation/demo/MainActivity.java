@@ -8,6 +8,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
+import com.yupaopao.animation.gif.decode.GifParser;
+import com.yupaopao.animation.gif.io.GifReader;
+import com.yupaopao.animation.loader.AssetStreamLoader;
+import com.yupaopao.animation.loader.Loader;
+
+import java.io.IOException;
+
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     @Override
@@ -24,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.tv_3).setOnClickListener(this);
         findViewById(R.id.tv_4).setOnClickListener(this);
         findViewById(R.id.tv_5).setOnClickListener(this);
+        findViewById(R.id.tv_6).setOnClickListener(this);
     }
 
     @Override
@@ -70,6 +78,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Intent intent = new Intent(this, APNGTestActivity.class);
                 startActivity(intent);
             }
+            break;
+            case R.id.tv_6: {
+                Loader loader = new AssetStreamLoader(this, "world-cup.gif");
+                try {
+                    GifParser.parse(new GifReader(loader.obtain()));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            break;
         }
     }
 }
