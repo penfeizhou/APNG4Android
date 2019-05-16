@@ -70,6 +70,7 @@ public class APNGDecoder extends FrameSeqDecoder<APNGReader, APNGWriter> {
     @Override
     protected void release() {
         snapShot.byteBuffer = null;
+        apngWriter = null;
     }
 
 
@@ -140,33 +141,45 @@ public class APNGDecoder extends FrameSeqDecoder<APNGReader, APNGWriter> {
             // 从缓存中恢复当前帧
             frameBuffer.rewind();
             bitmap.copyPixelsFromBuffer(frameBuffer);
-            // 如果需要在下一帧渲染前恢复当前显示内容，需要在渲染前将当前显示内容保存到快照中
-            if (((APNGFrame) frame).dispose_op == FCTLChunk.APNG_DISPOSE_OP_PREVIOUS) {
-                frameBuffer.rewind();
-                snapShot.byteBuffer.rewind();
-                snapShot.byteBuffer.put(frameBuffer);
-            }
-
-
-            //开始绘制前，处理快照中的设定
+            // 开始绘制前，处理快照中的设定
+            canvas.save();
+            canvas.clipRect(snapShot.dstRect);
             switch (snapShot.dispose_op) {
                 // 从快照中恢复上一帧之前的显示内容
                 case FCTLChunk.APNG_DISPOSE_OP_PREVIOUS:
                     snapShot.byteBuffer.rewind();
-                    bitmap.copyPixelsFromBuffer(snapShot.byteBuffer);
+                    Bitmap preBitmap = obtainBitmap(fullRect.width() / sampleSize, fullRect.height() / sampleSize);
+                    preBitmap.copyPixelsFromBuffer(snapShot.byteBuffer);
+                    canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+                    canvas.drawBitmap(preBitmap, 0, 0, paint);
+                    recycleBitmap(preBitmap);
                     break;
                 // 清空上一帧所画区域
                 case FCTLChunk.APNG_DISPOSE_OP_BACKGROUND:
-                    canvas.save();
-                    canvas.clipRect(snapShot.dstRect);
                     canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-                    canvas.restore();
                     break;
                 // 什么都不做
                 case FCTLChunk.APNG_DISPOSE_OP_NON:
                 default:
                     break;
             }
+            canvas.restore();
+            // 然后根据dispose设定传递到快照信息中
+            if (((APNGFrame) frame).dispose_op == FCTLChunk.APNG_DISPOSE_OP_PREVIOUS) {
+                if (snapShot.dispose_op != FCTLChunk.APNG_DISPOSE_OP_PREVIOUS) {
+                    frameBuffer.rewind();
+                    snapShot.byteBuffer.rewind();
+                    snapShot.byteBuffer.put(frameBuffer);
+                }
+            }
+
+            snapShot.dispose_op = ((APNGFrame) frame).dispose_op;
+
+            snapShot.dstRect.set(frame.frameX / sampleSize,
+                    frame.frameY / sampleSize,
+                    (frame.frameX + frame.frameWidth) / sampleSize,
+                    (frame.frameY + frame.frameHeight) / sampleSize);
+
             canvas.save();
             canvas.clipRect(
                     frame.frameX / sampleSize,
@@ -176,24 +189,13 @@ public class APNGDecoder extends FrameSeqDecoder<APNGReader, APNGWriter> {
             if (((APNGFrame) frame).blend_op == FCTLChunk.APNG_BLEND_OP_SOURCE) {
                 canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
             }
-        }
+            canvas.restore();
 
+        }
         //开始真正绘制当前帧的内容
         Bitmap inBitmap = obtainBitmap(frame.frameWidth, frame.frameHeight);
         recycleBitmap(frame.draw(canvas, paint, sampleSize, inBitmap, getWriter()));
         recycleBitmap(inBitmap);
-        if (frame instanceof APNGFrame) {
-            canvas.restore();
-            //然后根据dispose设定传递到快照信息中
-            snapShot.dispose_op = ((APNGFrame) frame).dispose_op;
-            snapShot.dstRect.set(frame.frameX / sampleSize,
-                    frame.frameY / sampleSize,
-                    (frame.frameX + frame.frameWidth) / sampleSize,
-                    (frame.frameY + frame.frameHeight) / sampleSize);
-            if (((APNGFrame) frame).blend_op == FCTLChunk.APNG_DISPOSE_OP_PREVIOUS) {
-                snapShot.byteBuffer.rewind();
-            }
-        }
         frameBuffer.rewind();
         bitmap.copyPixelsToBuffer(frameBuffer);
         recycleBitmap(bitmap);
