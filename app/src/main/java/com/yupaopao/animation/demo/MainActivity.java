@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
+import com.yupaopao.animation.gif.decode.GifFrame;
 import com.yupaopao.animation.gif.decode.GifParser;
 import com.yupaopao.animation.gif.io.GifReader;
 import com.yupaopao.animation.loader.AssetStreamLoader;
@@ -83,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Loader loader = new AssetStreamLoader(this, "world-cup.gif");
                 try {
                     GifParser.parse(new GifReader(loader.obtain()));
+                    new GifFrame(null);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
