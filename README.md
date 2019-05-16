@@ -20,7 +20,7 @@ repositories {
 }
 dependencies {
     implementation 'com.yupaopao.android.animation:awebp:0.2.0'
-    implementation 'com.yupaopao.android.animation:apng:0.2.0'
+    implementation 'com.yupaopao.android.animation:apng:0.2.1'
 }
 ```
 
