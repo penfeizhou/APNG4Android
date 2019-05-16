@@ -1,5 +1,6 @@
 package com.yupaopao.animation.gif.io;
 
+
 import com.yupaopao.animation.io.Reader;
 
 import java.io.IOException;

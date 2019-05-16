@@ -2,6 +2,7 @@ package com.yupaopao.animation.gif;
 
 import com.yupaopao.animation.FrameAnimationDrawable;
 import com.yupaopao.animation.decode.FrameSeqDecoder;
+import com.yupaopao.animation.gif.decode.GifDecoder;
 import com.yupaopao.animation.loader.Loader;
 
 /**
@@ -15,7 +16,7 @@ public class GifDrawable extends FrameAnimationDrawable {
     }
 
     @Override
-    protected FrameSeqDecoder createFrameSeqDecoder(Loader streamLoader, FrameSeqDecoder.RenderListener listener) {
-        return null;
+    protected FrameSeqDecoder createFrameSeqDecoder(Loader loader, FrameSeqDecoder.RenderListener listener) {
+        return new GifDecoder(loader, listener);
     }
 }
