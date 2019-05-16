@@ -130,9 +130,7 @@ public class APNGFrame extends Frame<APNGReader, APNGWriter> {
             options.inMutable = true;
             options.inBitmap = reusedBitmap;
             byte[] bytes = writer.toByteArray();
-            byte[] alc = new byte[length];
-            System.arraycopy(bytes, 0, alc, 0, length);
-            Bitmap bitmap = BitmapFactory.decodeByteArray(alc, 0, length, options);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, length, options);
             assert bitmap != null;
             canvas.drawBitmap(bitmap, (float) frameX / sampleSize, (float) frameY / sampleSize, paint);
             return bitmap;
