@@ -70,4 +70,11 @@ public class GifReader implements Reader {
         reset();
         return reader.toInputStream();
     }
+
+
+    public int readUInt16() throws IOException {
+        byte[] buf = ensureBytes();
+        read(buf, 0, 2);
+        return buf[0] & 0xff | (buf[1] & 0xff) << 8;
+    }
 }
