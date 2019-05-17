@@ -118,14 +118,14 @@ import java.io.IOException;
  * @CreateDate: 2019-05-16
  */
 public class ImageDescriptor implements Block {
-    private int frameX;
-    private int frameY;
-    private int frameWidth;
-    private int frameHeight;
+    public int frameX;
+    public int frameY;
+    public int frameWidth;
+    public int frameHeight;
     private byte flag;
-    private ColorTable localColorTable;
-    private byte lzwMinimumCodeSize;
-    private int imageDataOffset;
+    public ColorTable localColorTable;
+    public byte lzwMinimumCodeSize;
+    public int imageDataOffset;
 
     @Override
     public void receive(GifReader reader) throws IOException {

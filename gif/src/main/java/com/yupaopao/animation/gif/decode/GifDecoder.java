@@ -1,6 +1,7 @@
 package com.yupaopao.animation.gif.decode;
 
 import android.graphics.Rect;
+import android.util.Log;
 
 import com.yupaopao.animation.decode.Frame;
 import com.yupaopao.animation.decode.FrameSeqDecoder;
@@ -10,6 +11,8 @@ import com.yupaopao.animation.io.Reader;
 import com.yupaopao.animation.loader.Loader;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.List;
 
 /**
  * @Description: GifDecoder
@@ -17,6 +20,9 @@ import java.io.IOException;
  * @CreateDate: 2019-05-16
  */
 public class GifDecoder extends FrameSeqDecoder<GifReader, GifWriter> {
+
+    private GifWriter mGifWriter = new GifWriter();
+
     /**
      * @param loader         webp的reader
      * @param renderListener 渲染的回调
@@ -27,12 +33,15 @@ public class GifDecoder extends FrameSeqDecoder<GifReader, GifWriter> {
 
     @Override
     protected GifWriter getWriter() {
-        return null;
+        if (mGifWriter == null) {
+            mGifWriter = new GifWriter();
+        }
+        return mGifWriter;
     }
 
     @Override
     protected GifReader getReader(Reader reader) {
-        return null;
+        return new GifReader(reader);
     }
 
     @Override
@@ -42,16 +51,35 @@ public class GifDecoder extends FrameSeqDecoder<GifReader, GifWriter> {
 
     @Override
     protected void release() {
-
+        mGifWriter = null;
     }
 
     @Override
     protected Rect read(GifReader reader) throws IOException {
-        return null;
+        List<Block> blocks = GifParser.parse(reader);
+        int canvasWidth = 0, canvasHeight = 0;
+        ColorTable globalColorTable = null;
+        GraphicControlExtension graphicControlExtension = null;
+        for (Block block : blocks) {
+            if (block instanceof LogicalScreenDescriptor) {
+                canvasWidth = ((LogicalScreenDescriptor) block).screenWidth;
+                canvasHeight = ((LogicalScreenDescriptor) block).screenHeight;
+            } else if (block instanceof ColorTable) {
+                globalColorTable = (ColorTable) block;
+            } else if (block instanceof GraphicControlExtension) {
+                graphicControlExtension = (GraphicControlExtension) block;
+            } else if (block instanceof ImageDescriptor) {
+                GifFrame gifFrame = new GifFrame(reader, globalColorTable, graphicControlExtension, (ImageDescriptor) block);
+                frames.add(gifFrame);
+            }
+        }
+        frameBuffer = ByteBuffer.allocate((canvasWidth * canvasHeight / (sampleSize * sampleSize) + 1) * 4);
+        return new Rect(0, 0, canvasWidth, canvasHeight);
     }
 
     @Override
     protected void renderFrame(Frame frame) {
-
+        GifFrame gifFrame = (GifFrame) frame;
+        Log.d("GifDecode", "draw:" + frameIndex);
     }
 }

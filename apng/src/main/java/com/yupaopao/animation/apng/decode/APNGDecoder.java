@@ -121,8 +121,8 @@ public class APNGDecoder extends FrameSeqDecoder<APNGReader, APNGWriter> {
         }
         paint = new Paint();
         paint.setAntiAlias(true);
-        frameBuffer = ByteBuffer.allocate((canvasWidth * canvasHeight / sampleSize ^ 2 + 1) * 4);
-        snapShot.byteBuffer = ByteBuffer.allocate((canvasWidth * canvasHeight / sampleSize ^ 2 + 1) * 4);
+        frameBuffer = ByteBuffer.allocate((canvasWidth * canvasHeight / (sampleSize * sampleSize) + 1) * 4);
+        snapShot.byteBuffer = ByteBuffer.allocate((canvasWidth * canvasHeight / (sampleSize * sampleSize) + 1) * 4);
         return new Rect(0, 0, canvasWidth, canvasHeight);
     }
 
