@@ -80,6 +80,7 @@ public class GifDecoder extends FrameSeqDecoder<GifReader, GifWriter> {
     @Override
     protected void renderFrame(Frame frame) {
         GifFrame gifFrame = (GifFrame) frame;
+        gifFrame.draw(null, null, sampleSize, null, getWriter());
         Log.d("GifDecode", "draw:" + frameIndex);
     }
 }
