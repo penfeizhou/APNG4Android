@@ -9,6 +9,8 @@ import com.yupaopao.animation.decode.Frame;
 import com.yupaopao.animation.gif.io.GifReader;
 import com.yupaopao.animation.gif.io.GifWriter;
 
+import java.io.IOException;
+
 /**
  * @Description: GifFrame
  * @Author: pengfei.zhou
@@ -18,6 +20,13 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
     public final int disposalMethod;
     public final int transparentColorIndex;
     public final ColorTable colorTable;
+    private final int imageDataOffset;
+    private final int lzwMinCodeSize;
+    private static final ThreadLocal<byte[]> sDataBlock = new ThreadLocal<>();
+
+    static {
+        sDataBlock.set(new byte[0xff]);
+    }
 
     public GifFrame(GifReader reader,
                     ColorTable globalColorTable,
@@ -45,10 +54,33 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
         } else {
             colorTable = globalColorTable;
         }
+        this.lzwMinCodeSize = imageDescriptor.lzwMinimumCodeSize;
+        imageDataOffset = imageDescriptor.imageDataOffset;
     }
 
     @Override
     public Bitmap draw(Canvas canvas, Paint paint, int sampleSize, Bitmap reusedBitmap, GifWriter writer) {
+        try {
+            reader.reset();
+            reader.skip(imageDataOffset);
+            writer.reset(frameWidth * frameHeight / (sampleSize * sampleSize) * 4 + 1);
+            int clearCode = 1 << lzwMinCodeSize;
+            int endCode = clearCode + 1;
+            int dataBlockSize;
+
+            byte[] dataBlock = sDataBlock.get();
+
+            while ((dataBlockSize = (reader.peek() & 0xff)) != 0) {
+                for (int i = 0; i < dataBlockSize; i++) {
+
+                }
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
         return null;
     }
 }
