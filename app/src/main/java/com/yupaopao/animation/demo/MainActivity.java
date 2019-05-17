@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.tv_1: {
                 Intent intent = new Intent(this, AnimationTestActivity.class);
                 intent.putExtra("files", new String[]{
-                        "wheel.png",
+                        "world-cup.png",
                 });
                 startActivity(intent);
             }
@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.tv_3: {
                 Intent intent = new Intent(this, AnimationTestActivity.class);
                 intent.putExtra("files", new String[]{
-                        "1.webp",
+                        "world-cup.webp",
                 });
                 startActivity(intent);
             }
@@ -81,13 +81,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             break;
             case R.id.tv_6: {
-                Loader loader = new AssetStreamLoader(this, "world-cup.gif");
-                try {
-                    GifParser.parse(new GifReader(loader.obtain()));
-                    // new GifFrame(null);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                Intent intent = new Intent(this, AnimationTestActivity.class);
+                intent.putExtra("files", new String[]{
+                        "world-cup.gif",
+                });
+                startActivity(intent);
             }
             break;
         }

@@ -12,12 +12,12 @@ import java.io.IOException;
 class GraphicControlExtension extends ExtensionBlock {
     private int blockSize;
     private byte packedFields;
-    private int delayTime;
-    private int transparentColorIndex;
+    public int delayTime;
+    public int transparentColorIndex;
 
     @Override
     public void receive(GifReader reader) throws IOException {
-        blockSize = reader.peek();
+        blockSize = reader.peek() & 0xff;
         packedFields = reader.peek();
         delayTime = reader.readUInt16();
         transparentColorIndex = reader.peek() & 0xff;
