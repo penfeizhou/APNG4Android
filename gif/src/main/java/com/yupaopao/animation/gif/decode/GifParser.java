@@ -41,8 +41,22 @@ public class GifParser {
             blocks.add(globalColorTable);
         }
         byte flag;
-        while ((flag = reader.peek())!=0){
-
+        while ((flag = reader.peek()) != 0x3B) {
+            Block block = null;
+            switch (flag) {
+                case 0x21:
+                    block = ExtensionBlock.retrive(reader);
+                    break;
+                case 0x2c:
+                    block = new ImageDescriptor();
+                    break;
+            }
+            if (block != null) {
+                block.receive(reader);
+                blocks.add(block);
+            } else {
+                throw new FormatException();
+            }
         }
 
         return blocks;

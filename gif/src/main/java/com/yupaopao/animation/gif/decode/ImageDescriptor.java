@@ -125,13 +125,10 @@ public class ImageDescriptor implements Block {
     private byte flag;
     private ColorTable localColorTable;
     private byte lzwMinimumCodeSize;
-    private int imageDataoffset;
+    private int imageDataOffset;
 
     @Override
     public void receive(GifReader reader) throws IOException {
-        if (reader.peek() != 0x2c) {
-            throw new GifParser.FormatException();
-        }
         this.frameX = reader.readUInt16();
         this.frameY = reader.readUInt16();
         this.frameWidth = reader.readUInt16();
@@ -142,10 +139,10 @@ public class ImageDescriptor implements Block {
             this.localColorTable.receive(reader);
         }
         this.lzwMinimumCodeSize = reader.peek();
-        imageDataoffset = reader.position();
+        imageDataOffset = reader.position();
         byte blockSize;
         while ((blockSize = reader.peek()) != 0x0) {
-            reader.skip(blockSize);
+            reader.skip(blockSize & 0xff);
         }
     }
 
@@ -162,7 +159,7 @@ public class ImageDescriptor implements Block {
     }
 
     public int localColorTableSize() {
-        return (this.flag & 0xf) + 1;
+        return 2 << (this.flag & 0xf);
     }
 
     @Override
