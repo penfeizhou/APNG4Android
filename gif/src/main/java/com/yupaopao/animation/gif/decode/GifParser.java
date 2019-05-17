@@ -3,16 +3,18 @@ package com.yupaopao.animation.gif.decode;
 import com.yupaopao.animation.gif.io.GifReader;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * @Description: GifParser
  * @Author: pengfei.zhou
  * @CreateDate: 2019-05-16
+ * @see <a href="https://www.w3.org/Graphics/GIF/spec-gif89a.txt">Gif Spec</a>
  */
 public class GifParser {
     static class FormatException extends IOException {
         FormatException() {
-            super("WebP Format error");
+            super("Gif Format error");
         }
     }
 
@@ -26,9 +28,26 @@ public class GifParser {
         }
     }
 
-    public static void parse(GifReader reader) throws IOException {
+    public static List<Block> parse(GifReader reader) throws IOException {
         checkHeader(reader);
+        List<Block> blocks = new ArrayList<>();
+        // Logical Screen Descriptor
+        LogicalScreenDescriptor logicalScreenDescriptor = new LogicalScreenDescriptor();
+        logicalScreenDescriptor.receive(reader);
+        blocks.add(logicalScreenDescriptor);
+        if (logicalScreenDescriptor.gColorTableFlag()) {
+            ColorTable globalColorTable = new ColorTable(logicalScreenDescriptor.gColorTableSize());
+            globalColorTable.receive(reader);
+            blocks.add(globalColorTable);
+        }
+        byte flag;
+        while ((flag = reader.peek())!=0){
+
+        }
+
+        return blocks;
     }
+
 
     private static void checkHeader(GifReader reader) throws IOException {
         byte a;

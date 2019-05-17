@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Loader loader = new AssetStreamLoader(this, "world-cup.gif");
                 try {
                     GifParser.parse(new GifReader(loader.obtain()));
-                    new GifFrame(null);
+                    // new GifFrame(null);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
