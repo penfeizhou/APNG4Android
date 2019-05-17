@@ -124,7 +124,7 @@ public class ImageDescriptor implements Block {
     public int frameHeight;
     private byte flag;
     public ColorTable localColorTable;
-    public byte lzwMinimumCodeSize;
+    public int lzwMinimumCodeSize;
     public int imageDataOffset;
 
     @Override
@@ -138,7 +138,7 @@ public class ImageDescriptor implements Block {
             this.localColorTable = new ColorTable(localColorTableSize());
             this.localColorTable.receive(reader);
         }
-        this.lzwMinimumCodeSize = reader.peek();
+        this.lzwMinimumCodeSize = reader.peek() & 0xff;
         imageDataOffset = reader.position();
         byte blockSize;
         while ((blockSize = reader.peek()) != 0x0) {
