@@ -168,7 +168,7 @@ public class LogicalScreenDescriptor implements Block {
     }
 
     public int gColorTableSize() {
-        return (flag & 0x7) + 1;
+        return 2 << (flag & 0x7);
     }
 
 }
