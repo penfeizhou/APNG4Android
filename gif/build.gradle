@@ -12,11 +12,11 @@ android {
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
-        externalNativeBuild {
-            cmake {
-                cppFlags ""
-            }
-        }
+//        externalNativeBuild {
+//            cmake {
+//                cppFlags ""
+//            }
+//        }
     }
 
     buildTypes {
@@ -25,11 +25,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    externalNativeBuild {
-        cmake {
-            path "src/main/cpp/CMakeLists.txt"
-        }
-    }
+//    externalNativeBuild {
+//        cmake {
+//            path "src/main/cpp/CMakeLists.txt"
+//        }
+//    }
 
 }
 
