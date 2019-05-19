@@ -12,8 +12,6 @@ import com.yupaopao.animation.decode.Frame;
 import com.yupaopao.animation.gif.io.GifReader;
 import com.yupaopao.animation.gif.io.GifWriter;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.LinkedList;
 
 /**
@@ -22,6 +20,10 @@ import java.util.LinkedList;
  * @CreateDate: 2019-05-16
  */
 public class GifFrame extends Frame<GifReader, GifWriter> {
+    static {
+        System.loadLibrary("gif-decoder");
+    }
+
     public final int disposalMethod;
     public final int transparentColorIndex;
     public final ColorTable colorTable;
@@ -57,6 +59,7 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
         }
         this.lzwMinCodeSize = imageDescriptor.lzwMinimumCodeSize;
         imageDataOffset = imageDescriptor.imageDataOffset;
+        Log.d("osborn", nativeDecode());
     }
 
     @Override
@@ -156,4 +159,8 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
             gifWriter.putByte((byte) (idx & 0xff));
         }
     }
+
+    private native void uncompressLZW(GifReader gifReader, byte[] pixels, int lzwMinCodeSize);
+
+    private native String nativeDecode();
 }
