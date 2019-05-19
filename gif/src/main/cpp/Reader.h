@@ -7,6 +7,8 @@
 
 #include <jni.h>
 #include "common.h"
+#include <stdio.h>
+#include <string.h>
 
 class Reader {
 public:
@@ -16,9 +18,9 @@ public:
     mByteArray(byteArray),
     mByteArrayLength(env->GetArrayLength(byteArray)) {}
 
-    char* peek();
+    char peek();
 
-    size_t read(char* buffer, size_t size);
+    size_t read(char* in, size_t size);
 private:
     JNIEnv* mEnv;
     const jobject mJavaReader;
