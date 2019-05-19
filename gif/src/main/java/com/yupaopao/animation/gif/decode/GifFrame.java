@@ -147,6 +147,22 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        try {
+            reader.reset();
+            reader.skip(imageDataOffset);
+            writer.reset(frameWidth * frameHeight);
+            byte[] dataBlock = sDataBlock.get();
+            if (dataBlock == null) {
+                dataBlock = new byte[0xff];
+                sDataBlock.set(dataBlock);
+            }
+            uncompressLZW(reader, writer.toByteArray(), lzwMinCodeSize, dataBlock);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
         return null;
     }
 
@@ -160,7 +176,7 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
         }
     }
 
-    private native void uncompressLZW(GifReader gifReader, byte[] pixels, int lzwMinCodeSize);
+    private native void uncompressLZW(GifReader gifReader, byte[] pixels, int lzwMinCodeSize, byte[] buffer);
 
     private native String nativeDecode();
 }
