@@ -20,15 +20,6 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 
 
 extern "C" {
-JNIEXPORT jstring JNICALL
-Java_com_yupaopao_animation_gif_decode_GifFrame_nativeDecode(
-        JNIEnv *env,
-        jobject /* this */) {
-    std::string hello = "Hello from C++";
-    return env->NewStringUTF(hello.c_str());
-}
-
-
 struct Slice {
     char *ptr_data;
     size_t len_data;
@@ -72,7 +63,6 @@ Java_com_yupaopao_animation_gif_decode_GifFrame_uncompressLZW(
         offset_data--;
         while (bits >= code_size) {
             code = datum & ((1 << code_size) - 1);
-            LOGD("CODE IS %d", code);
             datum >>= code_size;
             bits -= code_size;
             if (code == code_clear) {
