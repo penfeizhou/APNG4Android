@@ -55,4 +55,8 @@ public class GifWriter implements Writer {
     public int[] asIntArray() {
         return intBuffer.array();
     }
+
+    public IntBuffer asBuffer() {
+        return intBuffer;
+    }
 }
