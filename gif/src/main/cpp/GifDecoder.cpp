@@ -21,7 +21,7 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 
 extern "C" {
 struct Slice {
-    char *ptr_data;
+    int *ptr_data;
     size_t len_data;
 };
 
@@ -30,13 +30,14 @@ Java_com_yupaopao_animation_gif_decode_GifFrame_uncompressLZW(
         JNIEnv *env,
         jobject /* this */,
         jobject jReader,
-        jbyteArray pixels,
+        jintArray colorTable,
+        jintArray pixels,
         jint pixelsSize,
         jint lzwMinCodeSize,
         jbyteArray buffer) {
     Reader reader(env, jReader, buffer);
     char buf[0xff];
-    char *pixelsBuffer = (char *) malloc(pixelsSize * sizeof(char));
+    int *pixelsBuffer = (int *) malloc(pixelsSize * sizeof(int));
     size_t idx_pixel = 0;
     size_t offset_data = 0;
     size_t idx_data = 0;
@@ -77,14 +78,14 @@ Java_com_yupaopao_animation_gif_decode_GifFrame_uncompressLZW(
                 if (prefix.len_data > 0 && prefix.ptr_data) {
                     //Add to String Table
                     Slice slice;
-                    char sufix;
+                    int sufix;
                     // Find suffix
                     if (code > code_end) {
                         if (code - code_end > table_string.size()) {
                             sufix = *prefix.ptr_data;
                             //output current slice to buffer
                             memcpy(pixelsBuffer + idx_pixel, prefix.ptr_data,
-                                   prefix.len_data);
+                                   prefix.len_data * sizeof(int));
                             //update slice ptr,so that this continious memory includes sufix
                             slice.ptr_data = pixelsBuffer + idx_pixel;
                             idx_pixel += prefix.len_data;
@@ -102,7 +103,8 @@ Java_com_yupaopao_animation_gif_decode_GifFrame_uncompressLZW(
                             // update ptr so that new table item contain sufix
                             slice.ptr_data = pixelsBuffer + idx_pixel - prefix.len_data;
                             slice.len_data = prefix.len_data + 1;
-                            memcpy(pixelsBuffer + idx_pixel, current.ptr_data, current.len_data);
+                            memcpy(pixelsBuffer + idx_pixel, current.ptr_data, current.len_data *
+                                                                               sizeof(int));
                             idx_pixel += current.len_data;
                             //Add to string table
                             table_string.push_back(slice);
@@ -110,7 +112,7 @@ Java_com_yupaopao_animation_gif_decode_GifFrame_uncompressLZW(
                             prefix.len_data = current.len_data;
                         }
                     } else {
-                        sufix = (char) (code & 0xff);
+                        sufix = code;
                         pixelsBuffer[idx_pixel] = sufix;
                         // It's been copied to pixelsBuffer,so just move forward so that sufix can be contained
                         slice.len_data = prefix.len_data + 1;
@@ -127,7 +129,7 @@ Java_com_yupaopao_animation_gif_decode_GifFrame_uncompressLZW(
                         code_size++;
                     }
                 } else {
-                    pixelsBuffer[idx_pixel] = (char) (code & 0xff);
+                    pixelsBuffer[idx_pixel] = code & 0xff;
                     prefix.ptr_data = pixelsBuffer + idx_pixel;
                     prefix.len_data = 1;
                     idx_pixel++;
@@ -135,7 +137,15 @@ Java_com_yupaopao_animation_gif_decode_GifFrame_uncompressLZW(
             }
         }
     }
-    env->SetByteArrayRegion(pixels, 0, pixelsSize, (jbyte *) pixelsBuffer);
+    jboolean b;
+    int *colors = env->GetIntArrayElements(colorTable, &b);
+    int idx;
+    for (int loop = 0; loop < pixelsSize; loop++) {
+        idx = pixelsBuffer[loop] & 0xff;
+        pixelsBuffer[loop] = colors[idx];
+    }
+    env->ReleaseIntArrayElements(colorTable, colors, JNI_ABORT);
+    env->SetIntArrayRegion(pixels, 0, pixelsSize, pixelsBuffer);
     free(pixelsBuffer);
 }
 }

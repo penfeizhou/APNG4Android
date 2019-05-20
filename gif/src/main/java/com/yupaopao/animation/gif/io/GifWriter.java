@@ -1,23 +1,58 @@
 package com.yupaopao.animation.gif.io;
 
-import com.yupaopao.animation.io.ByteBufferWriter;
+import com.yupaopao.animation.io.Writer;
 
-import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 
 /**
  * @Description: APNG4Android
  * @Author: pengfei.zhou
  * @CreateDate: 2019-05-16
  */
-public class GifWriter extends ByteBufferWriter {
-    public void putInt(int val) {
-        putByte((byte) (val & 0xff));
-        putByte((byte) ((val >> 8) & 0xff));
-        putByte((byte) ((val >> 16) & 0xff));
-        putByte((byte) ((val >> 24) & 0xff));
+public class GifWriter implements Writer {
+
+    protected IntBuffer intBuffer;
+
+    public GifWriter() {
+        reset(10 * 1024);
     }
 
-    public ByteBuffer toByteBuffer() {
-        return byteBuffer;
+    @Override
+    public void putByte(byte b) {
+    }
+
+    @Override
+    public void putBytes(byte[] b) {
+    }
+
+    @Override
+    public int position() {
+        return intBuffer.position();
+    }
+
+    @Override
+    public void skip(int length) {
+        intBuffer.position(length + position());
+    }
+
+    @Override
+    public byte[] toByteArray() {
+        return null;
+    }
+
+    @Override
+    public void close() {
+    }
+
+    @Override
+    public void reset(int size) {
+        if (intBuffer == null || size > intBuffer.limit()) {
+            intBuffer = IntBuffer.allocate(size);
+        }
+        intBuffer.clear();
+    }
+
+    public int[] asIntArray() {
+        return intBuffer.array();
     }
 }
