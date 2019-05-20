@@ -64,6 +64,7 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
 
     @Override
     public Bitmap draw(Canvas canvas, Paint paint, int sampleSize, Bitmap reusedBitmap, GifWriter writer) {
+        int[] codeAll = new int[frameWidth * frameHeight];
         try {
             reader.reset();
             reader.skip(imageDataOffset);
@@ -84,6 +85,7 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
             int prefix = -1;
             int curW = 0;
             LinkedList<Point> stringTable = new LinkedList<>();
+            int loop = 0;
             while (writer.position() < frameWidth * frameHeight) {
                 if (dataLeftCount == 0) {
                     dataLeftCount = reader.peek() & 0xff;
@@ -97,6 +99,7 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
                 while (bits >= codeSize) {
                     // Get Code
                     code = datum & ((1 << codeSize) - 1);
+                    codeAll[loop++] = code;
                     // Dispose preVal
                     datum >>= codeSize;
                     bits -= codeSize;
@@ -116,6 +119,9 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
                             //ignore first char
                         } else {
                             curW = code;
+                            if (code - endCode - 1 > stringTable.size()) {
+                                Log.e("OSBORN", "error");
+                            }
                             while (curW > endCode) {
                                 if (curW - endCode > stringTable.size()) {
                                     curW = prefix;
@@ -157,7 +163,15 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
                 dataBlock = new byte[0xff];
                 sDataBlock.set(dataBlock);
             }
-            uncompressLZW(reader, writer.toByteArray(), lzwMinCodeSize, dataBlock);
+            byte[] pixels = new byte[frameWidth * frameHeight];
+            uncompressLZW(reader, pixels, frameWidth * frameHeight, lzwMinCodeSize, dataBlock);
+            int[] colors = new int[frameWidth * frameHeight];
+            for (int i = 0; i < frameWidth * frameHeight; i++) {
+                int idx = pixels[i] & 0xff;
+                colors[i] = colorTable.getColor(idx);
+            }
+            Bitmap bitmap = Bitmap.createBitmap(colors, frameWidth, frameHeight, Bitmap.Config.ARGB_8888);
+            Log.d("OSBORN", "native decode");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -176,7 +190,7 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
         }
     }
 
-    private native void uncompressLZW(GifReader gifReader, byte[] pixels, int lzwMinCodeSize, byte[] buffer);
+    private native void uncompressLZW(GifReader gifReader, byte[] pixels, int pixelSize, int lzwMinCodeSize, byte[] buffer);
 
     private native String nativeDecode();
 }
