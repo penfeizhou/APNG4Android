@@ -1,18 +1,14 @@
 package com.yupaopao.animation.gif.decode;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Point;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.yupaopao.animation.decode.Frame;
 import com.yupaopao.animation.gif.io.GifReader;
 import com.yupaopao.animation.gif.io.GifWriter;
 
-import java.util.LinkedList;
 
 /**
  * @Description: GifFrame
@@ -64,7 +60,6 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
     @Override
     public Bitmap draw(Canvas canvas, Paint paint, int sampleSize, Bitmap reusedBitmap, GifWriter writer) {
         try {
-            long start = System.currentTimeMillis();
             reader.reset();
             reader.skip(imageDataOffset);
             writer.reset(frameWidth * frameHeight);
@@ -76,11 +71,11 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
             int[] pixels = writer.asIntArray();
             uncompressLZW(reader, colorTable.getColorTable(), pixels, frameWidth * frameHeight, lzwMinCodeSize, dataBlock);
             Bitmap bitmap = Bitmap.createBitmap(pixels, frameWidth, frameHeight, Bitmap.Config.ARGB_8888);
-            Log.d("OSBORN", "jni cost" + (System.currentTimeMillis() - start));
+            reusedBitmap.copyPixelsFromBuffer(writer.asBuffer());
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+        return reusedBitmap;
     }
 
     private native void uncompressLZW(GifReader gifReader, int[] colorTable, int[] pixels, int pixelSize, int lzwMinCodeSize, byte[] buffer);
