@@ -59,13 +59,12 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
         }
         this.lzwMinCodeSize = imageDescriptor.lzwMinimumCodeSize;
         imageDataOffset = imageDescriptor.imageDataOffset;
-        Log.d("osborn", nativeDecode());
     }
 
     @Override
     public Bitmap draw(Canvas canvas, Paint paint, int sampleSize, Bitmap reusedBitmap, GifWriter writer) {
-        int[] codeAll = new int[frameWidth * frameHeight];
         try {
+            long start = System.currentTimeMillis();
             reader.reset();
             reader.skip(imageDataOffset);
             writer.reset(frameWidth * frameHeight);
@@ -85,7 +84,6 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
             int prefix = -1;
             int curW = 0;
             LinkedList<Point> stringTable = new LinkedList<>();
-            int loop = 0;
             while (writer.position() < frameWidth * frameHeight) {
                 if (dataLeftCount == 0) {
                     dataLeftCount = reader.peek() & 0xff;
@@ -99,7 +97,6 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
                 while (bits >= codeSize) {
                     // Get Code
                     code = datum & ((1 << codeSize) - 1);
-                    codeAll[loop++] = code;
                     // Dispose preVal
                     datum >>= codeSize;
                     bits -= codeSize;
@@ -149,12 +146,13 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
                 colors[i] = colorTable.getColor(idx);
             }
             Bitmap bitmap = Bitmap.createBitmap(colors, frameWidth, frameHeight, Bitmap.Config.ARGB_8888);
-            Log.d("OSBORN", "Create Bitmap");
+            Log.d("OSBORN", "java cost" + (System.currentTimeMillis() - start));
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         try {
+            long start = System.currentTimeMillis();
             reader.reset();
             reader.skip(imageDataOffset);
             writer.reset(frameWidth * frameHeight);
@@ -171,7 +169,7 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
                 colors[i] = colorTable.getColor(idx);
             }
             Bitmap bitmap = Bitmap.createBitmap(colors, frameWidth, frameHeight, Bitmap.Config.ARGB_8888);
-            Log.d("OSBORN", "native decode");
+            Log.d("OSBORN", "jni cost" + (System.currentTimeMillis() - start));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -191,6 +189,4 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
     }
 
     private native void uncompressLZW(GifReader gifReader, byte[] pixels, int pixelSize, int lzwMinCodeSize, byte[] buffer);
-
-    private native String nativeDecode();
 }
