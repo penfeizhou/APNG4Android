@@ -1,5 +1,6 @@
 package com.yupaopao.animation.gif.decode;
 
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.util.Log;
 
@@ -80,7 +81,9 @@ public class GifDecoder extends FrameSeqDecoder<GifReader, GifWriter> {
     @Override
     protected void renderFrame(Frame frame) {
         GifFrame gifFrame = (GifFrame) frame;
-        gifFrame.draw(null, null, sampleSize, null, getWriter());
+        Bitmap reused = obtainBitmap(fullRect.width(), fullRect.height());
+        gifFrame.draw(null, null, sampleSize, reused, getWriter());
+        recycleBitmap(reused);
         Log.d("GifDecode", "draw:" + frameIndex);
     }
 }
