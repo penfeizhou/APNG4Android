@@ -77,6 +77,10 @@ public class ColorTable implements Block {
         return colorTable[idx];
     }
 
+    public int[] getColorTable() {
+        return colorTable;
+    }
+
     @Override
     public int size() {
         return this.colorTable.length * 3;

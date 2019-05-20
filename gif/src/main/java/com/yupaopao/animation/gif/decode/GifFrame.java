@@ -68,125 +68,20 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
             reader.reset();
             reader.skip(imageDataOffset);
             writer.reset(frameWidth * frameHeight);
-            int clearCode = 1 << lzwMinCodeSize;
-            int endCode = clearCode + 1;
-            int dataLeftCount = 0;
-            int codeSize = lzwMinCodeSize + 1;
             byte[] dataBlock = sDataBlock.get();
             if (dataBlock == null) {
                 dataBlock = new byte[0xff];
                 sDataBlock.set(dataBlock);
             }
-            int dataIndex = 0;
-            int bits = 0;
-            int datum = 0;
-            int code;
-            int prefix = -1;
-            int curW = 0;
-            LinkedList<Point> stringTable = new LinkedList<>();
-            while (writer.position() < frameWidth * frameHeight) {
-                if (dataLeftCount == 0) {
-                    dataLeftCount = reader.peek() & 0xff;
-                    reader.read(dataBlock, 0, dataLeftCount);
-                    dataIndex = 0;
-                }
-                datum += (dataBlock[dataIndex] & 0xff) << bits;
-                bits += 8;
-                dataIndex++;
-                dataLeftCount--;
-                while (bits >= codeSize) {
-                    // Get Code
-                    code = datum & ((1 << codeSize) - 1);
-                    // Dispose preVal
-                    datum >>= codeSize;
-                    bits -= codeSize;
-
-                    if (code == clearCode) {
-                        codeSize = lzwMinCodeSize + 1;
-                        if (prefix >= 0) {
-                            output(writer, stringTable, prefix, endCode);
-                        }
-                        stringTable.clear();
-                        prefix = -1;
-                        continue;
-                    } else if (code == endCode) {
-                        break;
-                    } else {
-                        if (prefix < 0) {
-                            //ignore first char
-                        } else {
-                            curW = code;
-                            if (code - endCode - 1 > stringTable.size()) {
-                                Log.e("OSBORN", "error");
-                            }
-                            while (curW > endCode) {
-                                if (curW - endCode > stringTable.size()) {
-                                    curW = prefix;
-                                } else {
-                                    curW = stringTable.get(curW - endCode - 1).x;
-                                }
-                            }
-                            Point point = new Point(prefix, curW);
-                            stringTable.add(point);
-                            if (stringTable.size() >= (1 << codeSize) - endCode - 1) {
-                                codeSize++;
-                            }
-                            //output
-                            output(writer, stringTable, prefix, endCode);
-                        }
-                        prefix = code;
-                    }
-
-                }
-            }
-            int[] colors = new int[frameWidth * frameHeight];
-            byte[] pixels = writer.toByteArray();
-            for (int i = 0; i < frameWidth * frameHeight; i++) {
-                int idx = pixels[i] & 0xff;
-                colors[i] = colorTable.getColor(idx);
-            }
-            Bitmap bitmap = Bitmap.createBitmap(colors, frameWidth, frameHeight, Bitmap.Config.ARGB_8888);
-            Log.d("OSBORN", "java cost" + (System.currentTimeMillis() - start));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            long start = System.currentTimeMillis();
-            reader.reset();
-            reader.skip(imageDataOffset);
-            writer.reset(frameWidth * frameHeight);
-            byte[] dataBlock = sDataBlock.get();
-            if (dataBlock == null) {
-                dataBlock = new byte[0xff];
-                sDataBlock.set(dataBlock);
-            }
-            byte[] pixels = new byte[frameWidth * frameHeight];
-            uncompressLZW(reader, pixels, frameWidth * frameHeight, lzwMinCodeSize, dataBlock);
-            int[] colors = new int[frameWidth * frameHeight];
-            for (int i = 0; i < frameWidth * frameHeight; i++) {
-                int idx = pixels[i] & 0xff;
-                colors[i] = colorTable.getColor(idx);
-            }
-            Bitmap bitmap = Bitmap.createBitmap(colors, frameWidth, frameHeight, Bitmap.Config.ARGB_8888);
+            int[] pixels = writer.asIntArray();
+            uncompressLZW(reader, colorTable.getColorTable(), pixels, frameWidth * frameHeight, lzwMinCodeSize, dataBlock);
+            Bitmap bitmap = Bitmap.createBitmap(pixels, frameWidth, frameHeight, Bitmap.Config.ARGB_8888);
             Log.d("OSBORN", "jni cost" + (System.currentTimeMillis() - start));
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
         return null;
     }
 
-    private void output(GifWriter gifWriter, LinkedList<Point> stringTable, int idx, int endCode) {
-        if (idx > endCode) {
-            Point point = stringTable.get(idx - endCode - 1);
-            output(gifWriter, stringTable, point.x, endCode);
-            output(gifWriter, stringTable, point.y, endCode);
-        } else {
-            gifWriter.putByte((byte) (idx & 0xff));
-        }
-    }
-
-    private native void uncompressLZW(GifReader gifReader, byte[] pixels, int pixelSize, int lzwMinCodeSize, byte[] buffer);
+    private native void uncompressLZW(GifReader gifReader, int[] colorTable, int[] pixels, int pixelSize, int lzwMinCodeSize, byte[] buffer);
 }
