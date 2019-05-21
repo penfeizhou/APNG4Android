@@ -30,7 +30,7 @@ public class APNGDecoder extends FrameSeqDecoder<APNGReader, APNGWriter> {
 
     private APNGWriter apngWriter;
     private int mLoopCount;
-    private Paint paint;
+    private final Paint paint = new Paint();
 
 
     private class SnapShot {
@@ -47,6 +47,7 @@ public class APNGDecoder extends FrameSeqDecoder<APNGReader, APNGWriter> {
      */
     public APNGDecoder(Loader loader, RenderListener renderListener) {
         super(loader, renderListener);
+        paint.setAntiAlias(true);
     }
 
     @Override
@@ -119,8 +120,6 @@ public class APNGDecoder extends FrameSeqDecoder<APNGReader, APNGWriter> {
                 otherChunks.add(chunk);
             }
         }
-        paint = new Paint();
-        paint.setAntiAlias(true);
         frameBuffer = ByteBuffer.allocate((canvasWidth * canvasHeight / (sampleSize * sampleSize) + 1) * 4);
         snapShot.byteBuffer = ByteBuffer.allocate((canvasWidth * canvasHeight / (sampleSize * sampleSize) + 1) * 4);
         return new Rect(0, 0, canvasWidth, canvasHeight);
