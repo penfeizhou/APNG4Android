@@ -149,7 +149,6 @@ public class APNGDecoder extends FrameSeqDecoder<APNGReader, APNGWriter> {
                     snapShot.byteBuffer.rewind();
                     Bitmap preBitmap = obtainBitmap(fullRect.width() / sampleSize, fullRect.height() / sampleSize);
                     preBitmap.copyPixelsFromBuffer(snapShot.byteBuffer);
-                    canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
                     canvas.drawBitmap(preBitmap, 0, 0, paint);
                     recycleBitmap(preBitmap);
                     break;
