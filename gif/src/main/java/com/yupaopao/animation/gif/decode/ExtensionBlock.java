@@ -10,9 +10,9 @@ import java.io.IOException;
  * @CreateDate: 2019-05-17
  */
 public abstract class ExtensionBlock implements Block {
-    public static ExtensionBlock retrive(GifReader reader) throws IOException {
+    public static ExtensionBlock retrieve(GifReader reader) throws IOException {
         byte extensionLabel = reader.peek();
-        ExtensionBlock extensionBlock = null;
+        ExtensionBlock extensionBlock;
         switch (extensionLabel) {
             case (byte) 0xf9:
                 extensionBlock = new GraphicControlExtension();
