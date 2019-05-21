@@ -1,6 +1,7 @@
 package com.yupaopao.animation.gif.decode;
 
 import com.yupaopao.animation.gif.io.GifReader;
+import com.yupaopao.animation.io.Reader;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,9 +19,10 @@ public class GifParser {
         }
     }
 
-    public static boolean isGif(GifReader reader) {
+    public static boolean isGif(Reader reader) {
         try {
-            checkHeader(reader);
+            GifReader gifReader = reader instanceof GifReader ? (GifReader) reader : new GifReader(reader);
+            checkHeader(gifReader);
             return true;
         } catch (IOException e) {
             e.printStackTrace();
@@ -45,7 +47,7 @@ public class GifParser {
             Block block = null;
             switch (flag) {
                 case 0x21:
-                    block = ExtensionBlock.retrive(reader);
+                    block = ExtensionBlock.retrieve(reader);
                     break;
                 case 0x2c:
                     block = new ImageDescriptor();
