@@ -33,8 +33,10 @@ Java_com_yupaopao_animation_gif_decode_GifFrame_uncompressLZW(
         jintArray colorTable,
         jint transparentColorIndex,
         jintArray pixels,
-        jint pixelsSize,
+        jint width,
+        jint height,
         jint lzwMinCodeSize,
+        jboolean interlace,
         jbyteArray buffer) {
     Reader reader(env, jReader, buffer);
     char buf[0xff];
@@ -45,7 +47,7 @@ Java_com_yupaopao_animation_gif_decode_GifFrame_uncompressLZW(
     size_t idx_data = 0;
     size_t bits = 0;
     size_t code_size = lzwMinCodeSize + 1;
-
+    size_t pixelsSize = width * height;
     int datum = 0;
     int code_clear = 1 << lzwMinCodeSize;
     int code_end = code_clear + 1;
@@ -158,7 +160,47 @@ Java_com_yupaopao_animation_gif_decode_GifFrame_uncompressLZW(
     while (idx_pixel < pixelsSize) {
         pixelsBuffer[idx_pixel++] = 0;
     }
-    //env->ReleaseIntArrayElements(colorTable, colors, JNI_ABORT);
-    //env->ReleaseIntArrayElements(pixels, pixelsBuffer, JNI_ABORT);
+    if (interlace) {
+        // interlace flag
+        size_t i = 0;
+        int *pixels_copy = static_cast<int *>(malloc(sizeof(int) * pixelsSize));
+        size_t src_row = 0;
+        size_t pack = 1;
+        size_t step = 8;
+        size_t start = 8;
+        for (; pack <= 4 & src_row < height;) {
+            switch (pack) {
+                case 1:
+                    step = 8;
+                    start = 0;
+                    break;
+                case 2:
+                    step = 8;
+                    start = 4;
+                    break;
+                case 3:
+                    step = 4;
+                    start = 2;
+                    break;
+                case 4:
+                    step = 2;
+                    start = 1;
+                    break;
+            }
+            i = start;
+            do {
+                // copy
+                memcpy(pixels_copy + i * width, pixelsBuffer + src_row * width,
+                       width * (sizeof(int)));
+                src_row++;
+                i += step;
+            } while (i < height);
+            pack++;
+        }
+        memcpy(pixelsBuffer, pixels_copy, pixelsSize * sizeof(int));
+        free(pixels_copy);
+    }
+    env->ReleaseIntArrayElements(pixels, pixelsBuffer, 0);
+    env->ReleaseIntArrayElements(colorTable, colors, JNI_ABORT);
 }
 }
