@@ -31,6 +31,7 @@ Java_com_yupaopao_animation_gif_decode_GifFrame_uncompressLZW(
         jobject /* this */,
         jobject jReader,
         jintArray colorTable,
+        jint transparentColorIndex,
         jintArray pixels,
         jint pixelsSize,
         jint lzwMinCodeSize,
@@ -142,7 +143,11 @@ Java_com_yupaopao_animation_gif_decode_GifFrame_uncompressLZW(
     int idx;
     for (int loop = 0; loop < pixelsSize; loop++) {
         idx = pixelsBuffer[loop] & 0xff;
-        pixelsBuffer[loop] = colors[idx];
+        if (idx == transparentColorIndex) {
+            pixelsBuffer[loop] = 0;
+        } else {
+            pixelsBuffer[loop] = colors[idx];
+        }
     }
     env->ReleaseIntArrayElements(colorTable, colors, JNI_ABORT);
     env->SetIntArrayRegion(pixels, 0, pixelsSize, pixelsBuffer);

@@ -71,13 +71,26 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
                 sDataBlock.set(dataBlock);
             }
             int[] pixels = writer.asIntArray();
-            uncompressLZW(reader, colorTable.getColorTable(), pixels, frameWidth * frameHeight, lzwMinCodeSize, dataBlock);
+            uncompressLZW(reader,
+                    colorTable.getColorTable(),
+                    transparentColorIndex,
+                    pixels,
+                    frameWidth * frameHeight,
+                    lzwMinCodeSize,
+                    dataBlock);
             reusedBitmap.copyPixelsFromBuffer(writer.asBuffer());
+            canvas.drawBitmap(reusedBitmap, frameX, frameY, paint);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return reusedBitmap;
     }
 
-    private native void uncompressLZW(GifReader gifReader, int[] colorTable, int[] pixels, int pixelSize, int lzwMinCodeSize, byte[] buffer);
+    private native void uncompressLZW(GifReader gifReader,
+                                      int[] colorTable,
+                                      int transparentColorIndex,
+                                      int[] pixels,
+                                      int pixelSize,
+                                      int lzwMinCodeSize,
+                                      byte[] buffer);
 }
