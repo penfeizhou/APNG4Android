@@ -9,8 +9,6 @@ import com.yupaopao.animation.decode.Frame;
 import com.yupaopao.animation.gif.io.GifReader;
 import com.yupaopao.animation.gif.io.GifWriter;
 
-import java.nio.IntBuffer;
-
 
 /**
  * @Description: GifFrame
@@ -28,6 +26,7 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
     private final int imageDataOffset;
     private final int lzwMinCodeSize;
     private static final ThreadLocal<byte[]> sDataBlock = new ThreadLocal<>();
+    private static final int DEFAULT_DELAY = 10;
 
     public GifFrame(GifReader reader,
                     ColorTable globalColorTable,
@@ -36,7 +35,9 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
         super(reader);
         if (graphicControlExtension != null) {
             this.disposalMethod = graphicControlExtension.disposalMethod();
-            frameDuration = graphicControlExtension.delayTime * 10;
+            frameDuration = ((graphicControlExtension.delayTime <= 0)
+                    ? DEFAULT_DELAY
+                    : graphicControlExtension.delayTime) * 10;
             if (graphicControlExtension.transparencyFlag()) {
                 transparentColorIndex = graphicControlExtension.transparentColorIndex;
             } else {
