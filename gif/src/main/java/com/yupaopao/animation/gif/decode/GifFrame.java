@@ -27,6 +27,7 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
     private final int lzwMinCodeSize;
     private static final ThreadLocal<byte[]> sDataBlock = new ThreadLocal<>();
     private static final int DEFAULT_DELAY = 10;
+    private final boolean interlace;
 
     public GifFrame(GifReader reader,
                     ColorTable globalColorTable,
@@ -51,6 +52,7 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
         frameY = imageDescriptor.frameY;
         frameWidth = imageDescriptor.frameWidth;
         frameHeight = imageDescriptor.frameHeight;
+        interlace = imageDescriptor.interlaceFlag();
         if (imageDescriptor.localColorTableFlag()) {
             colorTable = imageDescriptor.localColorTable;
         } else {
@@ -76,8 +78,10 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
                     colorTable.getColorTable(),
                     transparentColorIndex,
                     pixels,
-                    frameWidth * frameHeight,
+                    frameWidth,
+                    frameHeight,
                     lzwMinCodeSize,
+                    interlace,
                     dataBlock);
             reusedBitmap.copyPixelsFromBuffer(writer.asBuffer());
             canvas.drawBitmap(reusedBitmap, frameX, frameY, paint);
@@ -91,7 +95,9 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
                                       int[] colorTable,
                                       int transparentColorIndex,
                                       int[] pixels,
-                                      int pixelSize,
+                                      int width,
+                                      int height,
                                       int lzwMinCodeSize,
+                                      boolean interlace,
                                       byte[] buffer);
 }
