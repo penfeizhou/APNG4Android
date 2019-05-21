@@ -69,12 +69,9 @@ public class ColorTable implements Block {
             byte red = reader.peek();
             byte green = reader.peek();
             byte blue = reader.peek();
-            this.colorTable[i] = Color.rgb(red & 0xff, green & 0xff, blue & 0xff);
+            // store in RGBA order,in case use for byte buffer
+            this.colorTable[i] = 0xff000000 | ((blue & 0xff) << 16) | ((green & 0xff) << 8) | (red & 0xff);
         }
-    }
-
-    public int getColor(int idx) {
-        return colorTable[idx];
     }
 
     public int[] getColorTable() {

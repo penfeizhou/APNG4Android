@@ -9,6 +9,8 @@ import com.yupaopao.animation.decode.Frame;
 import com.yupaopao.animation.gif.io.GifReader;
 import com.yupaopao.animation.gif.io.GifWriter;
 
+import java.nio.IntBuffer;
+
 
 /**
  * @Description: GifFrame
@@ -70,7 +72,6 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
             }
             int[] pixels = writer.asIntArray();
             uncompressLZW(reader, colorTable.getColorTable(), pixels, frameWidth * frameHeight, lzwMinCodeSize, dataBlock);
-            Bitmap bitmap = Bitmap.createBitmap(pixels, frameWidth, frameHeight, Bitmap.Config.ARGB_8888);
             reusedBitmap.copyPixelsFromBuffer(writer.asBuffer());
         } catch (Exception e) {
             e.printStackTrace();
