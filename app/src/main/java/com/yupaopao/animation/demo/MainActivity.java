@@ -84,6 +84,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Intent intent = new Intent(this, AnimationTestActivity.class);
                 intent.putExtra("files", new String[]{
                         "world-cup.gif",
+                        "1.gif",
+                        "2.gif",
+                        "3.gif",
+                        "4.gif",
+                        "5.gif",
+                        "6.gif",
                 });
                 startActivity(intent);
             }

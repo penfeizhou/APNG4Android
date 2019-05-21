@@ -23,7 +23,9 @@ public class APNGTestActivity extends Activity {
         String[] urls = new String[]{
                 "https://misc.aotu.io/ONE-SUNDAY/SteamEngine.png",
                 "https://isparta.github.io/compare-webp/image/gif_webp/webp/2.webp",
-                "file:///android_asset/world-cup.gif",
+                "file:///android_asset/1.gif",
+                "file:///android_asset/5.gif",
+                "file:///android_asset/6.gif",
         };
         for (String url : urls) {
             ImageView imageView = new ImageView(this);

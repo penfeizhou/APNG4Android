@@ -1,6 +1,7 @@
 package com.yupaopao.animation.demo;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.ViewGroup;
@@ -39,6 +40,7 @@ public class AnimationTestActivity extends Activity {
                 drawable = new GifDrawable(loader);
             }
             imageView.setImageDrawable(drawable);
+            imageView.setBackgroundColor(Color.BLACK);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             layoutParams.bottomMargin = 50;
             layoutParams.topMargin = 50;

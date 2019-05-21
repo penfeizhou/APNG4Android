@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
-import android.util.Log;
 
 import com.yupaopao.animation.decode.Frame;
 import com.yupaopao.animation.decode.FrameSeqDecoder;
@@ -29,6 +28,11 @@ public class GifDecoder extends FrameSeqDecoder<GifReader, GifWriter> {
     private GifWriter mGifWriter = new GifWriter();
     private final Paint paint = new Paint();
     private int bgColor = Color.TRANSPARENT;
+    private SnapShot snapShot = new SnapShot();
+
+    private class SnapShot {
+        ByteBuffer byteBuffer;
+    }
 
     /**
      * @param loader         webp的reader
@@ -59,6 +63,7 @@ public class GifDecoder extends FrameSeqDecoder<GifReader, GifWriter> {
 
     @Override
     protected void release() {
+        snapShot.byteBuffer = null;
         mGifWriter = null;
     }
 
@@ -86,6 +91,7 @@ public class GifDecoder extends FrameSeqDecoder<GifReader, GifWriter> {
             }
         }
         frameBuffer = ByteBuffer.allocate((canvasWidth * canvasHeight / (sampleSize * sampleSize) + 1) * 4);
+        snapShot.byteBuffer = ByteBuffer.allocate((canvasWidth * canvasHeight / (sampleSize * sampleSize) + 1) * 4);
         if (globalColorTable != null && bgColorIndex > 0) {
             int abgr = globalColorTable.getColorTable()[bgColorIndex];
             this.bgColor = Color.rgb(abgr & 0xff, (abgr >> 8) & 0xff, (abgr >> 16) & 0xff);
@@ -110,25 +116,35 @@ public class GifDecoder extends FrameSeqDecoder<GifReader, GifWriter> {
         } else {
             GifFrame preFrame = (GifFrame) frames.get(frameIndex - 1);
             canvas.save();
+            canvas.clipRect(preFrame.frameX,
+                    preFrame.frameY,
+                    preFrame.frameX + preFrame.frameWidth,
+                    preFrame.frameY + preFrame.frameHeight);
             switch (preFrame.disposalMethod) {
                 case 0:
                     break;
                 case 1:
                     break;
                 case 2:
-                    canvas.clipRect(preFrame.frameX,
-                            preFrame.frameY,
-                            preFrame.frameX + preFrame.frameWidth,
-                            preFrame.frameY + preFrame.frameHeight);
                     canvas.drawColor(bgColor, PorterDuff.Mode.CLEAR);
                     break;
                 case 3:
+                    snapShot.byteBuffer.rewind();
+                    Bitmap preBitmap = obtainBitmap(fullRect.width() / sampleSize, fullRect.height() / sampleSize);
+                    preBitmap.copyPixelsFromBuffer(snapShot.byteBuffer);
+                    canvas.drawBitmap(preBitmap, 0, 0, paint);
+                    recycleBitmap(preBitmap);
                     break;
             }
             canvas.restore();
+            if (gifFrame.disposalMethod == 3) {
+                if (preFrame.disposalMethod != 3) {
+                    frameBuffer.rewind();
+                    snapShot.byteBuffer.rewind();
+                    snapShot.byteBuffer.put(frameBuffer);
+                }
+            }
         }
-
-
         Bitmap reused = obtainBitmap(frame.frameWidth, frame.frameHeight);
         gifFrame.draw(canvas, paint, sampleSize, reused, getWriter());
         recycleBitmap(reused);
