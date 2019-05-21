@@ -38,7 +38,8 @@ Java_com_yupaopao_animation_gif_decode_GifFrame_uncompressLZW(
         jbyteArray buffer) {
     Reader reader(env, jReader, buffer);
     char buf[0xff];
-    int *pixelsBuffer = (int *) malloc(pixelsSize * sizeof(int));
+    jboolean b = JNI_FALSE;
+    int *pixelsBuffer = env->GetIntArrayElements(pixels, &b);
     size_t idx_pixel = 0;
     size_t offset_data = 0;
     size_t idx_data = 0;
@@ -143,7 +144,6 @@ Java_com_yupaopao_animation_gif_decode_GifFrame_uncompressLZW(
         }
     }
 
-    jboolean b;
     int *colors = env->GetIntArrayElements(colorTable, &b);
     int idx;
     for (int loop = 0; loop < idx_pixel; loop++) {
@@ -158,9 +158,7 @@ Java_com_yupaopao_animation_gif_decode_GifFrame_uncompressLZW(
     while (idx_pixel < pixelsSize) {
         pixelsBuffer[idx_pixel++] = 0;
     }
-
-    env->ReleaseIntArrayElements(colorTable, colors, JNI_ABORT);
-    env->SetIntArrayRegion(pixels, 0, pixelsSize, pixelsBuffer);
-    free(pixelsBuffer);
+    //env->ReleaseIntArrayElements(colorTable, colors, JNI_ABORT);
+    //env->ReleaseIntArrayElements(pixels, pixelsBuffer, JNI_ABORT);
 }
 }
