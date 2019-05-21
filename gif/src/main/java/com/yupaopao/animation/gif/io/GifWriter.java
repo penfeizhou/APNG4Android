@@ -46,7 +46,7 @@ public class GifWriter implements Writer {
 
     @Override
     public void reset(int size) {
-        if (intBuffer == null || size > intBuffer.limit()) {
+        if (intBuffer == null || size > intBuffer.capacity()) {
             intBuffer = IntBuffer.allocate(size);
         }
         intBuffer.clear();
