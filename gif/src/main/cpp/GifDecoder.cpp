@@ -53,9 +53,14 @@ Java_com_yupaopao_animation_gif_decode_GifFrame_uncompressLZW(
     std::vector<Slice> table_string;
 
     Slice prefix;
+    int table_max_size = (1 << 12) - code_end - 1;
     while (idx_pixel < pixelsSize) {
         if (offset_data == 0) {
             offset_data = reader.peek() & 0xff;
+            if (offset_data <= 0) {
+                // DECODE ERROR
+                break;
+            }
             reader.read(buf, offset_data);
             idx_data = 0;
         }
@@ -92,8 +97,6 @@ Java_com_yupaopao_animation_gif_decode_GifFrame_uncompressLZW(
                             idx_pixel += prefix.len_data;
                             pixelsBuffer[idx_pixel++] = sufix;
                             slice.len_data = prefix.len_data + 1;
-                            //Add to string table
-                            table_string.push_back(slice);
                             prefix.ptr_data = slice.ptr_data;
                             prefix.len_data = slice.len_data;
                         } else {
@@ -107,8 +110,7 @@ Java_com_yupaopao_animation_gif_decode_GifFrame_uncompressLZW(
                             memcpy(pixelsBuffer + idx_pixel, current.ptr_data, current.len_data *
                                                                                sizeof(int));
                             idx_pixel += current.len_data;
-                            //Add to string table
-                            table_string.push_back(slice);
+
                             prefix.ptr_data = current.ptr_data;
                             prefix.len_data = current.len_data;
                         }
@@ -118,16 +120,18 @@ Java_com_yupaopao_animation_gif_decode_GifFrame_uncompressLZW(
                         // It's been copied to pixelsBuffer,so just move forward so that sufix can be contained
                         slice.len_data = prefix.len_data + 1;
                         slice.ptr_data = pixelsBuffer + idx_pixel - prefix.len_data;
-                        //Add to string table
-                        table_string.push_back(slice);
-
                         // Set prefix to just one code
                         prefix.len_data = 1;
                         prefix.ptr_data = pixelsBuffer + idx_pixel;
                         idx_pixel++;
                     }
-                    if (table_string.size() >= (1 << code_size) - code_end - 1) {
-                        code_size++;
+                    if (table_string.size() < table_max_size) {
+                        //Add to string table
+                        table_string.push_back(slice);
+                        if (table_string.size() >= (1 << code_size) - code_end - 1
+                            && table_string.size() < table_max_size) {
+                            code_size++;
+                        }
                     }
                 } else {
                     pixelsBuffer[idx_pixel] = code & 0xff;
@@ -138,10 +142,11 @@ Java_com_yupaopao_animation_gif_decode_GifFrame_uncompressLZW(
             }
         }
     }
+
     jboolean b;
     int *colors = env->GetIntArrayElements(colorTable, &b);
     int idx;
-    for (int loop = 0; loop < pixelsSize; loop++) {
+    for (int loop = 0; loop < idx_pixel; loop++) {
         idx = pixelsBuffer[loop] & 0xff;
         if (idx == transparentColorIndex) {
             pixelsBuffer[loop] = 0;
@@ -149,6 +154,11 @@ Java_com_yupaopao_animation_gif_decode_GifFrame_uncompressLZW(
             pixelsBuffer[loop] = colors[idx];
         }
     }
+
+    while (idx_pixel < pixelsSize) {
+        pixelsBuffer[idx_pixel++] = 0;
+    }
+
     env->ReleaseIntArrayElements(colorTable, colors, JNI_ABORT);
     env->SetIntArrayRegion(pixels, 0, pixelsSize, pixelsBuffer);
     free(pixelsBuffer);
