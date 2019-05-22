@@ -3,6 +3,7 @@ package com.yupaopao.animation.glide;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
@@ -21,8 +22,10 @@ import com.yupaopao.animation.loader.StreamLoader;
 import com.yupaopao.animation.webp.WebPDrawable;
 import com.yupaopao.animation.webp.decode.WebPParser;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 
 /**
  * @Description: StreamAnimationDecoder
@@ -31,7 +34,10 @@ import java.io.InputStream;
  */
 public class StreamAnimationDecoder implements ResourceDecoder<InputStream, Drawable> {
 
-    public StreamAnimationDecoder() {
+    private final ResourceDecoder<ByteBuffer, Drawable> byteBufferDecoder;
+
+    public StreamAnimationDecoder(ResourceDecoder<ByteBuffer, Drawable> byteBufferDecoder) {
+        this.byteBufferDecoder = byteBufferDecoder;
     }
 
     @Override
@@ -45,43 +51,28 @@ public class StreamAnimationDecoder implements ResourceDecoder<InputStream, Draw
     @Nullable
     @Override
     public Resource<Drawable> decode(@NonNull final InputStream source, int width, int height, @NonNull Options options) throws IOException {
-        Loader loader = new StreamLoader() {
-            @Override
-            protected InputStream getInputStream() {
-                try {
-                    source.reset();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return source;
-            }
-        };
-        FrameAnimationDrawable drawable;
-        if (WebPParser.isAWebP(new StreamReader(source))) {
-            drawable = new WebPDrawable(loader);
-        } else if (APNGParser.isAPNG(new StreamReader(source))) {
-            drawable = new APNGDrawable(loader);
-        } else if (GifParser.isGif(new StreamReader(source))) {
-            drawable = new GifDrawable(loader);
-        } else {
+        byte[] data = inputStreamToBytes(source);
+        if (data == null) {
             return null;
         }
-        final int size = source.available();
-        return new DrawableResource<Drawable>(drawable) {
-            @NonNull
-            @Override
-            public Class<Drawable> getResourceClass() {
-                return Drawable.class;
-            }
+        ByteBuffer byteBuffer = ByteBuffer.wrap(data);
+        return byteBufferDecoder.decode(byteBuffer, width, height, options);
+    }
 
-            @Override
-            public int getSize() {
-                return size;
-            }
 
-            @Override
-            public void recycle() {
+    private static byte[] inputStreamToBytes(InputStream is) {
+        final int bufferSize = 16384;
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream(bufferSize);
+        try {
+            int nRead;
+            byte[] data = new byte[bufferSize];
+            while ((nRead = is.read(data)) != -1) {
+                buffer.write(data, 0, nRead);
             }
-        };
+            buffer.flush();
+        } catch (IOException e) {
+            return null;
+        }
+        return buffer.toByteArray();
     }
 }
