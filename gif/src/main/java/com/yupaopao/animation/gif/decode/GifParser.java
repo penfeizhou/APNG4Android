@@ -25,7 +25,9 @@ public class GifParser {
             checkHeader(gifReader);
             return true;
         } catch (IOException e) {
-            e.printStackTrace();
+            if (!(e instanceof FormatException)) {
+                e.printStackTrace();
+            }
             return false;
         }
     }
