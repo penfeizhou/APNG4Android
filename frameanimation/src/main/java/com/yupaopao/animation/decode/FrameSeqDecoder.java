@@ -149,7 +149,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
             FutureTask<Rect> futureTask = new FutureTask<>(callable);
             getExecutor().execute(futureTask);
             try {
-                fullRect = futureTask.get();
+                fullRect = futureTask.get(500,TimeUnit.MILLISECONDS);
             } catch (Exception e) {
                 e.printStackTrace();
                 fullRect = RECT_EMPTY;
