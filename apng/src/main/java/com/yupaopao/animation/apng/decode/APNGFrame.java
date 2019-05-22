@@ -28,7 +28,16 @@ public class APNGFrame extends Frame<APNGReader, APNGWriter> {
     private static final byte[] sPNGSignatures = {(byte) 137, 80, 78, 71, 13, 10, 26, 10};
     private static final byte[] sPNGEndChunk = {0, 0, 0, 0, 0x49, 0x45, 0x4E, 0x44, (byte) 0xAE, 0x42, 0x60, (byte) 0x82};
 
-    private static CRC32 crc32 = new CRC32();
+    private static ThreadLocal<CRC32> sCRC32 = new ThreadLocal<>();
+
+    private CRC32 getCRC32() {
+        CRC32 crc32 = sCRC32.get();
+        if (crc32 == null) {
+            crc32 = new CRC32();
+            sCRC32.set(crc32);
+        }
+        return crc32;
+    }
 
     public APNGFrame(APNGReader reader, FCTLChunk fctlChunk) {
         super(reader);
@@ -67,6 +76,7 @@ public class APNGFrame extends Frame<APNGReader, APNGWriter> {
         apngWriter.writeInt(frameWidth);
         apngWriter.writeInt(frameHeight);
         apngWriter.putBytes(ihdrData);
+        CRC32 crc32 = getCRC32();
         crc32.reset();
         crc32.update(apngWriter.toByteArray(), start, 17);
         apngWriter.writeInt((int) crc32.getValue());

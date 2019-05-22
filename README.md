@@ -1,12 +1,10 @@
-# APNG&Webp4Android
-* Support APNG & Animated Webp
-* Glide library module support
-* Implement play control
-* Fast Decode
-* Low memory usage
-* No temporary files generated
+# Animation Android
+* Support APNG & Animated Webp & Gif in Android
+* Efficient decoder
+* Support Drawable usage and glide library module
+* Support animation play control
 * Support still image
-* Lightweight implementation
+* Low memory usage
 
 ## Usages
 
@@ -20,7 +18,7 @@ repositories {
 }
 dependencies {
     implementation 'com.yupaopao.android.animation:awebp:0.2.0'
-    implementation 'com.yupaopao.android.animation:apng:0.2.0'
+    implementation 'com.yupaopao.android.animation:apng:0.2.1'
 }
 ```
 

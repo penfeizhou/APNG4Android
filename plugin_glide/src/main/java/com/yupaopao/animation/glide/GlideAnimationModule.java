@@ -22,8 +22,8 @@ public class GlideAnimationModule extends LibraryGlideModule {
     @Override
     public void registerComponents(@NonNull Context context, @NonNull Glide glide, @NonNull Registry registry) {
         super.registerComponents(context, glide, registry);
-        StreamAnimationDecoder streamAnimationDecoder = new StreamAnimationDecoder();
         ByteBufferAnimationDecoder byteBufferAnimationDecoder = new ByteBufferAnimationDecoder();
+        StreamAnimationDecoder streamAnimationDecoder = new StreamAnimationDecoder(byteBufferAnimationDecoder);
         registry.prepend(InputStream.class, Drawable.class, streamAnimationDecoder);
         registry.prepend(ByteBuffer.class, Drawable.class, byteBufferAnimationDecoder);
     }

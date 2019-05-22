@@ -12,6 +12,8 @@ import com.bumptech.glide.load.resource.gif.GifOptions;
 import com.yupaopao.animation.FrameAnimationDrawable;
 import com.yupaopao.animation.apng.APNGDrawable;
 import com.yupaopao.animation.apng.decode.APNGParser;
+import com.yupaopao.animation.gif.GifDrawable;
+import com.yupaopao.animation.gif.decode.GifParser;
 import com.yupaopao.animation.io.ByteBufferReader;
 import com.yupaopao.animation.loader.ByteBufferLoader;
 import com.yupaopao.animation.loader.Loader;
@@ -33,7 +35,7 @@ public class ByteBufferAnimationDecoder implements ResourceDecoder<ByteBuffer, D
         return !options.get(GifOptions.DISABLE_ANIMATION)
                 && (WebPParser.isAWebP(new ByteBufferReader(source))
                 || APNGParser.isAPNG(new ByteBufferReader(source))
-        );
+                || GifParser.isGif(new ByteBufferReader(source)));
     }
 
     @Nullable
@@ -42,6 +44,7 @@ public class ByteBufferAnimationDecoder implements ResourceDecoder<ByteBuffer, D
         Loader loader = new ByteBufferLoader() {
             @Override
             public ByteBuffer getByteBuffer() {
+                source.position(0);
                 return source;
             }
         };
@@ -50,6 +53,8 @@ public class ByteBufferAnimationDecoder implements ResourceDecoder<ByteBuffer, D
             drawable = new WebPDrawable(loader);
         } else if (APNGParser.isAPNG(new ByteBufferReader(source))) {
             drawable = new APNGDrawable(loader);
+        } else if (GifParser.isGif(new ByteBufferReader(source))) {
+            drawable = new GifDrawable(loader);
         } else {
             return null;
         }
