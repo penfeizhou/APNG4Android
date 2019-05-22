@@ -177,11 +177,13 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         getExecutor().execute(new Runnable() {
             @Override
             public void run() {
-                if (frames.size() == 0) {
-                    try {
-                        initCanvasBounds(read(getReader(mLoader.obtain())));
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                synchronized (FrameSeqDecoder.this) {
+                    if (frames.size() == 0) {
+                        try {
+                            initCanvasBounds(read(getReader(mLoader.obtain())));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
@@ -220,24 +222,26 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         getExecutor().execute(new Runnable() {
             @Override
             public void run() {
-                frames.clear();
-                for (Bitmap bitmap : cacheBitmaps) {
-                    if (bitmap != null && !bitmap.isRecycled()) {
-                        bitmap.recycle();
+                synchronized (FrameSeqDecoder.this) {
+                    frames.clear();
+                    for (Bitmap bitmap : cacheBitmaps) {
+                        if (bitmap != null && !bitmap.isRecycled()) {
+                            bitmap.recycle();
+                        }
                     }
+                    cacheBitmaps.clear();
+                    if (frameBuffer != null) {
+                        frameBuffer = null;
+                    }
+                    cachedCanvas.clear();
+                    try {
+                        mLoader.release();
+                        mWriter.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    release();
                 }
-                cacheBitmaps.clear();
-                if (frameBuffer != null) {
-                    frameBuffer = null;
-                }
-                cachedCanvas.clear();
-                try {
-                    mLoader.release();
-                    mWriter.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                release();
             }
         });
 
