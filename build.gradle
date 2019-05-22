@@ -46,3 +46,10 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('version.properties').newDataInputStream())
+
+ext {
+    Version = properties.version
+}
