@@ -5,9 +5,9 @@ import com.yupaopao.animation.apng.io.APNGReader;
 import java.io.IOException;
 
 /**
- * @Description: https://developer.mozilla.org/en-US/docs/Mozilla/Tech/APNG#.27fcTL.27:_The_Frame_Control_Chunk
  * @Author: pengfei.zhou
  * @CreateDate: 2019/3/27
+ * @see {link=https://developer.mozilla.org/en-US/docs/Mozilla/Tech/APNG#.27fcTL.27:_The_Frame_Control_Chunk}
  */
 class FCTLChunk extends Chunk {
     static final int ID = Chunk.fourCCToInt("fcTL");

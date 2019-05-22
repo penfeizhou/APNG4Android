@@ -18,6 +18,9 @@ allprojects {
         maven {
             url "https://dl.bintray.com/osborn/Android"
         }
+        maven {
+            url "http://maven.yupaopao.cn/nexus/content/groups/public/"
+        }
     }
     def needReplaceLocal = true
     gradle.startParameter.taskNames.each {
@@ -32,6 +35,7 @@ allprojects {
                     substitute module('com.yupaopao.android.animation:frameanimation') with project(":frameanimation")
                     substitute module('com.yupaopao.android.animation:apng') with project(":apng")
                     substitute module('com.yupaopao.android.animation:awebp') with project(":awebp")
+                    substitute module('com.yupaopao.android.animation:gif') with project(":gif")
                     substitute module('com.yupaopao.android.animation:glide-plugin') with project(":plugin_glide")
                 }
             }
@@ -41,4 +45,35 @@ allprojects {
 
 task clean(type: Delete) {
     delete rootProject.buildDir
+}
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('version.properties').newDataInputStream())
+
+ext {
+    Version = properties.version
+}
+
+task publishFrameAnimation dependsOn(":frameanimation:uploadArchives") {
+    println "FrameAnimation published"
+}
+
+task publishAPNG dependsOn(publishFrameAnimation, ":apng:uploadArchives") {
+    println "APNG published"
+}
+
+task publishAWebP dependsOn(publishFrameAnimation, ":awebp:uploadArchives") {
+    println "AWebP published"
+}
+
+task publishGif dependsOn(publishFrameAnimation, ":gif:uploadArchives") {
+    println "Gif published"
+}
+
+task publishGlidePlugin dependsOn(publishAPNG, publishAWebP, publishGif, ":plugin_glide:uploadArchives") {
+    println "GlidePlugin published"
+}
+
+task PublishAll dependsOn(publishGlidePlugin) {
+    println "All published"
 }

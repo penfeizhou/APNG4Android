@@ -8,7 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
-
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +23,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.tv_3).setOnClickListener(this);
         findViewById(R.id.tv_4).setOnClickListener(this);
         findViewById(R.id.tv_5).setOnClickListener(this);
+        findViewById(R.id.tv_6).setOnClickListener(this);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.tv_1: {
                 Intent intent = new Intent(this, AnimationTestActivity.class);
                 intent.putExtra("files", new String[]{
-                        "wheel.png",
+                        "world-cup.png",
                 });
                 startActivity(intent);
             }
@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.tv_3: {
                 Intent intent = new Intent(this, AnimationTestActivity.class);
                 intent.putExtra("files", new String[]{
-                        "1.webp",
+                        "world-cup.webp",
                 });
                 startActivity(intent);
             }
@@ -70,6 +70,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Intent intent = new Intent(this, APNGTestActivity.class);
                 startActivity(intent);
             }
+            break;
+            case R.id.tv_6: {
+                Intent intent = new Intent(this, AnimationTestActivity.class);
+                intent.putExtra("files", new String[]{
+                        "world-cup.gif",
+                        "1.gif",
+                        "2.gif",
+                        "3.gif",
+                        "4.gif",
+                        "5.gif",
+                        "6.gif",
+                });
+                startActivity(intent);
+            }
+            break;
         }
     }
 }
