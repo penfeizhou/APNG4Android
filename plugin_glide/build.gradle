@@ -35,5 +35,6 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.8.0'
     api('com.yupaopao.android.animation:awebp:0.2.0')
     api('com.yupaopao.android.animation:apng:0.2.0')
+    api('com.yupaopao.android.animation:gif:0.2.0')
 }
 apply from: rootProject.file('scripts/upload.gradle')
