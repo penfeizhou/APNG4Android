@@ -8,15 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
-import com.yupaopao.animation.gif.decode.GifFrame;
-import com.yupaopao.animation.gif.decode.GifParser;
-import com.yupaopao.animation.gif.io.GifReader;
-import com.yupaopao.animation.loader.AssetStreamLoader;
-import com.yupaopao.animation.loader.Loader;
-
-import java.io.IOException;
-
-
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
