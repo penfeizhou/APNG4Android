@@ -9,11 +9,15 @@ import java.io.InputStream;
  * @CreateDate: 2019-05-11
  */
 public class StreamReader extends FilterInputStream implements Reader {
-    private static ThreadLocal<byte[]> __intBytes = new ThreadLocal<>();
     private int position;
 
     public StreamReader(InputStream in) {
         super(in);
+        try {
+            in.reset();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

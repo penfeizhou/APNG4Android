@@ -312,7 +312,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         }
     }
 
-    private int getDesiredSample(int desiredWidth, int desiredHeight) {
+    protected int getDesiredSample(int desiredWidth, int desiredHeight) {
         if (desiredWidth == 0 || desiredHeight == 0) {
             return 1;
         }
