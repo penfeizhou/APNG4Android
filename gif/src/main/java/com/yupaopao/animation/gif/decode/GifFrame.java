@@ -67,7 +67,7 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
         try {
             reader.reset();
             reader.skip(imageDataOffset);
-            writer.reset(frameWidth * frameHeight);
+            writer.reset(frameWidth * frameHeight / (sampleSize * sampleSize));
             byte[] dataBlock = sDataBlock.get();
             if (dataBlock == null) {
                 dataBlock = new byte[0xff];
@@ -78,13 +78,13 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
                     colorTable.getColorTable(),
                     transparentColorIndex,
                     pixels,
-                    frameWidth,
-                    frameHeight,
+                    frameWidth / sampleSize,
+                    frameHeight / sampleSize,
                     lzwMinCodeSize,
                     interlace,
                     dataBlock);
             reusedBitmap.copyPixelsFromBuffer(writer.asBuffer());
-            canvas.drawBitmap(reusedBitmap, frameX, frameY, paint);
+            canvas.drawBitmap(reusedBitmap, frameX / sampleSize, frameY / sampleSize, paint);
         } catch (Exception e) {
             e.printStackTrace();
         }
