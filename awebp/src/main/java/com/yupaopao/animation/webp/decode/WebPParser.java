@@ -36,7 +36,9 @@ public class WebPParser {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            if (!(e instanceof FormatException)) {
+                e.printStackTrace();
+            }
         }
         return false;
     }
