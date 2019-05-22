@@ -46,3 +46,34 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('version.properties').newDataInputStream())
+
+ext {
+    Version = properties.version
+}
+
+task publishFrameAnimation dependsOn(":frameanimation:uploadArchives") {
+    println "FrameAnimation published"
+}
+
+task publishAPNG dependsOn(publishFrameAnimation, ":apng:uploadArchives") {
+    println "APNG published"
+}
+
+task publishAWebP dependsOn(publishFrameAnimation, ":awebp:uploadArchives") {
+    println "AWebP published"
+}
+
+task publishGif dependsOn(publishFrameAnimation, ":gif:uploadArchives") {
+    println "Gif published"
+}
+
+task publishGlidePlugin dependsOn(publishAPNG, publishAWebP, publishGif, ":plugin_glide:uploadArchives") {
+    println "GlidePlugin published"
+}
+
+task PublishAll dependsOn(publishGlidePlugin) {
+    println "All published"
+}
