@@ -100,6 +100,11 @@ public class GifDecoder extends FrameSeqDecoder<GifReader, GifWriter> {
     }
 
     @Override
+    public void setDesiredSize(int width, int height) {
+        // setDesiredSize(width, height);
+    }
+
+    @Override
     protected void renderFrame(Frame frame) {
         GifFrame gifFrame = (GifFrame) frame;
         Bitmap bitmap = obtainBitmap(fullRect.width() / sampleSize, fullRect.height() / sampleSize);
@@ -116,10 +121,10 @@ public class GifDecoder extends FrameSeqDecoder<GifReader, GifWriter> {
         } else {
             GifFrame preFrame = (GifFrame) frames.get(frameIndex - 1);
             canvas.save();
-            canvas.clipRect(preFrame.frameX,
-                    preFrame.frameY,
-                    preFrame.frameX + preFrame.frameWidth,
-                    preFrame.frameY + preFrame.frameHeight);
+            canvas.clipRect(preFrame.frameX / sampleSize,
+                    preFrame.frameY / sampleSize,
+                    (preFrame.frameX + preFrame.frameWidth) / sampleSize,
+                    (preFrame.frameY + preFrame.frameHeight) / sampleSize);
             switch (preFrame.disposalMethod) {
                 case 0:
                     break;
@@ -145,7 +150,7 @@ public class GifDecoder extends FrameSeqDecoder<GifReader, GifWriter> {
                 }
             }
         }
-        Bitmap reused = obtainBitmap(frame.frameWidth, frame.frameHeight);
+        Bitmap reused = obtainBitmap(frame.frameWidth / sampleSize, frame.frameHeight / sampleSize);
         gifFrame.draw(canvas, paint, sampleSize, reused, getWriter());
         recycleBitmap(reused);
         frameBuffer.rewind();
