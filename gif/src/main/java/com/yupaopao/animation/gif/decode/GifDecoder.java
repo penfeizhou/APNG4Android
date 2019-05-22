@@ -100,8 +100,8 @@ public class GifDecoder extends FrameSeqDecoder<GifReader, GifWriter> {
     }
 
     @Override
-    public void setDesiredSize(int width, int height) {
-        // setDesiredSize(width, height);
+    protected int getDesiredSample(int desiredWidth, int desiredHeight) {
+        return 1;
     }
 
     @Override

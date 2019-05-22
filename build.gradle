@@ -32,6 +32,7 @@ allprojects {
                     substitute module('com.yupaopao.android.animation:frameanimation') with project(":frameanimation")
                     substitute module('com.yupaopao.android.animation:apng') with project(":apng")
                     substitute module('com.yupaopao.android.animation:awebp') with project(":awebp")
+                    substitute module('com.yupaopao.android.animation:gif') with project(":gif")
                     substitute module('com.yupaopao.android.animation:glide-plugin') with project(":plugin_glide")
                 }
             }
