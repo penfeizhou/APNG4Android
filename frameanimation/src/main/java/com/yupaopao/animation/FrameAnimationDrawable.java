@@ -174,8 +174,10 @@ public abstract class FrameAnimationDrawable extends Drawable implements Animata
 
     @Override
     public boolean setVisible(boolean visible, boolean restart) {
-        if (visible && !restart) {
-            start();
+        if (visible) {
+            if (restart) {
+                start();
+            }
         } else if (isRunning()) {
             stop();
         }
