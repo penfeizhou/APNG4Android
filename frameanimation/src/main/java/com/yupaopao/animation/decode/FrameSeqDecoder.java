@@ -149,7 +149,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
             FutureTask<Rect> futureTask = new FutureTask<>(callable);
             getExecutor().execute(futureTask);
             try {
-                fullRect = futureTask.get(500,TimeUnit.MILLISECONDS);
+                fullRect = futureTask.get(500, TimeUnit.MILLISECONDS);
             } catch (Exception e) {
                 e.printStackTrace();
                 fullRect = RECT_EMPTY;
@@ -223,6 +223,9 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
             @Override
             public void run() {
                 synchronized (FrameSeqDecoder.this) {
+                    if (running) {
+                        return;
+                    }
                     frames.clear();
                     for (Bitmap bitmap : cacheBitmaps) {
                         if (bitmap != null && !bitmap.isRecycled()) {
