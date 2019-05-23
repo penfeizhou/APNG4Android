@@ -20,7 +20,7 @@ public class DataSubBlock implements Block {
     }
 
     public static DataSubBlock retrive(GifReader reader) throws IOException {
-        byte blockSize = reader.peek();
+        int blockSize = reader.peek() & 0xff;
         if (blockSize == 0) {
             return sBlockTerminal;
         }
