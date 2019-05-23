@@ -2,17 +2,16 @@ package com.yupaopao.animation.webp.io;
 
 import android.text.TextUtils;
 
+import com.yupaopao.animation.io.FilterReader;
 import com.yupaopao.animation.io.Reader;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * @Author: pengfei.zhou
  * @CreateDate: 2019-05-11
  */
-public class WebPReader implements Reader {
-    private Reader reader;
+public class WebPReader extends FilterReader {
     private static ThreadLocal<byte[]> __intBytes = new ThreadLocal<>();
 
     protected static byte[] ensureBytes() {
@@ -25,7 +24,7 @@ public class WebPReader implements Reader {
     }
 
     public WebPReader(Reader reader) {
-        this.reader = reader;
+        super(reader);
     }
 
     /**
@@ -86,46 +85,5 @@ public class WebPReader implements Reader {
             }
         }
         return true;
-    }
-
-    @Override
-    public long skip(long total) throws IOException {
-        return reader.skip(total);
-    }
-
-    @Override
-    public byte peek() throws IOException {
-        return reader.peek();
-    }
-
-    @Override
-    public void reset() throws IOException {
-        reader.reset();
-    }
-
-    @Override
-    public int position() {
-        return reader.position();
-    }
-
-    @Override
-    public int read(byte[] buffer, int start, int byteCount) throws IOException {
-        return reader.read(buffer, start, byteCount);
-    }
-
-    @Override
-    public int available() throws IOException {
-        return reader.available();
-    }
-
-    @Override
-    public void close() throws IOException {
-        reader.close();
-    }
-
-    @Override
-    public InputStream toInputStream() throws IOException {
-        reset();
-        return reader.toInputStream();
     }
 }
