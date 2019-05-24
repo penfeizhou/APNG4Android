@@ -17,7 +17,7 @@ public class CommentExtension extends ExtensionBlock {
     @Override
     public void receive(GifReader reader) throws IOException {
         DataSubBlock dataSubBlock;
-        while (!(dataSubBlock = DataSubBlock.retrive(reader)).isTerminal()) {
+        while (!(dataSubBlock = DataSubBlock.retrieve(reader)).isTerminal()) {
             dataSubBlocks.add(dataSubBlock);
         }
     }
