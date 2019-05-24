@@ -22,8 +22,10 @@ import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @Description: Abstract Frame Animation Decoder
@@ -163,9 +165,38 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         frameBuffer = ByteBuffer.allocate((rect.width() * rect.height() / (sampleSize * sampleSize) + 1) * 4);
     }
 
+    private static class DefaultThreadFactory implements ThreadFactory {
+        private static final AtomicInteger poolNumber = new AtomicInteger(1);
+        private final ThreadGroup group;
+        private final AtomicInteger threadNumber = new AtomicInteger(1);
+        private final String namePrefix;
+
+        DefaultThreadFactory(String namePrefix) {
+            SecurityManager s = System.getSecurityManager();
+            group = (s != null) ? s.getThreadGroup() :
+                    Thread.currentThread().getThreadGroup();
+            this.namePrefix = namePrefix;
+        }
+
+        public Thread newThread(Runnable r) {
+            Thread t = new Thread(group, r,
+                    namePrefix + "-pool-" +
+                            poolNumber.getAndIncrement() +
+                            "-thread-" + threadNumber.getAndIncrement(),
+                    0);
+            if (t.isDaemon())
+                t.setDaemon(false);
+            if (t.getPriority() != Thread.NORM_PRIORITY)
+                t.setPriority(Thread.NORM_PRIORITY);
+            return t;
+        }
+    }
+
     protected ScheduledThreadPoolExecutor getExecutor() {
         if (scheduledThreadPoolExecutor == null || scheduledThreadPoolExecutor.isShutdown()) {
-            scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1, new ThreadPoolExecutor.DiscardPolicy());
+            scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1,
+                    new DefaultThreadFactory(this.getClass().getSimpleName()),
+                    new ThreadPoolExecutor.DiscardPolicy());
         }
         return scheduledThreadPoolExecutor;
     }
@@ -174,7 +205,8 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         if (fullRect == RECT_EMPTY) {
             return;
         }
-        getExecutor().execute(new Runnable() {
+        ScheduledThreadPoolExecutor executor = getExecutor();
+        executor.execute(new Runnable() {
             @Override
             public void run() {
                 synchronized (FrameSeqDecoder.this) {
@@ -195,8 +227,8 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
                 || (this.playCount == getNumPlays() - 1 && this.frameIndex < this.getFrameCount() - 1)) {
             running = true;
             this.frameIndex = -1;
-            getExecutor().remove(renderTask);
-            getExecutor().execute(renderTask);
+            executor.remove(renderTask);
+            executor.execute(renderTask);
             renderListener.onStart();
         } else {
             Log.i(TAG, "No need to started");
@@ -216,10 +248,14 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         if (fullRect == RECT_EMPTY) {
             return;
         }
-        boolean tempRunning = running;
+        if (!running) {
+            Log.i(TAG, "No need to stop");
+            return;
+        }
         running = false;
-        getExecutor().remove(renderTask);
-        getExecutor().execute(new Runnable() {
+        ScheduledThreadPoolExecutor executor = getExecutor();
+        executor.remove(renderTask);
+        executor.execute(new Runnable() {
             @Override
             public void run() {
                 synchronized (FrameSeqDecoder.this) {
@@ -247,15 +283,8 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
                 }
             }
         });
-
-        if (frameBuffer == null) {
-            getExecutor().shutdownNow();
-        } else {
-            getExecutor().shutdown();
-        }
-        if (tempRunning) {
-            renderListener.onEnd();
-        }
+        executor.shutdown();
+        renderListener.onEnd();
     }
 
     protected abstract void release();
