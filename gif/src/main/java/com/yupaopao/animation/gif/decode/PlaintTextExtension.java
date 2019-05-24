@@ -26,7 +26,7 @@ public class PlaintTextExtension extends ExtensionBlock {
         int fgColorIndex = reader.peek();
         int bgColorIndex = reader.peek();
         DataSubBlock dataSubBlock;
-        while (!(dataSubBlock = DataSubBlock.retrive(reader)).isTerminal()) {
+        while (!(dataSubBlock = DataSubBlock.retrieve(reader)).isTerminal()) {
             plainTextData.add(dataSubBlock);
         }
     }
