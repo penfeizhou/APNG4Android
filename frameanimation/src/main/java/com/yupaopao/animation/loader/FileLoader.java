@@ -33,6 +33,7 @@ public class FileLoader implements Loader {
     public void release() throws IOException {
         if (mReader != null) {
             mReader.close();
+            mReader = null;
         }
     }
 }
