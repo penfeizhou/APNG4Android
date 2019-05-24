@@ -3,8 +3,6 @@ package com.yupaopao.animation.gif.decode;
 import com.yupaopao.animation.gif.io.GifReader;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @Description: ApplicationExtension
@@ -12,14 +10,32 @@ import java.util.List;
  * @CreateDate: 2019-05-17
  */
 public class ApplicationExtension extends ExtensionBlock {
+    public int loopCount = -1;
+    public String identifier;
+
     @Override
     public void receive(GifReader reader) throws IOException {
         int blockSize = reader.peek();
-        reader.skip(blockSize);
-        DataSubBlock dataSubBlock;
-        do {
-            dataSubBlock = DataSubBlock.retrive(reader);
-        } while (!dataSubBlock.isTerminal());
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < blockSize; i++) {
+            stringBuilder.append((char) reader.peek());
+        }
+        identifier = stringBuilder.toString();
+        if ("NETSCAPE2.0".equals(identifier)) {
+            int size = reader.peek() & 0xff;
+            if (size == 3 && (reader.peek() & 0xff) == 1) {
+                loopCount = reader.readUInt16();
+            }
+            DataSubBlock dataSubBlock;
+            do {
+                dataSubBlock = DataSubBlock.retrieve(reader);
+            } while (!dataSubBlock.isTerminal());
+        } else {
+            DataSubBlock dataSubBlock;
+            do {
+                dataSubBlock = DataSubBlock.retrieve(reader);
+            } while (!dataSubBlock.isTerminal());
+        }
     }
 
     @Override
