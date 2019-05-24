@@ -1,14 +1,14 @@
 package com.yupaopao.animation.apng;
 
-import com.yupaopao.animation.loader.FileStreamLoader;
+import com.yupaopao.animation.loader.FileLoader;
 
 /**
  * @Author: pengfei.zhou
  * @CreateDate: 2019/3/28
- * @see com.yupaopao.animation.loader.FileStreamLoader use this insted
+ * @see FileLoader use this insted
  */
 @Deprecated
-public class APNGFileLoader extends FileStreamLoader {
+public class APNGFileLoader extends FileLoader {
 
     public APNGFileLoader(String path) {
         super(path);

@@ -16,7 +16,7 @@ public class StreamReader extends FilterInputStream implements Reader {
         try {
             in.reset();
         } catch (IOException e) {
-            e.printStackTrace();
+            // e.printStackTrace();
         }
     }
 
@@ -54,7 +54,6 @@ public class StreamReader extends FilterInputStream implements Reader {
 
     @Override
     public InputStream toInputStream() throws IOException {
-        reset();
         return this;
     }
 }

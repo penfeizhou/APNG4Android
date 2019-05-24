@@ -2,6 +2,7 @@ package com.yupaopao.animation.apng.io;
 
 import android.text.TextUtils;
 
+import com.yupaopao.animation.io.FilterReader;
 import com.yupaopao.animation.io.Reader;
 
 import java.io.IOException;
@@ -12,10 +13,9 @@ import java.io.InputStream;
  * @Author: pengfei.zhou
  * @CreateDate: 2019-05-13
  */
-public class APNGReader implements Reader {
+public class APNGReader extends FilterReader {
     private static ThreadLocal<byte[]> __intBytes = new ThreadLocal<>();
 
-    private Reader reader;
 
     protected static byte[] ensureBytes() {
         byte[] bytes = __intBytes.get();
@@ -27,7 +27,7 @@ public class APNGReader implements Reader {
     }
 
     public APNGReader(Reader in) {
-        this.reader = in;
+        super(in);
     }
 
     public int readInt() throws IOException {
@@ -66,46 +66,5 @@ public class APNGReader implements Reader {
         byte[] buf = ensureBytes();
         read(buf, 0, 4);
         return buf[0] & 0xff | (buf[1] & 0xff) << 8 | (buf[2] & 0xff) << 16 | (buf[3] & 0xff) << 24;
-    }
-
-    @Override
-    public long skip(long total) throws IOException {
-        return reader.skip(total);
-    }
-
-    @Override
-    public byte peek() throws IOException {
-        return reader.peek();
-    }
-
-    @Override
-    public void reset() throws IOException {
-        reader.reset();
-    }
-
-    @Override
-    public int position() {
-        return reader.position();
-    }
-
-    @Override
-    public int read(byte[] buffer, int start, int byteCount) throws IOException {
-        return reader.read(buffer, start, byteCount);
-    }
-
-    @Override
-    public int available() throws IOException {
-        return reader.available();
-    }
-
-    @Override
-    public void close() throws IOException {
-        reader.close();
-    }
-
-    @Override
-    public InputStream toInputStream() throws IOException {
-        reset();
-        return reader.toInputStream();
     }
 }
