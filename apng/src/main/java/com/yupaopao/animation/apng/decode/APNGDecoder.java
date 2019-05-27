@@ -147,10 +147,7 @@ public class APNGDecoder extends FrameSeqDecoder<APNGReader, APNGWriter> {
                 // 从快照中恢复上一帧之前的显示内容
                 case FCTLChunk.APNG_DISPOSE_OP_PREVIOUS:
                     snapShot.byteBuffer.rewind();
-                    Bitmap preBitmap = obtainBitmap(fullRect.width() / sampleSize, fullRect.height() / sampleSize);
-                    preBitmap.copyPixelsFromBuffer(snapShot.byteBuffer);
-                    canvas.drawBitmap(preBitmap, 0, 0, paint);
-                    recycleBitmap(preBitmap);
+                    bitmap.copyPixelsFromBuffer(snapShot.byteBuffer);
                     break;
                 // 清空上一帧所画区域
                 case FCTLChunk.APNG_DISPOSE_OP_BACKGROUND:
