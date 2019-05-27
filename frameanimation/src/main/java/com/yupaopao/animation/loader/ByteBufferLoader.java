@@ -18,9 +18,4 @@ public abstract class ByteBufferLoader implements Loader {
     public Reader obtain() throws IOException {
         return new ByteBufferReader(getByteBuffer());
     }
-
-    @Override
-    public void release() throws IOException {
-
-    }
 }
