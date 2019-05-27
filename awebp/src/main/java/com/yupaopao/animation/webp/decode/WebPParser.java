@@ -1,9 +1,16 @@
 package com.yupaopao.animation.webp.decode;
 
+import android.content.Context;
+
 import com.yupaopao.animation.io.Reader;
+import com.yupaopao.animation.io.StreamReader;
 import com.yupaopao.animation.webp.io.WebPReader;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +23,60 @@ public class WebPParser {
     static class FormatException extends IOException {
         FormatException() {
             super("WebP Format error");
+        }
+    }
+
+    public static boolean isAWebP(String filePath) {
+        InputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream(filePath);
+            return isAWebP(new StreamReader(inputStream));
+        } catch (Exception e) {
+            return false;
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public static boolean isAWebP(Context context, String assetPath) {
+        InputStream inputStream = null;
+        try {
+            inputStream = context.getAssets().open(assetPath);
+            return isAWebP(new StreamReader(inputStream));
+        } catch (Exception e) {
+            return false;
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public static boolean isAWebP(Context context, int resId) {
+        InputStream inputStream = null;
+        try {
+            inputStream = context.getResources().openRawResource(resId);
+            return isAWebP(new StreamReader(inputStream));
+        } catch (Exception e) {
+            return false;
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
