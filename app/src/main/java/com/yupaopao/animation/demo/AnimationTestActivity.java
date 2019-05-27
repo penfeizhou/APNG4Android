@@ -28,16 +28,15 @@ public class AnimationTestActivity extends Activity {
         String[] files = getIntent().getStringArrayExtra("files");
         for (String assetFile : files) {
             ImageView imageView = new ImageView(this);
-            AssetStreamLoader loader = new AssetStreamLoader(this, assetFile);
             Drawable drawable = null;
             if (assetFile.endsWith("png")) {
-                drawable = new APNGDrawable(loader);
+                drawable = APNGDrawable.fromAsset(this, assetFile);
             }
             if (assetFile.endsWith("webp")) {
-                drawable = new WebPDrawable(loader);
+                drawable = WebPDrawable.fromAsset(this, assetFile);
             }
             if (assetFile.endsWith("gif")) {
-                drawable = new GifDrawable(loader);
+                drawable = GifDrawable.fromAsset(this, assetFile);
             }
             imageView.setImageDrawable(drawable);
             imageView.setBackgroundColor(Color.BLACK);

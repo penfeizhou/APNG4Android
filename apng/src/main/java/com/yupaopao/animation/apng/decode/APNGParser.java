@@ -1,9 +1,14 @@
 package com.yupaopao.animation.apng.decode;
 
+import android.content.Context;
+
 import com.yupaopao.animation.apng.io.APNGReader;
 import com.yupaopao.animation.io.Reader;
+import com.yupaopao.animation.io.StreamReader;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +21,60 @@ public class APNGParser {
     static class FormatException extends IOException {
         FormatException() {
             super("APNG Format error");
+        }
+    }
+
+    public static boolean isAPNG(String filePath) {
+        InputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream(filePath);
+            return isAPNG(new StreamReader(inputStream));
+        } catch (Exception e) {
+            return false;
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public static boolean isAPNG(Context context, String assetPath) {
+        InputStream inputStream = null;
+        try {
+            inputStream = context.getAssets().open(assetPath);
+            return isAPNG(new StreamReader(inputStream));
+        } catch (Exception e) {
+            return false;
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public static boolean isAPNG(Context context, int resId) {
+        InputStream inputStream = null;
+        try {
+            inputStream = context.getResources().openRawResource(resId);
+            return isAPNG(new StreamReader(inputStream));
+        } catch (Exception e) {
+            return false;
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
