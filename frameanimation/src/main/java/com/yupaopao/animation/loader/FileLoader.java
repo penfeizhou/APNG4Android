@@ -23,17 +23,6 @@ public class FileLoader implements Loader {
 
     @Override
     public synchronized Reader obtain() throws IOException {
-        if (mReader == null) {
-            mReader = new FileReader(mFile);
-        }
-        return mReader;
-    }
-
-    @Override
-    public void release() throws IOException {
-        if (mReader != null) {
-            mReader.close();
-            mReader = null;
-        }
+        return new FileReader(mFile);
     }
 }

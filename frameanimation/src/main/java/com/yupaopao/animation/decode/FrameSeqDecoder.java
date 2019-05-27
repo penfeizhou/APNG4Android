@@ -69,6 +69,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     protected ByteBuffer frameBuffer;
     protected Rect fullRect;
     protected W mWriter = getWriter();
+    private R mReader = null;
 
     protected abstract W getWriter();
 
@@ -143,7 +144,10 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
                 @Override
                 public Rect call() throws Exception {
                     if (fullRect == null) {
-                        initCanvasBounds(read(getReader(mLoader.obtain())));
+                        if (mReader == null) {
+                            mReader = getReader(mLoader.obtain());
+                        }
+                        initCanvasBounds(read(mReader));
                     }
                     return fullRect;
                 }
@@ -163,6 +167,9 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     private void initCanvasBounds(Rect rect) {
         fullRect = rect;
         frameBuffer = ByteBuffer.allocate((rect.width() * rect.height() / (sampleSize * sampleSize) + 1) * 4);
+        if (mWriter == null) {
+            mWriter = getWriter();
+        }
     }
 
     private static class DefaultThreadFactory implements ThreadFactory {
@@ -212,7 +219,10 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
                 synchronized (FrameSeqDecoder.this) {
                     if (frames.size() == 0) {
                         try {
-                            initCanvasBounds(read(getReader(mLoader.obtain())));
+                            if (mReader == null) {
+                                mReader = getReader(mLoader.obtain());
+                            }
+                            initCanvasBounds(read(mReader));
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -274,8 +284,13 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
                     }
                     cachedCanvas.clear();
                     try {
-                        mLoader.release();
-                        mWriter.close();
+                        if (mReader != null) {
+                            mReader.close();
+                            mReader = null;
+                        }
+                        if (mWriter != null) {
+                            mWriter.close();
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
