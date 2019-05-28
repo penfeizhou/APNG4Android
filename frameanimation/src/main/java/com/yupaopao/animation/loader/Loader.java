@@ -11,6 +11,4 @@ import java.io.IOException;
  */
 public interface Loader {
     Reader obtain() throws IOException;
-
-    void release() throws IOException;
 }

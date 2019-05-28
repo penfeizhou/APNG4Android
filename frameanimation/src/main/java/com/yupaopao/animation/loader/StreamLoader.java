@@ -14,19 +14,8 @@ import java.io.InputStream;
 public abstract class StreamLoader implements Loader {
     protected abstract InputStream getInputStream() throws IOException;
 
-    private InputStream in;
 
     public final synchronized Reader obtain() throws IOException {
-        if (in == null) {
-            in = getInputStream();
-        }
-        return new StreamReader(in);
-    }
-
-    public final synchronized void release() throws IOException {
-        if (in != null) {
-            in.close();
-            in = null;
-        }
+        return new StreamReader(getInputStream());
     }
 }
