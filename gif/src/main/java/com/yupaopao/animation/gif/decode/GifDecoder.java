@@ -118,9 +118,12 @@ public class GifDecoder extends FrameSeqDecoder<GifReader, GifWriter> {
         }
         frameBuffer.rewind();
         bitmap.copyPixelsFromBuffer(frameBuffer);
-
+        int backgroundColor = Color.TRANSPARENT;
+        if (!gifFrame.transparencyFlag()) {
+            backgroundColor = this.bgColor;
+        }
         if (frameIndex == 0) {
-            bitmap.eraseColor(bgColor);
+            bitmap.eraseColor(backgroundColor);
         } else {
             GifFrame preFrame = (GifFrame) frames.get(frameIndex - 1);
             canvas.save();
@@ -155,6 +158,7 @@ public class GifDecoder extends FrameSeqDecoder<GifReader, GifWriter> {
         }
         Bitmap reused = obtainBitmap(frame.frameWidth / sampleSize, frame.frameHeight / sampleSize);
         gifFrame.draw(canvas, paint, sampleSize, reused, getWriter());
+        canvas.drawColor(backgroundColor, PorterDuff.Mode.DST_OVER);
         recycleBitmap(reused);
         frameBuffer.rewind();
         bitmap.copyPixelsToBuffer(frameBuffer);
