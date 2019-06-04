@@ -62,6 +62,10 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
         imageDataOffset = imageDescriptor.imageDataOffset;
     }
 
+    public boolean transparencyFlag() {
+        return transparentColorIndex >= 0;
+    }
+
     @Override
     public Bitmap draw(Canvas canvas, Paint paint, int sampleSize, Bitmap reusedBitmap, GifWriter writer) {
         try {
