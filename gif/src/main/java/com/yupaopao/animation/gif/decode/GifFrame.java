@@ -87,7 +87,7 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
                     lzwMinCodeSize,
                     interlace,
                     dataBlock);
-            reusedBitmap.copyPixelsFromBuffer(writer.asBuffer());
+            reusedBitmap.copyPixelsFromBuffer(writer.asBuffer().rewind());
             canvas.drawBitmap(reusedBitmap, frameX / sampleSize, frameY / sampleSize, paint);
         } catch (Exception e) {
             e.printStackTrace();
