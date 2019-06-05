@@ -26,8 +26,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @Description: Abstract Frame Animation Decoder
@@ -71,6 +69,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     protected Rect fullRect;
     protected W mWriter = getWriter();
     private R mReader = null;
+    private static final boolean DEBUG = false;
 
     private enum State {
         IDLE,
@@ -150,8 +149,13 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         if (fullRect != null) {
             return fullRect;
         } else {
-            while (mState == State.FINISHING) {
+            if (mState == State.FINISHING) {
                 Log.e(TAG, "In finishing,do not interrupt");
+                try {
+                    wait(3000);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             Callable<Rect> callable = new Callable<Rect>() {
                 @Override
@@ -229,14 +233,20 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         }
 
         if (mState == State.RUNNING || mState == State.INITIALIZING) {
-            Log.i(TAG, getEnv() + " Already started");
+            Log.i(TAG, debugInfo() + " Already started");
             return;
         }
-
-        while (mState == State.FINISHING) {
-            Log.e(TAG, getEnv() + " Processing,wait for finish at " + mState);
+        if (mState == State.FINISHING) {
+            Log.e(TAG, debugInfo() + " Processing,wait for finish at " + mState);
+            try {
+                wait(3000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-        Log.i(TAG, getEnv() + "Set state to INITIALIZING");
+        if (DEBUG) {
+            Log.i(TAG, debugInfo() + "Set state to INITIALIZING");
+        }
         mState = State.INITIALIZING;
         ScheduledThreadPoolExecutor executor = getExecutor();
         executor.execute(new Runnable() {
@@ -251,17 +261,14 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
                                 mReader.reset();
                             }
                             initCanvasBounds(read(mReader));
-                            Log.i(TAG, getEnv() + " Set state to RUNNING");
-                            mState = State.RUNNING;
                         } catch (Throwable e) {
                             e.printStackTrace();
                         }
                     }
                 } finally {
-                    if (mState == State.INITIALIZING) {
-                        Log.i(TAG, getEnv() + " Set state to IDLE");
-                        mState = State.IDLE;
-                    }
+                    Log.i(TAG, debugInfo() + " Set state to RUNNING");
+                    mState = State.RUNNING;
+                    FrameSeqDecoder.this.notify();
                 }
             }
         });
@@ -273,7 +280,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
             executor.execute(renderTask);
             renderListener.onStart();
         } else {
-            Log.i(TAG, getEnv() + " No need to started");
+            Log.i(TAG, debugInfo() + " No need to started");
         }
     }
 
@@ -291,13 +298,20 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
             return;
         }
         if (mState == State.FINISHING || mState == State.IDLE) {
-            Log.i(TAG, getEnv() + "No need to stop");
+            Log.i(TAG, debugInfo() + "No need to stop");
             return;
         }
-        while (mState == State.INITIALIZING) {
-            Log.e(TAG, getEnv() + "Processing,wait for finish at " + mState);
+        if (mState == State.INITIALIZING) {
+            Log.e(TAG, debugInfo() + "Processing,wait for finish at " + mState);
+            try {
+                wait(3000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-        Log.i(TAG, getEnv() + " Set state to finishing");
+        if (DEBUG) {
+            Log.i(TAG, debugInfo() + " Set state to finishing");
+        }
         mState = State.FINISHING;
         final ScheduledThreadPoolExecutor executor = getExecutor();
         executor.execute(new Runnable() {
@@ -327,16 +341,22 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
                     e.printStackTrace();
                 }
                 release();
-                Log.i(TAG, getEnv() + " release and Set state to IDLE");
+                if (DEBUG) {
+                    Log.i(TAG, debugInfo() + " release and Set state to IDLE");
+                }
                 mState = State.IDLE;
+                FrameSeqDecoder.this.notify();
             }
         });
         executor.shutdown();
         renderListener.onEnd();
     }
 
-    private String getEnv() {
-        return String.format("thread is %s, decoder is %s,state is %s", Thread.currentThread(), FrameSeqDecoder.this.toString(), mState.toString());
+    private String debugInfo() {
+        if (DEBUG) {
+            return String.format("thread is %s, decoder is %s,state is %s", Thread.currentThread(), FrameSeqDecoder.this.toString(), mState.toString());
+        }
+        return "";
     }
 
     protected abstract void release();
