@@ -14,6 +14,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.graphics.drawable.Animatable2Compat;
+import android.util.Log;
 
 import com.yupaopao.animation.decode.FrameSeqDecoder;
 import com.yupaopao.animation.loader.Loader;
@@ -93,11 +94,17 @@ public abstract class FrameAnimationDrawable extends Drawable implements Animata
 
     @Override
     public void start() {
+        if (FrameSeqDecoder.DEBUG) {
+            Log.d(TAG, this.toString() + ",start");
+        }
         frameSeqDecoder.start();
     }
 
     @Override
     public void stop() {
+        if (FrameSeqDecoder.DEBUG) {
+            Log.d(TAG, this.toString() + ",stop");
+        }
         frameSeqDecoder.stop();
         if (bitmap != null && !bitmap.isRecycled()) {
             bitmap.recycle();
@@ -126,9 +133,6 @@ public abstract class FrameAnimationDrawable extends Drawable implements Animata
         matrix.setScale(
                 1.0f * getBounds().width() * frameSeqDecoder.getSampleSize() / frameSeqDecoder.getBounds().width(),
                 1.0f * getBounds().height() * frameSeqDecoder.getSampleSize() / frameSeqDecoder.getBounds().height());
-        if (!isRunning()) {
-            start();
-        }
     }
 
     @Override
@@ -174,6 +178,9 @@ public abstract class FrameAnimationDrawable extends Drawable implements Animata
 
     @Override
     public boolean setVisible(boolean visible, boolean restart) {
+        if (FrameSeqDecoder.DEBUG) {
+            Log.d(TAG, this.toString() + ",visible:" + visible + ",restart:" + restart);
+        }
         if (visible) {
             if (!isRunning()) {
                 start();
