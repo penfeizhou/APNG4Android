@@ -40,7 +40,6 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     private int playCount;
     private Integer loopLimit = null;
     private final RenderListener renderListener;
-    private boolean running;
     private boolean paused;
     private static final Rect RECT_EMPTY = new Rect();
     private Runnable renderTask = new Runnable() {
@@ -70,6 +69,16 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     protected Rect fullRect;
     protected W mWriter = getWriter();
     private R mReader = null;
+    private static final boolean DEBUG = false;
+
+    private enum State {
+        IDLE,
+        RUNNING,
+        INITIALIZING,
+        FINISHING,
+    }
+
+    private volatile State mState = State.IDLE;
 
     protected abstract W getWriter();
 
@@ -140,12 +149,22 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         if (fullRect != null) {
             return fullRect;
         } else {
+            if (mState == State.FINISHING) {
+                Log.e(TAG, "In finishing,do not interrupt");
+                try {
+                    wait(3000);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
             Callable<Rect> callable = new Callable<Rect>() {
                 @Override
                 public Rect call() throws Exception {
                     if (fullRect == null) {
                         if (mReader == null) {
                             mReader = getReader(mLoader.obtain());
+                        } else {
+                            mReader.reset();
                         }
                         initCanvasBounds(read(mReader));
                     }
@@ -212,36 +231,56 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         if (fullRect == RECT_EMPTY) {
             return;
         }
+
+        if (mState == State.RUNNING || mState == State.INITIALIZING) {
+            Log.i(TAG, debugInfo() + " Already started");
+            return;
+        }
+        if (mState == State.FINISHING) {
+            Log.e(TAG, debugInfo() + " Processing,wait for finish at " + mState);
+            try {
+                wait(3000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (DEBUG) {
+            Log.i(TAG, debugInfo() + "Set state to INITIALIZING");
+        }
+        mState = State.INITIALIZING;
         ScheduledThreadPoolExecutor executor = getExecutor();
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                synchronized (FrameSeqDecoder.this) {
+                try {
                     if (frames.size() == 0) {
                         try {
                             if (mReader == null) {
                                 mReader = getReader(mLoader.obtain());
+                            } else {
+                                mReader.reset();
                             }
                             initCanvasBounds(read(mReader));
-                        } catch (IOException e) {
+                        } catch (Throwable e) {
                             e.printStackTrace();
                         }
                     }
+                } finally {
+                    Log.i(TAG, debugInfo() + " Set state to RUNNING");
+                    mState = State.RUNNING;
+                    FrameSeqDecoder.this.notify();
                 }
             }
         });
-        if (running) {
-            Log.i(TAG, "Already started");
-        } else if (getNumPlays() == 0
+        if (getNumPlays() == 0
                 || this.playCount < getNumPlays() - 1
                 || (this.playCount == getNumPlays() - 1 && this.frameIndex < this.getFrameCount() - 1)) {
-            running = true;
             this.frameIndex = -1;
             executor.remove(renderTask);
             executor.execute(renderTask);
             renderListener.onStart();
         } else {
-            Log.i(TAG, "No need to started");
+            Log.i(TAG, debugInfo() + " No need to started");
         }
     }
 
@@ -258,54 +297,72 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         if (fullRect == RECT_EMPTY) {
             return;
         }
-        if (!running) {
-            Log.i(TAG, "No need to stop");
+        if (mState == State.FINISHING || mState == State.IDLE) {
+            Log.i(TAG, debugInfo() + "No need to stop");
             return;
         }
-        running = false;
-        ScheduledThreadPoolExecutor executor = getExecutor();
-        executor.remove(renderTask);
+        if (mState == State.INITIALIZING) {
+            Log.e(TAG, debugInfo() + "Processing,wait for finish at " + mState);
+            try {
+                wait(3000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (DEBUG) {
+            Log.i(TAG, debugInfo() + " Set state to finishing");
+        }
+        mState = State.FINISHING;
+        final ScheduledThreadPoolExecutor executor = getExecutor();
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                synchronized (FrameSeqDecoder.this) {
-                    if (running) {
-                        return;
+                executor.getQueue().clear();
+                frames.clear();
+                for (Bitmap bitmap : cacheBitmaps) {
+                    if (bitmap != null && !bitmap.isRecycled()) {
+                        bitmap.recycle();
                     }
-                    frames.clear();
-                    for (Bitmap bitmap : cacheBitmaps) {
-                        if (bitmap != null && !bitmap.isRecycled()) {
-                            bitmap.recycle();
-                        }
-                    }
-                    cacheBitmaps.clear();
-                    if (frameBuffer != null) {
-                        frameBuffer = null;
-                    }
-                    cachedCanvas.clear();
-                    try {
-                        if (mReader != null) {
-                            mReader.close();
-                            mReader = null;
-                        }
-                        if (mWriter != null) {
-                            mWriter.close();
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    release();
                 }
+                cacheBitmaps.clear();
+                if (frameBuffer != null) {
+                    frameBuffer = null;
+                }
+                cachedCanvas.clear();
+                try {
+                    if (mReader != null) {
+                        mReader.close();
+                        mReader = null;
+                    }
+                    if (mWriter != null) {
+                        mWriter.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                release();
+                if (DEBUG) {
+                    Log.i(TAG, debugInfo() + " release and Set state to IDLE");
+                }
+                mState = State.IDLE;
+                FrameSeqDecoder.this.notify();
             }
         });
         executor.shutdown();
         renderListener.onEnd();
     }
 
+    private String debugInfo() {
+        if (DEBUG) {
+            return String.format("thread is %s, decoder is %s,state is %s", Thread.currentThread(), FrameSeqDecoder.this.toString(), mState.toString());
+        }
+        return "";
+    }
+
     protected abstract void release();
 
     public boolean isRunning() {
-        return running;
+        return mState == State.RUNNING || mState == State.INITIALIZING;
     }
 
     public boolean isPaused() {
@@ -340,7 +397,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         int sample = getDesiredSample(width, height);
         if (sample != this.sampleSize) {
             this.sampleSize = sample;
-            final boolean tempRunning = running;
+            final boolean tempRunning = isRunning();
             stop();
             getExecutor().execute(new Runnable() {
                 @Override

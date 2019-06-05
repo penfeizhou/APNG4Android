@@ -42,7 +42,7 @@ public class StreamAnimationDecoder implements ResourceDecoder<InputStream, Draw
 
     @Override
     public boolean handles(@NonNull InputStream source, @NonNull Options options) {
-        return !options.get(GifOptions.DISABLE_ANIMATION)
+        return !options.get(AnimationDecoderOption.DISABLE_ANIMATION_DECODER)
                 && (WebPParser.isAWebP(new StreamReader(source))
                 || APNGParser.isAPNG(new StreamReader(source))
                 || GifParser.isGif(new StreamReader(source)));

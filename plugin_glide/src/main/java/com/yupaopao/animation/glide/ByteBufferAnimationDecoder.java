@@ -32,7 +32,7 @@ public class ByteBufferAnimationDecoder implements ResourceDecoder<ByteBuffer, D
 
     @Override
     public boolean handles(@NonNull ByteBuffer source, @NonNull Options options) {
-        return !options.get(GifOptions.DISABLE_ANIMATION)
+        return !options.get(AnimationDecoderOption.DISABLE_ANIMATION_DECODER)
                 && (WebPParser.isAWebP(new ByteBufferReader(source))
                 || APNGParser.isAPNG(new ByteBufferReader(source))
                 || GifParser.isGif(new ByteBufferReader(source)));
