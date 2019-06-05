@@ -8,7 +8,6 @@ import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.resource.drawable.DrawableResource;
-import com.bumptech.glide.load.resource.gif.GifOptions;
 import com.yupaopao.animation.FrameAnimationDrawable;
 import com.yupaopao.animation.apng.APNGDrawable;
 import com.yupaopao.animation.apng.decode.APNGParser;
@@ -32,10 +31,9 @@ public class ByteBufferAnimationDecoder implements ResourceDecoder<ByteBuffer, D
 
     @Override
     public boolean handles(@NonNull ByteBuffer source, @NonNull Options options) {
-        return !options.get(AnimationDecoderOption.DISABLE_ANIMATION_DECODER)
-                && (WebPParser.isAWebP(new ByteBufferReader(source))
-                || APNGParser.isAPNG(new ByteBufferReader(source))
-                || GifParser.isGif(new ByteBufferReader(source)));
+        return (!options.get(AnimationDecoderOption.DISABLE_ANIMATION_WEBP_DECODER) && WebPParser.isAWebP(new ByteBufferReader(source)))
+                || (!options.get(AnimationDecoderOption.DISABLE_ANIMATION_APNG_DECODER) && APNGParser.isAPNG(new ByteBufferReader(source)))
+                || (!options.get(AnimationDecoderOption.DISABLE_ANIMATION_GIF_DECODER) && GifParser.isGif(new ByteBufferReader(source)));
     }
 
     @Nullable

@@ -10,11 +10,24 @@ import com.bumptech.glide.load.Option;
 public final class AnimationDecoderOption {
 
     /**
-     * If set to {@code true}, disables the Frame Animation Decoder {@link com.yupaopao.animation.FrameAnimationDrawable}
+     * If set to {@code true}, disables the Frame Animation Decoder {@link com.yupaopao.animation.gif.GifDrawable}
+     * Defaults to {@code true}.
+     */
+    public static final Option<Boolean> DISABLE_ANIMATION_GIF_DECODER = Option.memory(
+            "com.yupaopao.animation.glide.AnimationDecoderOption.DISABLE_ANIMATION_GIF_DECODER", true);
+    /**
+     * If set to {@code true}, disables the Frame Animation Decoder {@link com.yupaopao.animation.webp.WebPDrawable}
      * Defaults to {@code false}.
      */
-    public static final Option<Boolean> DISABLE_ANIMATION_DECODER = Option.memory(
-            "com.yupaopao.animation.glide.AnimationDecoderOption.DISABLE_ANIMATION_DECODER", false);
+    public static final Option<Boolean> DISABLE_ANIMATION_WEBP_DECODER = Option.memory(
+            "com.yupaopao.animation.glide.AnimationDecoderOption.DISABLE_ANIMATION_WEBP_DECODER", false);
+    /**
+     * If set to {@code true}, disables the Frame Animation Decoder {@link com.yupaopao.animation.apng.APNGDrawable}
+     * Defaults to {@code false}.
+     */
+    public static final Option<Boolean> DISABLE_ANIMATION_APNG_DECODER = Option.memory(
+            "com.yupaopao.animation.glide.AnimationDecoderOption.DISABLE_ANIMATION_APNG_DECODER", false);
+
 
     private AnimationDecoderOption() {
     }
