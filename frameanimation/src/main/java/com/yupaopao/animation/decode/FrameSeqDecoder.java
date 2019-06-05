@@ -45,6 +45,9 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     private Runnable renderTask = new Runnable() {
         @Override
         public void run() {
+            if (DEBUG) {
+                Log.d(TAG, renderListener.toString() + ",run");
+            }
             if (paused) {
                 return;
             }
@@ -69,7 +72,11 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     protected Rect fullRect;
     protected W mWriter = getWriter();
     private R mReader = null;
-    private static final boolean DEBUG = false;
+    public static final boolean DEBUG = false;
+    /**
+     * If played all the needed
+     */
+    private boolean finished = false;
 
     private enum State {
         IDLE,
@@ -227,7 +234,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         return scheduledThreadPoolExecutor;
     }
 
-    public void start() {
+    public synchronized void start() {
         if (fullRect == RECT_EMPTY) {
             return;
         }
@@ -236,19 +243,15 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
             Log.i(TAG, debugInfo() + " Already started");
             return;
         }
-        if (mState == State.FINISHING) {
+        while (mState == State.FINISHING) {
             Log.e(TAG, debugInfo() + " Processing,wait for finish at " + mState);
-            try {
-                wait(3000);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
         if (DEBUG) {
             Log.i(TAG, debugInfo() + "Set state to INITIALIZING");
         }
         mState = State.INITIALIZING;
         ScheduledThreadPoolExecutor executor = getExecutor();
+        final long start = System.currentTimeMillis();
         executor.execute(new Runnable() {
             @Override
             public void run() {
@@ -266,15 +269,12 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
                         }
                     }
                 } finally {
-                    Log.i(TAG, debugInfo() + " Set state to RUNNING");
+                    Log.i(TAG, debugInfo() + " Set state to RUNNING,cost " + (System.currentTimeMillis() - start));
                     mState = State.RUNNING;
-                    FrameSeqDecoder.this.notify();
                 }
             }
         });
-        if (getNumPlays() == 0
-                || this.playCount < getNumPlays() - 1
-                || (this.playCount == getNumPlays() - 1 && this.frameIndex < this.getFrameCount() - 1)) {
+        if (getNumPlays() == 0 || !finished) {
             this.frameIndex = -1;
             executor.remove(renderTask);
             executor.execute(renderTask);
@@ -293,7 +293,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
      */
     protected abstract int getLoopCount();
 
-    public void stop() {
+    public synchronized void stop() {
         if (fullRect == RECT_EMPTY) {
             return;
         }
@@ -301,13 +301,8 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
             Log.i(TAG, debugInfo() + "No need to stop");
             return;
         }
-        if (mState == State.INITIALIZING) {
+        while (mState == State.INITIALIZING) {
             Log.e(TAG, debugInfo() + "Processing,wait for finish at " + mState);
-            try {
-                wait(3000);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
         if (DEBUG) {
             Log.i(TAG, debugInfo() + " Set state to finishing");
@@ -376,6 +371,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     public void reset() {
         this.playCount = 0;
         this.frameIndex = -1;
+        this.finished = false;
     }
 
     public void pause() {
@@ -449,6 +445,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         } else if (this.playCount == getNumPlays() - 1 && this.frameIndex < this.getFrameCount() - 1) {
             return true;
         }
+        finished = true;
         return false;
     }
 
