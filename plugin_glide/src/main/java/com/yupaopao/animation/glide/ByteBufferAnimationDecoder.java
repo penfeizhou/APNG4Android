@@ -70,6 +70,7 @@ public class ByteBufferAnimationDecoder implements ResourceDecoder<ByteBuffer, D
 
             @Override
             public void recycle() {
+                ((FrameAnimationDrawable) drawable).stop();
             }
         };
     }
