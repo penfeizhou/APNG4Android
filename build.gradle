@@ -18,9 +18,6 @@ allprojects {
         maven {
             url "https://dl.bintray.com/osborn/Android"
         }
-        maven {
-            url "http://maven.yupaopao.cn/nexus/content/groups/public/"
-        }
     }
     def needReplaceLocal = true
     gradle.startParameter.taskNames.each {
