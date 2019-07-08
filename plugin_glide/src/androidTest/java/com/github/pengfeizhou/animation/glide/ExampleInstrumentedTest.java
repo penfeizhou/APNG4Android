@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.yupaopao.glide_awebp.test", appContext.getPackageName());
+        assertEquals("com.github.pengfeizhou.glide_awebp.test", appContext.getPackageName());
     }
 }
