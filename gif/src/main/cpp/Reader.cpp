@@ -4,7 +4,7 @@
 
 #include "Reader.h"
 
-#define READER_CLASS_PATH "com/yupaopao/animation/io/Reader"
+#define READER_CLASS_PATH "com/github/pengfeizhou/animation/io/Reader"
 
 #define min(a, b) \
    ({ __typeof__ (a) _a = (a); \
