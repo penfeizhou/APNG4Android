@@ -18,9 +18,6 @@ allprojects {
         maven {
             url "https://dl.bintray.com/osborn/Android"
         }
-        maven {
-            url "http://maven.yupaopao.cn/nexus/content/groups/public/"
-        }
     }
     def needReplaceLocal = true
     gradle.startParameter.taskNames.each {
@@ -32,11 +29,11 @@ allprojects {
         configurations.all {
             resolutionStrategy {
                 dependencySubstitution {
-                    substitute module('com.yupaopao.android.animation:frameanimation') with project(":frameanimation")
-                    substitute module('com.yupaopao.android.animation:apng') with project(":apng")
-                    substitute module('com.yupaopao.android.animation:awebp') with project(":awebp")
-                    substitute module('com.yupaopao.android.animation:gif') with project(":gif")
-                    substitute module('com.yupaopao.android.animation:glide-plugin') with project(":plugin_glide")
+                    substitute module('com.github.pengfeizhou.android.animation:frameanimation') with project(":frameanimation")
+                    substitute module('com.github.pengfeizhou.android.animation:apng') with project(":apng")
+                    substitute module('com.github.pengfeizhou.android.animation:awebp') with project(":awebp")
+                    substitute module('com.github.pengfeizhou.android.animation:gif') with project(":gif")
+                    substitute module('com.github.pengfeizhou.android.animation:glide-plugin') with project(":plugin_glide")
                 }
             }
         }
