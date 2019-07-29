@@ -15,17 +15,19 @@ repositories {
         jcenter()
 }
 ```
+#### Animated WebP
 ```gradle
 dependencies {
     implementation 'com.github.penfeizhou.android.animation:awebp:1.0.0'
 }
 ```
+#### APNG
 ```gradle
 dependencies {
     implementation 'com.github.penfeizhou.android.animation:apng:1.0.0'
 }
 ```
-
+#### Gif
 ```gradle
 dependencies {
     implementation 'com.github.penfeizhou.android.animation:gif:1.0.0'
