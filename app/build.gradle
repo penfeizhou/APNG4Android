@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "com.github.pengfeizhou.animation.demo"
+        applicationId "com.github.penfeizhou.animation.demo"
         minSdkVersion 19
         targetSdkVersion 28
         versionCode 1
