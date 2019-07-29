@@ -17,8 +17,8 @@ repositories {
         }
 }
 dependencies {
-    implementation 'com.github.pengfeizhou.android.animation:awebp:0.2.16'
-    implementation 'com.github.pengfeizhou.android.animation:apng:0.2.16'
+    implementation 'com.github.penfeizhou.android.animation:awebp:0.2.16'
+    implementation 'com.github.penfeizhou.android.animation:apng:0.2.16'
 }
 ```
 
@@ -70,7 +70,7 @@ repositories {
         }
 }
 dependencies {
-    implementation 'com.github.pengfeizhou.android.animation:glide-plugin:0.2.16'
+    implementation 'com.github.penfeizhou.android.animation:glide-plugin:0.2.16'
 }
 ```
 ### Direct use
