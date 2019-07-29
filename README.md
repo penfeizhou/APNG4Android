@@ -12,16 +12,27 @@
 
 ```gradle
 repositories {
-        maven {
-            url "https://dl.bintray.com/osborn/Android"
-        }
-}
-dependencies {
-    implementation 'com.github.pengfeizhou.android.animation:awebp:0.2.16'
-    implementation 'com.github.pengfeizhou.android.animation:apng:0.2.16'
+        jcenter()
 }
 ```
-
+#### Animated WebP
+```gradle
+dependencies {
+    implementation 'com.github.penfeizhou.android.animation:awebp:1.0.0'
+}
+```
+#### APNG
+```gradle
+dependencies {
+    implementation 'com.github.penfeizhou.android.animation:apng:1.0.0'
+}
+```
+#### Gif
+```gradle
+dependencies {
+    implementation 'com.github.penfeizhou.android.animation:gif:1.0.0'
+}
+```
 ### Use
 
 ```java
@@ -70,7 +81,7 @@ repositories {
         }
 }
 dependencies {
-    implementation 'com.github.pengfeizhou.android.animation:glide-plugin:0.2.16'
+    implementation 'com.github.penfeizhou.android.animation:glide-plugin:1.0.0'
 }
 ```
 ### Direct use
