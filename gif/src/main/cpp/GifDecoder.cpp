@@ -26,7 +26,7 @@ struct Slice {
 };
 
 JNIEXPORT void JNICALL
-Java_com_github_pengfeizhou_animation_gif_decode_GifFrame_uncompressLZW(
+Java_com_github_penfeizhou_animation_gif_decode_GifFrame_uncompressLZW(
         JNIEnv *env,
         jobject /* this */,
         jobject jReader,
