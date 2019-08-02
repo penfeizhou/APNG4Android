@@ -102,7 +102,7 @@ public class WebPParser {
         return false;
     }
 
-    static List<BaseChunk> parse(WebPReader reader) throws IOException {
+    public static List<BaseChunk> parse(WebPReader reader) throws IOException {
         //@link {https://developers.google.com/speed/webp/docs/riff_container#webp_file_header}
         if (!reader.matchFourCC("RIFF")) {
             throw new FormatException();
