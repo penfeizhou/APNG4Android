@@ -24,6 +24,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.tv_4).setOnClickListener(this);
         findViewById(R.id.tv_5).setOnClickListener(this);
         findViewById(R.id.tv_6).setOnClickListener(this);
+        findViewById(R.id.tv_7).setOnClickListener(this);
     }
 
     @Override
@@ -82,6 +83,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         "5.gif",
                         "6.gif",
                 });
+                startActivity(intent);
+            }
+            break;
+            case R.id.tv_7: {
+                Intent intent = new Intent(this, EncoderTestActivity.class);
                 startActivity(intent);
             }
             break;
