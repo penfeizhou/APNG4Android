@@ -10,7 +10,7 @@ import java.io.IOException;
  * @Author: pengfei.zhou
  * @CreateDate: 2019-05-11
  */
-class VP8XChunk extends BaseChunk {
+public class VP8XChunk extends BaseChunk {
     static final int ID = BaseChunk.fourCCToInt("VP8X");
     /**
      * 0                   1                   2                   3
@@ -51,12 +51,12 @@ class VP8XChunk extends BaseChunk {
      * Canvas Width Minus One: 24 bits
      * 1-based width of the canvas in pixels. The actual canvas width is '1 + Canvas Width Minus One'
      */
-    int canvasWidth;
+    public int canvasWidth;
     /**
      * Canvas Height Minus One: 24 bits
      * 1-based height of the canvas in pixels. The actual canvas height is '1 + Canvas Height Minus One'
      */
-    int canvasHeight;
+    public int canvasHeight;
 
     void innerParse(WebPReader reader) throws IOException {
         flags = reader.peek();

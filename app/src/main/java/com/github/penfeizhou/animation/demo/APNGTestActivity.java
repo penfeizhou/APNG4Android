@@ -38,7 +38,7 @@ public class APNGTestActivity extends Activity {
                     .set(AnimationDecoderOption.DISABLE_ANIMATION_GIF_DECODER, false)
                     .into(imageView);
         }
-//        FileLoader fileLoader = new FileLoader("/data/data/com.github.penfeizhou.animation.demo/cache/image_manager_disk_cache/b6dd68d837b8d1e8f24edb0a0df5213b7accebb16c22c8202e95363f7227740e.0");
+//        FileLoader fileLoader = new FileLoader("/data/data/com.github.pengfeizhou.animation.demo/cache/image_manager_disk_cache/b6dd68d837b8d1e8f24edb0a0df5213b7accebb16c22c8202e95363f7227740e.0");
 //
 //        ImageView imageView = new ImageView(this);
 //        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
