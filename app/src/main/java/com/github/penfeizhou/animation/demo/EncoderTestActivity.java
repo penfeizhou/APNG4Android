@@ -10,8 +10,6 @@ import com.bumptech.glide.Glide;
 import com.github.penfeizhou.animation.awebpencoder.WebPEncoder;
 import com.github.penfeizhou.animation.loader.AssetStreamLoader;
 
-import java.nio.ByteBuffer;
-
 /**
  * @Description: 作用描述
  * @Author: pengfei.zhou

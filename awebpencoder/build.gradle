@@ -34,3 +34,4 @@ dependencies {
     // api("com.github.penfeizhou.android.animation:apng:${rootProject.ext.Version}")
     api("com.github.penfeizhou.android.animation:gif:${rootProject.ext.Version}")
 }
+apply from: rootProject.file('scripts/upload.gradle')
