@@ -67,10 +67,14 @@ task publishGif dependsOn(publishFrameAnimation, ":gif:uploadArchives") {
     println "Gif published"
 }
 
+task publishAWebPEncoder dependsOn(publishAWebP, publishGif, ":awebpencoder:uploadArchives") {
+    println "AwebP Encoder published"
+}
+
 task publishGlidePlugin dependsOn(publishAPNG, publishAWebP, publishGif, ":plugin_glide:uploadArchives") {
     println "GlidePlugin published"
 }
 
-task PublishAll dependsOn(publishGlidePlugin) {
+task PublishAll dependsOn(publishGlidePlugin, publishAWebPEncoder) {
     println "All published"
 }
