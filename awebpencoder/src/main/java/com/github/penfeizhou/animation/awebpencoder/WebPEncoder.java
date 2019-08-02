@@ -1,10 +1,22 @@
 package com.github.penfeizhou.animation.awebpencoder;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
 
+import com.github.penfeizhou.animation.gif.decode.ApplicationExtension;
+import com.github.penfeizhou.animation.gif.decode.Block;
+import com.github.penfeizhou.animation.gif.decode.ColorTable;
+import com.github.penfeizhou.animation.gif.decode.GifFrame;
+import com.github.penfeizhou.animation.gif.decode.GifParser;
+import com.github.penfeizhou.animation.gif.decode.GraphicControlExtension;
+import com.github.penfeizhou.animation.gif.decode.ImageDescriptor;
+import com.github.penfeizhou.animation.gif.decode.LogicalScreenDescriptor;
+import com.github.penfeizhou.animation.gif.io.GifReader;
+import com.github.penfeizhou.animation.gif.io.GifWriter;
 import com.github.penfeizhou.animation.io.ByteBufferReader;
+import com.github.penfeizhou.animation.loader.Loader;
 import com.github.penfeizhou.animation.webp.decode.BaseChunk;
 import com.github.penfeizhou.animation.webp.decode.VP8XChunk;
 import com.github.penfeizhou.animation.webp.decode.WebPParser;
@@ -36,6 +48,76 @@ public class WebPEncoder {
     public WebPEncoder() {
     }
 
+
+    public ByteBuffer fromGif(Loader loader) {
+        try {
+            GifReader reader = new GifReader(loader.obtain());
+            List<Block> blocks = GifParser.parse(reader);
+            ColorTable globalColorTable = null;
+            List<GifFrame> frames = new ArrayList<>();
+            GraphicControlExtension graphicControlExtension = null;
+            int bgColorIndex = -1;
+            for (Block block : blocks) {
+                if (block instanceof LogicalScreenDescriptor) {
+                    width = ((LogicalScreenDescriptor) block).screenWidth;
+                    height = ((LogicalScreenDescriptor) block).screenHeight;
+                    if (((LogicalScreenDescriptor) block).gColorTableFlag()) {
+                        bgColorIndex = ((LogicalScreenDescriptor) block).bgColorIndex & 0xff;
+                    }
+                } else if (block instanceof ColorTable) {
+                    globalColorTable = (ColorTable) block;
+                } else if (block instanceof GraphicControlExtension) {
+                    graphicControlExtension = (GraphicControlExtension) block;
+                } else if (block instanceof ImageDescriptor) {
+                    GifFrame gifFrame = new GifFrame(reader, globalColorTable, graphicControlExtension, (ImageDescriptor) block);
+                    frames.add(gifFrame);
+                } else if (block instanceof ApplicationExtension && "NETSCAPE2.0".equals(((ApplicationExtension) block).identifier)) {
+                    loopCount = ((ApplicationExtension) block).loopCount;
+                }
+            }
+            if (globalColorTable != null && bgColorIndex > 0) {
+                int abgr = globalColorTable.getColorTable()[bgColorIndex];
+                this.bgColor = Color.rgb(abgr & 0xff, (abgr >> 8) & 0xff, (abgr >> 16) & 0xff);
+            }
+            GifWriter writer = new GifWriter();
+            for (GifFrame frame : frames) {
+                writer.reset(frame.frameWidth * frame.frameHeight);
+                int[] pixels = writer.asIntArray();
+                frame.encode(pixels, 1);
+                Bitmap bitmap = Bitmap.createBitmap(frame.frameWidth, frame.frameHeight, Bitmap.Config.ARGB_8888);
+                bitmap.copyPixelsFromBuffer(writer.asBuffer().rewind());
+                FrameBuilder frameBuilder = new FrameBuilder();
+                boolean disposal, blending;
+                switch (frame.disposalMethod) {
+                    case 0:
+                    case 1:
+                        disposal = false;
+                        blending = true;
+                        break;
+                    case 2:
+                        disposal = true;
+                        blending = true;
+                        break;
+                    case 3:
+                        disposal = true;
+                        blending = true;
+                        break;
+                }
+                frameBuilder
+                        .bitmap(bitmap)
+                        .duration(frame.frameDuration)
+                        .x(frame.frameX)
+                        .y(frame.frameY)
+                        .disposal(frame.disposalMethod != 2)
+                        .blending(frame.disposalMethod == 2);
+                frameInfoList.add(frameBuilder.build());
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return this.build();
+    }
 
     public WebPEncoder loopCount(int loopCount) {
         this.loopCount = loopCount;
@@ -122,8 +204,8 @@ public class WebPEncoder {
             List<BaseChunk> chunks = WebPParser.parse(reader);
 
             int payLoadSize = 16;
-            int width = 0;
-            int height = 0;
+            int width = frameInfo.bitmap.getWidth();
+            int height = frameInfo.bitmap.getHeight();
             for (BaseChunk chunk : chunks) {
                 if (chunk instanceof VP8XChunk) {
                     width = ((VP8XChunk) chunk).canvasWidth;

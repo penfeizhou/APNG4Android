@@ -9,7 +9,7 @@ import java.io.IOException;
  * @Author: pengfei.zhou
  * @CreateDate: 2019-05-17
  */
-class GraphicControlExtension extends ExtensionBlock {
+public class GraphicControlExtension extends ExtensionBlock {
     private int blockSize;
     private byte packedFields;
     public int delayTime;
