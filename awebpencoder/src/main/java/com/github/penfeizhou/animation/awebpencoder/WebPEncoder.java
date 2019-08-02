@@ -48,8 +48,13 @@ public class WebPEncoder {
     public WebPEncoder() {
     }
 
+    public static WebPEncoder fromGif(Loader loader) {
+        WebPEncoder webPEncoder = new WebPEncoder();
+        webPEncoder.loadGif(loader);
+        return webPEncoder;
+    }
 
-    public ByteBuffer fromGif(Loader loader) {
+    private void loadGif(Loader loader) {
         try {
             GifReader reader = new GifReader(loader.obtain());
             List<Block> blocks = GifParser.parse(reader);
@@ -87,7 +92,7 @@ public class WebPEncoder {
                 Bitmap bitmap = Bitmap.createBitmap(frame.frameWidth, frame.frameHeight, Bitmap.Config.ARGB_8888);
                 bitmap.copyPixelsFromBuffer(writer.asBuffer().rewind());
                 FrameBuilder frameBuilder = new FrameBuilder();
-                boolean disposal, blending;
+                boolean disposal = false, blending = false;
                 switch (frame.disposalMethod) {
                     case 0:
                     case 1:
@@ -106,17 +111,16 @@ public class WebPEncoder {
                 frameBuilder
                         .bitmap(bitmap)
                         .duration(frame.frameDuration)
-                        .x(frame.frameX)
-                        .y(frame.frameY)
-                        .disposal(frame.disposalMethod != 2)
-                        .blending(frame.disposalMethod == 2);
+                        .offsetX(frame.frameX)
+                        .offsetY(frame.frameY)
+                        .disposal(disposal)
+                        .blending(blending);
                 frameInfoList.add(frameBuilder.build());
             }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return this.build();
     }
 
     public WebPEncoder loopCount(int loopCount) {
@@ -149,7 +153,7 @@ public class WebPEncoder {
     }
 
     @WorkerThread
-    public ByteBuffer build() {
+    public byte[] build() {
         // 10M
         writer.reset(1000 * 1000 * 10);
         int vp8xPayloadSize = 10;
@@ -187,10 +191,10 @@ public class WebPEncoder {
         bytes[7] = (byte) ((size >> 24) & 0xff);
         ByteBuffer ret = ByteBuffer.allocate(writer.position());
         ret.put(bytes, 0, writer.position());
-        return ret;
+        return ret.array();
     }
 
-    public int encodeFrame(FrameInfo frameInfo) {
+    private int encodeFrame(FrameInfo frameInfo) {
         outputStream.reset();
         if (!frameInfo.bitmap.compress(Bitmap.CompressFormat.WEBP, quality, outputStream)) {
             Log.e(TAG, "error in encode frame");
@@ -217,8 +221,8 @@ public class WebPEncoder {
             }
             writer.putUInt32(BaseChunk.fourCCToInt("ANMF"));
             writer.putUInt32(payLoadSize);
-            writer.putUInt24(frameInfo.frameX);
-            writer.putUInt24(frameInfo.frameY);
+            writer.putUInt24(frameInfo.frameX / 2);
+            writer.putUInt24(frameInfo.frameY / 2);
             writer.put1Based(width);
             writer.put1Based(height);
             writer.putUInt24(frameInfo.duration);
@@ -243,7 +247,7 @@ public class WebPEncoder {
         return this;
     }
 
-    void writeChunk(WebPWriter writer, WebPReader reader, BaseChunk chunk) throws IOException {
+    private void writeChunk(WebPWriter writer, WebPReader reader, BaseChunk chunk) throws IOException {
         writer.putUInt32(chunk.chunkFourCC);
         writer.putUInt32(chunk.payloadSize);
         reader.reset();
@@ -276,12 +280,12 @@ public class WebPEncoder {
             return this;
         }
 
-        public FrameBuilder x(int x) {
+        public FrameBuilder offsetX(int x) {
             frameInfo.frameX = x;
             return this;
         }
 
-        public FrameBuilder y(int y) {
+        public FrameBuilder offsetY(int y) {
             frameInfo.frameY = y;
             return this;
         }
