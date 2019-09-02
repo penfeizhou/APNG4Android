@@ -25,6 +25,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -40,7 +41,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     private int playCount;
     private Integer loopLimit = null;
     private final RenderListener renderListener;
-    private boolean paused;
+    private AtomicBoolean paused = new AtomicBoolean(true);
     private static final Rect RECT_EMPTY = new Rect();
     private Runnable renderTask = new Runnable() {
         @Override
@@ -48,7 +49,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
             if (DEBUG) {
                 Log.d(TAG, renderListener.toString() + ",run");
             }
-            if (paused) {
+            if (paused.get()) {
                 return;
             }
             if (canStep()) {
@@ -250,6 +251,8 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
             Log.i(TAG, debugInfo() + "Set state to INITIALIZING");
         }
         mState = State.INITIALIZING;
+        paused.compareAndSet(true, false);
+
         ScheduledThreadPoolExecutor executor = getExecutor();
         final long start = System.currentTimeMillis();
         executor.execute(new Runnable() {
@@ -361,7 +364,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     }
 
     public boolean isPaused() {
-        return paused;
+        return paused.get();
     }
 
     public void setLoopLimit(int limit) {
@@ -375,12 +378,12 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     }
 
     public void pause() {
-        paused = true;
+        paused.compareAndSet(false, true);
         getExecutor().remove(renderTask);
     }
 
     public void resume() {
-        paused = false;
+        paused.compareAndSet(true, false);
         getExecutor().execute(renderTask);
     }
 
