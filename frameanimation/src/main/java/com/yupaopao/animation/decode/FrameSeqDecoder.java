@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 import kotlin.Unit;
 import kotlin.coroutines.Continuation;
@@ -37,6 +38,9 @@ import kotlin.coroutines.EmptyCoroutineContext;
  */
 public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     private static final String TAG = FrameSeqDecoder.class.getSimpleName();
+    private static final AtomicLong counter = new AtomicLong(0);
+    private long count = -1L;
+
     protected final Loader mLoader;
     protected List<Frame> frames = new ArrayList<>();
     protected int frameIndex = -1;
@@ -58,7 +62,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
                 long start = System.currentTimeMillis();
                 long delay = step();
                 long cost = System.currentTimeMillis() - start;
-                CoroutinePool.INSTANCE.runDelay(this, Math.max(0, delay - cost), new Continuation<Unit>() {
+                CoroutinePool.INSTANCE.runDelay(this, Math.max(0, delay - cost), count, new Continuation<Unit>() {
                     @NotNull
                     @Override
                     public CoroutineContext getContext() {
@@ -162,6 +166,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     public FrameSeqDecoder(Loader loader, RenderListener renderListener) {
         this.mLoader = loader;
         this.renderListener = renderListener;
+        count = counter.incrementAndGet();
     }
 
     public Rect getBounds() {
@@ -185,7 +190,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
                     return fullRect;
                 }
             };
-            CoroutinePool.INSTANCE.run(callable, new Continuation<Rect>() {
+            CoroutinePool.INSTANCE.run(callable, count, new Continuation<Rect>() {
                 @NotNull
                 @Override
                 public CoroutineContext getContext() {
@@ -253,7 +258,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
                     mState = State.RUNNING;
                 }
             }
-        }, new Continuation<Unit>() {
+        }, count, new Continuation<Unit>() {
             @NotNull
             @Override
             public CoroutineContext getContext() {
@@ -267,7 +272,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         });
         if (getNumPlays() == 0 || !finished) {
             this.frameIndex = -1;
-            CoroutinePool.INSTANCE.run(renderTask, new Continuation<Unit>() {
+            CoroutinePool.INSTANCE.run(renderTask, count, new Continuation<Unit>() {
                 @NotNull
                 @Override
                 public CoroutineContext getContext() {
@@ -340,7 +345,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
                 }
                 mState = State.IDLE;
             }
-        }, new Continuation<Unit>() {
+        }, count, new Continuation<Unit>() {
             @NotNull
             @Override
             public CoroutineContext getContext() {
@@ -388,7 +393,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
 
     public void resume() {
         paused.compareAndSet(true, false);
-        CoroutinePool.INSTANCE.run(renderTask, new Continuation<Unit>() {
+        CoroutinePool.INSTANCE.run(renderTask, count, new Continuation<Unit>() {
             @NotNull
             @Override
             public CoroutineContext getContext() {
@@ -426,7 +431,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
                         e.printStackTrace();
                     }
                 }
-            }, new Continuation<Unit>() {
+            }, count, new Continuation<Unit>() {
                 @NotNull
                 @Override
                 public CoroutineContext getContext() {
