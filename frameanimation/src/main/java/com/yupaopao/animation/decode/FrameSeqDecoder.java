@@ -24,7 +24,6 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
 
 import kotlin.Unit;
 import kotlin.coroutines.Continuation;
@@ -38,8 +37,7 @@ import kotlin.coroutines.EmptyCoroutineContext;
  */
 public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     private static final String TAG = FrameSeqDecoder.class.getSimpleName();
-    private static final AtomicLong counter = new AtomicLong(0);
-    private long count = -1L;
+    private int count = -1;
 
     protected final Loader mLoader;
     protected List<Frame> frames = new ArrayList<>();
@@ -166,7 +164,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     public FrameSeqDecoder(Loader loader, RenderListener renderListener) {
         this.mLoader = loader;
         this.renderListener = renderListener;
-        count = counter.incrementAndGet();
+        count = CoroutinePool.INSTANCE.incrementAndGet();
     }
 
     public Rect getBounds() {
