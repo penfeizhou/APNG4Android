@@ -18,19 +18,19 @@ repositories {
 #### Animated WebP
 ```gradle
 dependencies {
-    implementation 'com.github.penfeizhou.android.animation:awebp:1.0.0'
+    implementation 'com.github.penfeizhou.android.animation:awebp:1.1.0'
 }
 ```
 #### APNG
 ```gradle
 dependencies {
-    implementation 'com.github.penfeizhou.android.animation:apng:1.0.0'
+    implementation 'com.github.penfeizhou.android.animation:apng:1.1.0'
 }
 ```
 #### Gif
 ```gradle
 dependencies {
-    implementation 'com.github.penfeizhou.android.animation:gif:1.0.0'
+    implementation 'com.github.penfeizhou.android.animation:gif:1.1.0'
 }
 ```
 ### Use
@@ -38,30 +38,30 @@ dependencies {
 ```java
 // Load from asset file
 AssetStreamLoader assetLoader = new AssetStreamLoader(context, "wheel.png");
- 
- 
+
+
 // Load form Resource
 ResourceStreamLoader resourceLoader = new ResourceStreamLoader(context, R.drawable.sample);
- 
- 
+
+
 // Load from file
 FileStreamLoader fileLoader = new FileStreamLoader("/sdcard/Pictures/1.webp");
- 
- 
+
+
 // Create APNG Drawable
 APNGDrawable apngDrawable = new APNGDrawable(assetLoader);
 
 //Create Animated webp drawable
 WebPDrawable webpDrawable = new WebPDrawable(assetLoader);
- 
+
 // Auto play
 imageView.setImageDrawable(apngDrawable);
- 
- 
+
+
 // Not needed.default controlled by content
 apngDrawable.setLoopLimit(10);
- 
- 
+
+
 // Implement Animatable2Compat
 drawable.registerAnimationCallback(new Animatable2Compat.AnimationCallback() {
     @Override
@@ -81,7 +81,7 @@ repositories {
         }
 }
 dependencies {
-    implementation 'com.github.penfeizhou.android.animation:glide-plugin:1.0.0'
+    implementation 'com.github.penfeizhou.android.animation:glide-plugin:1.1.0'
 }
 ```
 ### Direct use
