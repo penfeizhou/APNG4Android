@@ -33,6 +33,9 @@ public class AnimationFrame extends Frame<WebPReader, WebPWriter> {
         this.frameX = anmfChunk.frameX;
         this.frameY = anmfChunk.frameY;
         this.frameDuration = anmfChunk.frameDuration;
+        if (this.frameDuration == 0) {
+            this.frameDuration = 100;
+        }
         this.blendingMethod = anmfChunk.blendingMethod();
         this.disposalMethod = anmfChunk.disposalMethod();
         this.imagePayloadOffset = anmfChunk.offset + BaseChunk.CHUNCK_HEADER_OFFSET + 16;
