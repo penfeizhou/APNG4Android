@@ -26,6 +26,10 @@ public class APNGTestActivity extends Activity {
                 "file:///android_asset/1.gif",
                 "file:///android_asset/5.gif",
                 "file:///android_asset/6.gif",
+                "https://misc.aotu.io/ONE-SUNDAY/world_cup_2014_42.webp",
+                "https://misc.aotu.io/ONE-SUNDAY/BladeRunner.webp",
+                "https://misc.aotu.io/ONE-SUNDAY/SteamEngine.webp",
+                "https://misc.aotu.io/ONE-SUNDAY/SteamEngine_lossy.webp",
         };
         for (String url : urls) {
             ImageView imageView = new ImageView(this);
