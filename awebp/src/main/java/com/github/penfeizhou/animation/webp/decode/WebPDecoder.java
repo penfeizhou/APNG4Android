@@ -134,10 +134,10 @@ public class WebPDecoder extends FrameSeqDecoder<WebPReader, WebPWriter> {
             //Dispose to background color. Fill the rectangle on the canvas covered by the current frame with background color specified in the ANIM chunk.
             if (preFrame instanceof AnimationFrame
                     && ((AnimationFrame) preFrame).disposalMethod) {
-                final float left = (float) preFrame.frameX / (float) sampleSize;
-                final float top = (float) preFrame.frameY / (float) sampleSize;
-                final float right = (float) (preFrame.frameX + preFrame.frameWidth) / (float) sampleSize;
-                final float bottom = (float) (preFrame.frameY + preFrame.frameHeight) / (float) sampleSize;
+                final float left = (float) preFrame.frameX * 2 / (float) sampleSize;
+                final float top = (float) preFrame.frameY * 2 / (float) sampleSize;
+                final float right = (float) (preFrame.frameX * 2 + preFrame.frameWidth) / (float) sampleSize;
+                final float bottom = (float) (preFrame.frameY * 2 + preFrame.frameHeight) / (float) sampleSize;
                 canvas.drawRect(left, top, right, bottom, mTransparentFillPaint);
             }
         }
