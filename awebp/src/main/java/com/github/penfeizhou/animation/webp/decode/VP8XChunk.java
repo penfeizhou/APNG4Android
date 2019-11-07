@@ -46,6 +46,7 @@ public class VP8XChunk extends BaseChunk {
      * SHOULD be 0
      */
     byte flags;
+    boolean alpha;
 
     /**
      * Canvas Width Minus One: 24 bits
@@ -60,6 +61,7 @@ public class VP8XChunk extends BaseChunk {
 
     void innerParse(WebPReader reader) throws IOException {
         flags = reader.peek();
+        alpha = byte2Digit(flags)[3] == 1;
         reader.skip(3);
         canvasWidth = reader.get1Based();
         canvasHeight = reader.get1Based();
@@ -70,5 +72,14 @@ public class VP8XChunk extends BaseChunk {
      */
     boolean animation() {
         return (flags & FLAG_ANIMATION) == FLAG_ANIMATION;
+    }
+
+    public static int[] byte2Digit(byte b) {
+        int[] s = new int[8];
+        for (int i = 0; i < 8; i++) {
+            byte temp = (byte) ((byte) (b >> 7 - i) & 1);
+            s[i] = temp;
+        }
+        return s;
     }
 }

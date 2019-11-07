@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.tv_3: {
                 Intent intent = new Intent(this, AnimationTestActivity.class);
                 intent.putExtra("files", new String[]{
-                        "world-cup.webp",
+                        "Rqa.webp",
                 });
                 startActivity(intent);
             }

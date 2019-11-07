@@ -32,6 +32,7 @@ public class WebPDecoder extends FrameSeqDecoder<WebPReader, WebPWriter> {
 
     private int canvasWidth;
     private int canvasHeight;
+    private boolean alpha;
     private int backgroundColor;
     private WebPWriter mWriter;
 
@@ -79,6 +80,7 @@ public class WebPDecoder extends FrameSeqDecoder<WebPReader, WebPWriter> {
             if (chunk instanceof VP8XChunk) {
                 this.canvasWidth = ((VP8XChunk) chunk).canvasWidth;
                 this.canvasHeight = ((VP8XChunk) chunk).canvasHeight;
+                this.alpha = ((VP8XChunk) chunk).alpha;
                 vp8x = true;
             } else if (chunk instanceof ANIMChunk) {
                 anim = true;
@@ -122,7 +124,11 @@ public class WebPDecoder extends FrameSeqDecoder<WebPReader, WebPWriter> {
         bitmap.copyPixelsFromBuffer(frameBuffer);
 
         if (this.frameIndex == 0) {
-            canvas.drawColor(backgroundColor);
+            if (this.alpha) {
+                canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.SRC);
+            } else {
+                canvas.drawColor(backgroundColor, PorterDuff.Mode.SRC);
+            }
         } else {
             Frame preFrame = frames.get(this.frameIndex - 1);
             //Dispose to background color. Fill the rectangle on the canvas covered by the current frame with background color specified in the ANIM chunk.

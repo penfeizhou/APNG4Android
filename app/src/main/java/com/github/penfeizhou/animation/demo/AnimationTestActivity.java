@@ -38,7 +38,6 @@ public class AnimationTestActivity extends Activity {
                 drawable = GifDrawable.fromAsset(this, assetFile);
             }
             imageView.setImageDrawable(drawable);
-            imageView.setBackgroundColor(Color.BLACK);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             layoutParams.bottomMargin = 50;
             layoutParams.topMargin = 50;
