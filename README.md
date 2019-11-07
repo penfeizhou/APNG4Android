@@ -6,6 +6,10 @@
 * Support still image
 * Low memory usage
 
+## Changelog 1.2.0
+* Fix vp8x chunk alpha in reserve digits
+* Fix webp glitch error on display
+
 ## Usages
 
 ### Add dependency in build.gradle
