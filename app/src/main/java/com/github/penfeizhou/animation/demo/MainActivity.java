@@ -2,10 +2,10 @@ package com.github.penfeizhou.animation.demo;
 
 import android.Manifest;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -25,6 +25,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.tv_5).setOnClickListener(this);
         findViewById(R.id.tv_6).setOnClickListener(this);
         findViewById(R.id.tv_7).setOnClickListener(this);
+        findViewById(R.id.tv_8).setOnClickListener(this);
     }
 
     @Override
@@ -36,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.tv_1: {
-                Intent intent = new Intent(this, AnimationTestActivity.class);
+                Intent intent = new Intent(this, APNGRecyclerViewTestActivity.class);
                 intent.putExtra("files", new String[]{
                         "world-cup.png",
                 });
@@ -88,6 +89,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             break;
             case R.id.tv_7: {
                 Intent intent = new Intent(this, EncoderTestActivity.class);
+                startActivity(intent);
+            }
+            break;
+            case R.id.tv_8: {
+                Intent intent = new Intent(this, APNGRecyclerViewTestActivity.class);
                 startActivity(intent);
             }
             break;

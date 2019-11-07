@@ -13,7 +13,7 @@
         <TextView
             android:id="@+id/tv_1"
             android:layout_width="wrap_content"
-            android:layout_height="100dp"
+            android:layout_height="80dp"
             android:layout_gravity="center"
             android:gravity="center"
             android:text="APNG"
@@ -22,7 +22,7 @@
         <TextView
             android:id="@+id/tv_2"
             android:layout_width="wrap_content"
-            android:layout_height="100dp"
+            android:layout_height="80dp"
             android:layout_gravity="center"
             android:gravity="center"
             android:text="Still PNG"
@@ -31,7 +31,7 @@
         <TextView
             android:id="@+id/tv_3"
             android:layout_width="wrap_content"
-            android:layout_height="100dp"
+            android:layout_height="80dp"
             android:layout_gravity="center"
             android:gravity="center"
             android:text="Animated WebP"
@@ -40,7 +40,7 @@
         <TextView
             android:id="@+id/tv_4"
             android:layout_width="wrap_content"
-            android:layout_height="100dp"
+            android:layout_height="80dp"
             android:layout_gravity="center"
             android:gravity="center"
             android:text="Still WebP"
@@ -49,7 +49,7 @@
         <TextView
             android:id="@+id/tv_5"
             android:layout_width="wrap_content"
-            android:layout_height="100dp"
+            android:layout_height="80dp"
             android:layout_gravity="center"
             android:gravity="center"
             android:text="Glide"
@@ -58,7 +58,7 @@
         <TextView
             android:id="@+id/tv_6"
             android:layout_width="wrap_content"
-            android:layout_height="100dp"
+            android:layout_height="80dp"
             android:layout_gravity="center"
             android:gravity="center"
             android:text="GIF"
@@ -67,11 +67,19 @@
         <TextView
             android:id="@+id/tv_7"
             android:layout_width="wrap_content"
-            android:layout_height="100dp"
+            android:layout_height="80dp"
             android:layout_gravity="center"
             android:gravity="center"
             android:text="WebP Encoder"
             android:textSize="20dp" />
 
+        <TextView
+            android:id="@+id/tv_8"
+            android:layout_width="wrap_content"
+            android:layout_height="80dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="Recycler View with Glide"
+            android:textSize="20dp" />
     </LinearLayout>
 </ScrollView>
