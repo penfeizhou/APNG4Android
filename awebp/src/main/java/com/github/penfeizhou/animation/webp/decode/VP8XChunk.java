@@ -29,6 +29,7 @@ public class VP8XChunk extends BaseChunk {
      */
 
     private static final int FLAG_ANIMATION = 0x2;
+    private static final int FLAG_ALPHA = 0x10;
     /**
      * Reserved (Rsv): 2 bits
      * SHOULD be 0.
@@ -46,7 +47,6 @@ public class VP8XChunk extends BaseChunk {
      * SHOULD be 0
      */
     byte flags;
-    boolean alpha;
 
     /**
      * Canvas Width Minus One: 24 bits
@@ -61,7 +61,6 @@ public class VP8XChunk extends BaseChunk {
 
     void innerParse(WebPReader reader) throws IOException {
         flags = reader.peek();
-        alpha = byte2Digit(flags)[3] == 1;
         reader.skip(3);
         canvasWidth = reader.get1Based();
         canvasHeight = reader.get1Based();
@@ -74,12 +73,10 @@ public class VP8XChunk extends BaseChunk {
         return (flags & FLAG_ANIMATION) == FLAG_ANIMATION;
     }
 
-    public static int[] byte2Digit(byte b) {
-        int[] s = new int[8];
-        for (int i = 0; i < 8; i++) {
-            byte temp = (byte) ((byte) (b >> 7 - i) & 1);
-            s[i] = temp;
-        }
-        return s;
+    /**
+     * @return Set if any of the frames of the image contain transparency information ("alpha").
+     */
+    boolean alpha() {
+        return (flags & FLAG_ALPHA) == FLAG_ALPHA;
     }
 }

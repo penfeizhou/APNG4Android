@@ -80,7 +80,7 @@ public class WebPDecoder extends FrameSeqDecoder<WebPReader, WebPWriter> {
             if (chunk instanceof VP8XChunk) {
                 this.canvasWidth = ((VP8XChunk) chunk).canvasWidth;
                 this.canvasHeight = ((VP8XChunk) chunk).canvasHeight;
-                this.alpha = ((VP8XChunk) chunk).alpha;
+                this.alpha = ((VP8XChunk) chunk).alpha();
                 vp8x = true;
             } else if (chunk instanceof ANIMChunk) {
                 anim = true;
