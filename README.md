@@ -22,19 +22,19 @@ repositories {
 #### Animated WebP
 ```gradle
 dependencies {
-    implementation 'com.github.penfeizhou.android.animation:awebp:1.1.0'
+    implementation 'com.github.penfeizhou.android.animation:awebp:1.2.0'
 }
 ```
 #### APNG
 ```gradle
 dependencies {
-    implementation 'com.github.penfeizhou.android.animation:apng:1.1.0'
+    implementation 'com.github.penfeizhou.android.animation:apng:1.2.0'
 }
 ```
 #### Gif
 ```gradle
 dependencies {
-    implementation 'com.github.penfeizhou.android.animation:gif:1.1.0'
+    implementation 'com.github.penfeizhou.android.animation:gif:1.2.0'
 }
 ```
 ### Use
@@ -85,7 +85,7 @@ repositories {
     }
 }
 dependencies {
-    implementation 'com.github.penfeizhou.android.animation:glide-plugin:1.1.0'
+    implementation 'com.github.penfeizhou.android.animation:glide-plugin:1.2.0'
 }
 ```
 ### Direct use
