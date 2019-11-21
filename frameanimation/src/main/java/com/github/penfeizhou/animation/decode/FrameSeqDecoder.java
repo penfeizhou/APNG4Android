@@ -72,7 +72,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     protected Rect fullRect;
     private W mWriter = getWriter();
     private R mReader = null;
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
     /**
      * If played all the needed
      */
