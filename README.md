@@ -6,7 +6,7 @@
 * Support still image
 * Low memory usage
 
-## Changelog 1.3.0
+## Changelog 1.3.1
 * Fix ANR when switch visibility of animation drawable quickly.
 
 ## Changelog 1.2.0
@@ -25,19 +25,19 @@ repositories {
 #### Animated WebP
 ```gradle
 dependencies {
-    implementation 'com.github.penfeizhou.android.animation:awebp:1.3.0'
+    implementation 'com.github.penfeizhou.android.animation:awebp:1.3.1'
 }
 ```
 #### APNG
 ```gradle
 dependencies {
-    implementation 'com.github.penfeizhou.android.animation:apng:1.3.0'
+    implementation 'com.github.penfeizhou.android.animation:apng:1.3.1'
 }
 ```
 #### Gif
 ```gradle
 dependencies {
-    implementation 'com.github.penfeizhou.android.animation:gif:1.3.0'
+    implementation 'com.github.penfeizhou.android.animation:gif:1.3.1'
 }
 ```
 ### Use
@@ -88,7 +88,7 @@ repositories {
     }
 }
 dependencies {
-    implementation 'com.github.penfeizhou.android.animation:glide-plugin:1.3.0'
+    implementation 'com.github.penfeizhou.android.animation:glide-plugin:1.3.1'
 }
 ```
 ### Direct use
