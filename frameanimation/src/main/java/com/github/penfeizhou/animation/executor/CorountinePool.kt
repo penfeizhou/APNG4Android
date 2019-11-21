@@ -53,10 +53,14 @@ object CoroutinePool {
         }
     }
 
-    suspend fun runDelay(runnable: Runnable, delay: Long, id: Int) {
-        withContext(coroutineDispatchers[id.rem(POOL_NUMBER)]) {
-            delay(delay)
-            runnable.run()
+    suspend fun runDelay(runnable: Runnable, delay: Long, id: Int): Job {
+        return withContext(coroutineDispatchers[id.rem(POOL_NUMBER)]) {
+            launch {
+                delay(delay)
+                if (isActive) {
+                    runnable.run()
+                }
+            }
         }
     }
 
