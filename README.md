@@ -7,6 +7,9 @@
 * Low memory usage
 
 ## Changelog 1.2.0
+* Fix ANR when switch visibility of animation drawable quickly.
+
+## Changelog 1.2.0
 * Fix vp8x chunk alpha in reserve digits
 * Fix webp glitch error on display
 
