@@ -1,6 +1,5 @@
 *.iml
 .gradle
-/local.properties
 /.idea/
 /gif/.cxx/
 .DS_Store
