@@ -21,7 +21,7 @@ allprojects {
             url "https://dl.bintray.com/osborn/Android"
         }
         maven {
-            url "http://maven.yupaopao.cn/nexus/content/groups/public/"
+            url 'http://maven.yupaopao.com/nexus/content/groups/public/'
         }
     }
     def needReplaceLocal = true
