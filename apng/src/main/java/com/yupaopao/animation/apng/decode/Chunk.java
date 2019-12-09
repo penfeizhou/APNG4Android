@@ -37,7 +37,7 @@ class Chunk {
         innerParse(reader);
         int offset = available - reader.available();
         if (offset > length) {
-            throw new IOException("Out of chunk area");
+            System.out.println("Out of chunk area");
         } else if (offset < length) {
             reader.skip(length - offset);
         }
