@@ -20,7 +20,7 @@ uploadArchives {
             }
 
             repository(url: properties.releasesRepository + properties.name) {
-                authentication(userName: properties.user, password: properties.apiKey)
+                authentication(userName: properties.mavenUsername, password: properties.mavenPassword)
             }
         }
     }
