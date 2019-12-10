@@ -27,7 +27,7 @@ public class TestAdapter extends RecyclerView.Adapter<TestAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Glide.with(mContext)
-                .load("https://misc.aotu.io/ONE-SUNDAY/SteamEngine.png?time=" + position)
+                .load("https://misc.aotu.io/ONE-SUNDAY/SteamEngine.png?time=" + System.nanoTime())
                 .into(holder.iv);
     }
 
