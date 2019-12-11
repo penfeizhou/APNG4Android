@@ -6,11 +6,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import com.bumptech.glide.Glide;
-import com.yupaopao.animation.apng.APNGDrawable;
-import com.yupaopao.animation.gif.GifDrawable;
-import com.yupaopao.animation.loader.FileLoader;
-import com.yupaopao.animation.demo.R;
+import com.yupaopao.animation.glide.AnimationDecoderOption;
 
 
 /**
@@ -25,7 +21,15 @@ public class APNGTestActivity extends Activity {
         setContentView(R.layout.activity_apnglib);
         LinearLayout linearLayout = findViewById(R.id.layout);
         String[] urls = new String[]{
-                "https://misc.aotu.io/ONE-SUNDAY/SteamEngine.png"
+                "https://misc.aotu.io/ONE-SUNDAY/SteamEngine.png",
+                "https://isparta.github.io/compare-webp/image/gif_webp/webp/2.webp",
+                "file:///android_asset/1.gif",
+                "file:///android_asset/5.gif",
+                "file:///android_asset/6.gif",
+                "https://misc.aotu.io/ONE-SUNDAY/world_cup_2014_42.webp",
+                "https://misc.aotu.io/ONE-SUNDAY/BladeRunner.webp",
+                "https://misc.aotu.io/ONE-SUNDAY/SteamEngine.webp",
+                "https://misc.aotu.io/ONE-SUNDAY/SteamEngine_lossy.webp",
         };
         for (String url : urls) {
             ImageView imageView = new ImageView(this);
@@ -33,7 +37,10 @@ public class APNGTestActivity extends Activity {
             layoutParams.bottomMargin = 50;
             layoutParams.topMargin = 50;
             linearLayout.addView(imageView, layoutParams);
-            Glide.with(imageView).load(url).into(imageView);
+            GlideApp.with(imageView)
+                    .load(url)
+                    .set(AnimationDecoderOption.DISABLE_ANIMATION_GIF_DECODER, false)
+                    .into(imageView);
         }
 //        FileLoader fileLoader = new FileLoader("/data/data/com.yupaopao.animation.demo/cache/image_manager_disk_cache/b6dd68d837b8d1e8f24edb0a0df5213b7accebb16c22c8202e95363f7227740e.0");
 //

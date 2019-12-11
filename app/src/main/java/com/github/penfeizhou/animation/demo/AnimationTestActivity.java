@@ -8,10 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import com.yupaopao.animation.FrameAnimationDrawable;
 import com.yupaopao.animation.apng.APNGDrawable;
 import com.yupaopao.animation.gif.GifDrawable;
-import com.yupaopao.animation.loader.AssetStreamLoader;
 import com.yupaopao.animation.webp.WebPDrawable;
 
 
@@ -21,9 +19,6 @@ import com.yupaopao.animation.webp.WebPDrawable;
  * @CreateDate: 2019/3/29
  */
 public class AnimationTestActivity extends Activity {
-
-    FrameAnimationDrawable drawable = null;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,7 +27,7 @@ public class AnimationTestActivity extends Activity {
         String[] files = getIntent().getStringArrayExtra("files");
         for (String assetFile : files) {
             ImageView imageView = new ImageView(this);
-
+            Drawable drawable = null;
             if (assetFile.endsWith("png")) {
                 drawable = APNGDrawable.fromAsset(this, assetFile);
             }
@@ -43,23 +38,10 @@ public class AnimationTestActivity extends Activity {
                 drawable = GifDrawable.fromAsset(this, assetFile);
             }
             imageView.setImageDrawable(drawable);
-            imageView.setBackgroundColor(Color.BLACK);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             layoutParams.bottomMargin = 50;
             layoutParams.topMargin = 50;
             linearLayout.addView(imageView, layoutParams);
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        drawable.resume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        drawable.pause();
     }
 }
