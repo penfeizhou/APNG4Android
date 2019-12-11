@@ -135,10 +135,10 @@ import java.io.IOException;
  * @CreateDate: 2019-05-16
  */
 public class LogicalScreenDescriptor implements Block {
-    int screenWidth;
-    int screenHeight;
+    public int screenWidth;
+    public int screenHeight;
     byte flag;
-    byte bgColorIndex;
+    public byte bgColorIndex;
     byte radio;
 
     @Override

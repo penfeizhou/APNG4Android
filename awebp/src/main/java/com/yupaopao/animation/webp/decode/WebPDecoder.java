@@ -12,14 +12,11 @@ import android.graphics.Rect;
 import com.yupaopao.animation.decode.Frame;
 import com.yupaopao.animation.decode.FrameSeqDecoder;
 import com.yupaopao.animation.io.Reader;
-import com.yupaopao.animation.io.StreamReader;
 import com.yupaopao.animation.loader.Loader;
-import com.yupaopao.animation.loader.StreamLoader;
 import com.yupaopao.animation.webp.io.WebPReader;
 import com.yupaopao.animation.webp.io.WebPWriter;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -35,6 +32,7 @@ public class WebPDecoder extends FrameSeqDecoder<WebPReader, WebPWriter> {
 
     private int canvasWidth;
     private int canvasHeight;
+    private boolean alpha;
     private int backgroundColor;
     private WebPWriter mWriter;
 
@@ -82,6 +80,7 @@ public class WebPDecoder extends FrameSeqDecoder<WebPReader, WebPWriter> {
             if (chunk instanceof VP8XChunk) {
                 this.canvasWidth = ((VP8XChunk) chunk).canvasWidth;
                 this.canvasHeight = ((VP8XChunk) chunk).canvasHeight;
+                this.alpha = ((VP8XChunk) chunk).alpha();
                 vp8x = true;
             } else if (chunk instanceof ANIMChunk) {
                 anim = true;
@@ -125,16 +124,20 @@ public class WebPDecoder extends FrameSeqDecoder<WebPReader, WebPWriter> {
         bitmap.copyPixelsFromBuffer(frameBuffer);
 
         if (this.frameIndex == 0) {
-            canvas.drawColor(backgroundColor);
+            if (this.alpha) {
+                canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.SRC);
+            } else {
+                canvas.drawColor(backgroundColor, PorterDuff.Mode.SRC);
+            }
         } else {
             Frame preFrame = frames.get(this.frameIndex - 1);
             //Dispose to background color. Fill the rectangle on the canvas covered by the current frame with background color specified in the ANIM chunk.
             if (preFrame instanceof AnimationFrame
                     && ((AnimationFrame) preFrame).disposalMethod) {
-                final float left = (float) preFrame.frameX / (float) sampleSize;
-                final float top = (float) preFrame.frameY / (float) sampleSize;
-                final float right = (float) (preFrame.frameX + preFrame.frameWidth) / (float) sampleSize;
-                final float bottom = (float) (preFrame.frameY + preFrame.frameHeight) / (float) sampleSize;
+                final float left = (float) preFrame.frameX * 2 / (float) sampleSize;
+                final float top = (float) preFrame.frameY * 2 / (float) sampleSize;
+                final float right = (float) (preFrame.frameX * 2 + preFrame.frameWidth) / (float) sampleSize;
+                final float bottom = (float) (preFrame.frameY * 2 + preFrame.frameHeight) / (float) sampleSize;
                 canvas.drawRect(left, top, right, bottom, mTransparentFillPaint);
             }
         }

@@ -17,7 +17,7 @@ public class BaseChunk {
     public int offset;
     public static final int CHUNCK_HEADER_OFFSET = 8;
 
-    static int fourCCToInt(String fourCC) {
+    public static int fourCCToInt(String fourCC) {
         if (TextUtils.isEmpty(fourCC) || fourCC.length() != 4) {
             return 0xbadeffff;
         }

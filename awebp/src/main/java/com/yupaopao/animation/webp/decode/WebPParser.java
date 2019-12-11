@@ -6,9 +6,7 @@ import com.yupaopao.animation.io.Reader;
 import com.yupaopao.animation.io.StreamReader;
 import com.yupaopao.animation.webp.io.WebPReader;
 
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -104,7 +102,7 @@ public class WebPParser {
         return false;
     }
 
-    static List<BaseChunk> parse(WebPReader reader) throws IOException {
+    public static List<BaseChunk> parse(WebPReader reader) throws IOException {
         //@link {https://developers.google.com/speed/webp/docs/riff_container#webp_file_header}
         if (!reader.matchFourCC("RIFF")) {
             throw new FormatException();
