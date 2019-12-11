@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * @Description: com.github.penfeizhou.animation.executor
+ * @Description: com.yupaopao.animation.executor
  * @Author: pengfei.zhou
  * @CreateDate: 2019-11-21
  */
