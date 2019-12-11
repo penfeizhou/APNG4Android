@@ -1,2 +1,2 @@
-include ':app', ':apng', ':awebp', ':frameanimation', ':plugin_glide', ':gif'
+include ':app', ':apng', ':awebp', ':awebpencoder', ':frameanimation', ':plugin_glide', ':gif'
 
