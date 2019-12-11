@@ -9,6 +9,8 @@ import com.yupaopao.animation.decode.Frame;
 import com.yupaopao.animation.gif.io.GifReader;
 import com.yupaopao.animation.gif.io.GifWriter;
 
+import java.io.IOException;
+
 
 /**
  * @Description: GifFrame
@@ -69,30 +71,34 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
     @Override
     public Bitmap draw(Canvas canvas, Paint paint, int sampleSize, Bitmap reusedBitmap, GifWriter writer) {
         try {
-            reader.reset();
-            reader.skip(imageDataOffset);
             writer.reset(frameWidth * frameHeight / (sampleSize * sampleSize));
-            byte[] dataBlock = sDataBlock.get();
-            if (dataBlock == null) {
-                dataBlock = new byte[0xff];
-                sDataBlock.set(dataBlock);
-            }
             int[] pixels = writer.asIntArray();
-            uncompressLZW(reader,
-                    colorTable.getColorTable(),
-                    transparentColorIndex,
-                    pixels,
-                    frameWidth / sampleSize,
-                    frameHeight / sampleSize,
-                    lzwMinCodeSize,
-                    interlace,
-                    dataBlock);
+            encode(pixels, sampleSize);
             reusedBitmap.copyPixelsFromBuffer(writer.asBuffer().rewind());
             canvas.drawBitmap(reusedBitmap, frameX / sampleSize, frameY / sampleSize, paint);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return reusedBitmap;
+    }
+
+    public void encode(int[] pixels, int sampleSize) throws IOException {
+        reader.reset();
+        reader.skip(imageDataOffset);
+        byte[] dataBlock = sDataBlock.get();
+        if (dataBlock == null) {
+            dataBlock = new byte[0xff];
+            sDataBlock.set(dataBlock);
+        }
+        uncompressLZW(reader,
+                colorTable.getColorTable(),
+                transparentColorIndex,
+                pixels,
+                frameWidth / sampleSize,
+                frameHeight / sampleSize,
+                lzwMinCodeSize,
+                interlace,
+                dataBlock);
     }
 
     private native void uncompressLZW(GifReader gifReader,
