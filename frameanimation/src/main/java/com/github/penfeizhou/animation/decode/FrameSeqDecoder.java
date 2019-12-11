@@ -3,15 +3,16 @@ package com.yupaopao.animation.decode;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
 
-import com.yupaopao.animation.executor.CoroutinePool;
+import com.yupaopao.animation.executor.FrameDecoderExecutor;
 import com.yupaopao.animation.io.Reader;
 import com.yupaopao.animation.io.Writer;
 import com.yupaopao.animation.loader.Loader;
-
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -22,13 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
-import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import kotlin.Unit;
-import kotlin.coroutines.Continuation;
-import kotlin.coroutines.CoroutineContext;
-import kotlin.coroutines.EmptyCoroutineContext;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * @Description: Abstract Frame Animation Decoder
@@ -37,9 +33,10 @@ import kotlin.coroutines.EmptyCoroutineContext;
  */
 public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     private static final String TAG = FrameSeqDecoder.class.getSimpleName();
-    private int count = -1;
+    private final int taskId;
 
-    protected final Loader mLoader;
+    private final Loader mLoader;
+    private final Handler workerHandler;
     protected List<Frame> frames = new ArrayList<>();
     protected int frameIndex = -1;
     private int playCount;
@@ -60,18 +57,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
                 long start = System.currentTimeMillis();
                 long delay = step();
                 long cost = System.currentTimeMillis() - start;
-                CoroutinePool.INSTANCE.runDelay(this, Math.max(0, delay - cost), count, new Continuation<Unit>() {
-                    @NotNull
-                    @Override
-                    public CoroutineContext getContext() {
-                        return EmptyCoroutineContext.INSTANCE;
-                    }
-
-                    @Override
-                    public void resumeWith(@NotNull Object o) {
-
-                    }
-                });
+                workerHandler.postDelayed(this, Math.max(0, delay - cost));
                 renderListener.onRender(frameBuffer);
             } else {
                 stop();
@@ -84,7 +70,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     protected Map<Bitmap, Canvas> cachedCanvas = new WeakHashMap<>();
     protected ByteBuffer frameBuffer;
     protected Rect fullRect;
-    protected W mWriter = getWriter();
+    private W mWriter = getWriter();
     private R mReader = null;
     public static final boolean DEBUG = false;
     /**
@@ -111,13 +97,24 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         while (iterator.hasNext()) {
             int reuseSize = width * height * 4;
             ret = iterator.next();
-            if (ret != null && ret.getAllocationByteCount() >= reuseSize) {
-                iterator.remove();
-                if (ret.getWidth() != width || ret.getHeight() != height) {
-                    ret.reconfigure(width, height, Bitmap.Config.ARGB_8888);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                if (ret != null && ret.getAllocationByteCount() >= reuseSize) {
+                    iterator.remove();
+                    if (ret.getWidth() != width || ret.getHeight() != height) {
+                        ret.reconfigure(width, height, Bitmap.Config.ARGB_8888);
+                    }
+                    ret.eraseColor(0);
+                    return ret;
                 }
-                ret.eraseColor(0);
-                return ret;
+            } else {
+                if (ret != null && ret.getByteCount() >= reuseSize) {
+                    if (ret.getWidth() == width && ret.getHeight() == height) {
+                        iterator.remove();
+                        ret.eraseColor(0);
+                    }
+                    return ret;
+                }
             }
         }
 
@@ -164,7 +161,8 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     public FrameSeqDecoder(Loader loader, RenderListener renderListener) {
         this.mLoader = loader;
         this.renderListener = renderListener;
-        count = CoroutinePool.INSTANCE.incrementAndGet();
+        this.taskId = FrameDecoderExecutor.getInstance().generateTaskId();
+        this.workerHandler = new Handler(FrameDecoderExecutor.getInstance().getLooper(taskId));
     }
 
     public Rect getBounds() {
@@ -174,36 +172,28 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
             if (mState == State.FINISHING) {
                 Log.e(TAG, "In finishing,do not interrupt");
             }
-            Callable<Rect> callable = new Callable<Rect>() {
+            final Thread thread = Thread.currentThread();
+            workerHandler.post(new Runnable() {
                 @Override
-                public Rect call() throws Exception {
-                    if (fullRect == null) {
-                        if (mReader == null) {
-                            mReader = getReader(mLoader.obtain());
-                        } else {
-                            mReader.reset();
+                public void run() {
+                    try {
+                        if (fullRect == null) {
+                            if (mReader == null) {
+                                mReader = getReader(mLoader.obtain());
+                            } else {
+                                mReader.reset();
+                            }
+                            initCanvasBounds(read(mReader));
                         }
-                        initCanvasBounds(read(mReader));
-                    }
-                    return fullRect;
-                }
-            };
-            CoroutinePool.INSTANCE.run(callable, count, new Continuation<Rect>() {
-                @NotNull
-                @Override
-                public CoroutineContext getContext() {
-                    return EmptyCoroutineContext.INSTANCE;
-                }
-
-                @Override
-                public void resumeWith(@NotNull Object o) {
-                    if (o instanceof Rect) {
-                        fullRect = (Rect) o;
-                    } else {
+                    } catch (Exception e) {
+                        e.printStackTrace();
                         fullRect = RECT_EMPTY;
+                    } finally {
+                        LockSupport.unpark(thread);
                     }
                 }
             });
+            LockSupport.park(thread);
             return fullRect;
         }
     }
@@ -216,77 +206,6 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         }
     }
 
-    public synchronized void start() {
-        if (fullRect == RECT_EMPTY) {
-            return;
-        }
-
-        if (mState == State.RUNNING || mState == State.INITIALIZING) {
-            Log.i(TAG, debugInfo() + " Already started");
-            return;
-        }
-        while (mState == State.FINISHING) {
-            Log.e(TAG, debugInfo() + " Processing,wait for finish at " + mState);
-        }
-        if (DEBUG) {
-            Log.i(TAG, debugInfo() + "Set state to INITIALIZING");
-        }
-        mState = State.INITIALIZING;
-        paused.compareAndSet(true, false);
-
-        final long start = System.currentTimeMillis();
-        CoroutinePool.INSTANCE.run(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if (frames.size() == 0) {
-                        try {
-                            if (mReader == null) {
-                                mReader = getReader(mLoader.obtain());
-                            } else {
-                                mReader.reset();
-                            }
-                            initCanvasBounds(read(mReader));
-                        } catch (Throwable e) {
-                            e.printStackTrace();
-                        }
-                    }
-                } finally {
-                    Log.i(TAG, debugInfo() + " Set state to RUNNING,cost " + (System.currentTimeMillis() - start));
-                    mState = State.RUNNING;
-                }
-            }
-        }, count, new Continuation<Unit>() {
-            @NotNull
-            @Override
-            public CoroutineContext getContext() {
-                return EmptyCoroutineContext.INSTANCE;
-            }
-
-            @Override
-            public void resumeWith(@NotNull Object o) {
-
-            }
-        });
-        if (getNumPlays() == 0 || !finished) {
-            this.frameIndex = -1;
-            CoroutinePool.INSTANCE.run(renderTask, count, new Continuation<Unit>() {
-                @NotNull
-                @Override
-                public CoroutineContext getContext() {
-                    return EmptyCoroutineContext.INSTANCE;
-                }
-
-                @Override
-                public void resumeWith(@NotNull Object o) {
-
-                }
-            });
-            renderListener.onStart();
-        } else {
-            Log.i(TAG, debugInfo() + " No need to started");
-        }
-    }
 
     private int getFrameCount() {
         return this.frames.size();
@@ -297,7 +216,98 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
      */
     protected abstract int getLoopCount();
 
-    public synchronized void stop() {
+    public void start() {
+        if (fullRect == RECT_EMPTY) {
+            return;
+        }
+        if (mState == State.RUNNING || mState == State.INITIALIZING) {
+            Log.i(TAG, debugInfo() + " Already started");
+            return;
+        }
+        if (mState == State.FINISHING) {
+            Log.e(TAG, debugInfo() + " Processing,wait for finish at " + mState);
+        }
+        if (DEBUG) {
+            Log.i(TAG, debugInfo() + "Set state to INITIALIZING");
+        }
+        mState = State.INITIALIZING;
+        if (Looper.myLooper() == workerHandler.getLooper()) {
+            innerStart();
+        } else {
+            workerHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    innerStart();
+                }
+            });
+        }
+    }
+
+    @WorkerThread
+    private void innerStart() {
+        paused.compareAndSet(true, false);
+
+        final long start = System.currentTimeMillis();
+        try {
+            if (frames.size() == 0) {
+                try {
+                    if (mReader == null) {
+                        mReader = getReader(mLoader.obtain());
+                    } else {
+                        mReader.reset();
+                    }
+                    initCanvasBounds(read(mReader));
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+            }
+        } finally {
+            Log.i(TAG, debugInfo() + " Set state to RUNNING,cost " + (System.currentTimeMillis() - start));
+            mState = State.RUNNING;
+        }
+        if (getNumPlays() == 0 || !finished) {
+            this.frameIndex = -1;
+            renderTask.run();
+            renderListener.onStart();
+        } else {
+            Log.i(TAG, debugInfo() + " No need to started");
+        }
+    }
+
+    @WorkerThread
+    private void innerStop() {
+        workerHandler.removeCallbacks(renderTask);
+        frames.clear();
+        for (Bitmap bitmap : cacheBitmaps) {
+            if (bitmap != null && !bitmap.isRecycled()) {
+                bitmap.recycle();
+            }
+        }
+        cacheBitmaps.clear();
+        if (frameBuffer != null) {
+            frameBuffer = null;
+        }
+        cachedCanvas.clear();
+        try {
+            if (mReader != null) {
+                mReader.close();
+                mReader = null;
+            }
+            if (mWriter != null) {
+                mWriter.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        release();
+        if (DEBUG) {
+            Log.i(TAG, debugInfo() + " release and Set state to IDLE");
+        }
+        mState = State.IDLE;
+        renderListener.onEnd();
+    }
+
+    public void stop() {
         if (fullRect == RECT_EMPTY) {
             return;
         }
@@ -305,57 +315,23 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
             Log.i(TAG, debugInfo() + "No need to stop");
             return;
         }
-        while (mState == State.INITIALIZING) {
+        if (mState == State.INITIALIZING) {
             Log.e(TAG, debugInfo() + "Processing,wait for finish at " + mState);
         }
         if (DEBUG) {
             Log.i(TAG, debugInfo() + " Set state to finishing");
         }
         mState = State.FINISHING;
-        CoroutinePool.INSTANCE.run(new Runnable() {
-            @Override
-            public void run() {
-                frames.clear();
-                for (Bitmap bitmap : cacheBitmaps) {
-                    if (bitmap != null && !bitmap.isRecycled()) {
-                        bitmap.recycle();
-                    }
+        if (Looper.myLooper() == workerHandler.getLooper()) {
+            innerStop();
+        } else {
+            workerHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    innerStop();
                 }
-                cacheBitmaps.clear();
-                if (frameBuffer != null) {
-                    frameBuffer = null;
-                }
-                cachedCanvas.clear();
-                try {
-                    if (mReader != null) {
-                        mReader.close();
-                        mReader = null;
-                    }
-                    if (mWriter != null) {
-                        mWriter.close();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                release();
-                if (DEBUG) {
-                    Log.i(TAG, debugInfo() + " release and Set state to IDLE");
-                }
-                mState = State.IDLE;
-            }
-        }, count, new Continuation<Unit>() {
-            @NotNull
-            @Override
-            public CoroutineContext getContext() {
-                return EmptyCoroutineContext.INSTANCE;
-            }
-
-            @Override
-            public void resumeWith(@NotNull Object o) {
-
-            }
-        });
-        renderListener.onEnd();
+            });
+        }
     }
 
     private String debugInfo() {
@@ -386,23 +362,14 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     }
 
     public void pause() {
+        workerHandler.removeCallbacks(renderTask);
         paused.compareAndSet(false, true);
     }
 
     public void resume() {
         paused.compareAndSet(true, false);
-        CoroutinePool.INSTANCE.run(renderTask, count, new Continuation<Unit>() {
-            @NotNull
-            @Override
-            public CoroutineContext getContext() {
-                return EmptyCoroutineContext.INSTANCE;
-            }
-
-            @Override
-            public void resumeWith(@NotNull Object o) {
-
-            }
-        });
+        workerHandler.removeCallbacks(renderTask);
+        workerHandler.post(renderTask);
     }
 
 
@@ -415,30 +382,19 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         if (sample != this.sampleSize) {
             this.sampleSize = sample;
             final boolean tempRunning = isRunning();
-            stop();
-            CoroutinePool.INSTANCE.run(new Runnable() {
+            workerHandler.removeCallbacks(renderTask);
+            workerHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    frames.clear();
+                    innerStop();
                     try {
                         initCanvasBounds(read(getReader(mLoader.obtain())));
                         if (tempRunning) {
-                            start();
+                            innerStart();
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                }
-            }, count, new Continuation<Unit>() {
-                @NotNull
-                @Override
-                public CoroutineContext getContext() {
-                    return EmptyCoroutineContext.INSTANCE;
-                }
-
-                @Override
-                public void resumeWith(@NotNull Object o) {
-
                 }
             });
         }
