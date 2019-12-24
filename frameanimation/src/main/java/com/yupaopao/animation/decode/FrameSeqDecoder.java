@@ -69,7 +69,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     private Set<Bitmap> cacheBitmaps = new HashSet<>();
     protected Map<Bitmap, Canvas> cachedCanvas = new WeakHashMap<>();
     protected ByteBuffer frameBuffer;
-    protected Rect fullRect;
+    protected Rect fullRect = RECT_EMPTY;
     private W mWriter = getWriter();
     private R mReader = null;
     public static final boolean DEBUG = false;
