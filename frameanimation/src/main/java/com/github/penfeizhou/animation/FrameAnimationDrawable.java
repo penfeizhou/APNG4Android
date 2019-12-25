@@ -193,12 +193,20 @@ public abstract class FrameAnimationDrawable extends Drawable implements Animata
 
     @Override
     public int getIntrinsicWidth() {
-        return frameSeqDecoder.getBounds().width();
+        try {
+            return frameSeqDecoder.getBounds().width();
+        } catch (Exception exception) {
+            return 0;
+        }
     }
 
     @Override
     public int getIntrinsicHeight() {
-        return frameSeqDecoder.getBounds().height();
+        try {
+            return frameSeqDecoder.getBounds().height();
+        } catch (Exception exception) {
+            return 0;
+        }
     }
 
     @Override
