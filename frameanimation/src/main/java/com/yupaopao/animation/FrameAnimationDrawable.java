@@ -168,11 +168,12 @@ public abstract class FrameAnimationDrawable extends Drawable implements Animata
         }
         byteBuffer.rewind();
 
-        if (this.bitmap.isRecycled()) {
-            return;
+        try {
+            this.bitmap.copyPixelsFromBuffer(byteBuffer);
+            uiHandler.post(invalidateRunnable);
+        } catch (Exception | Error exception) {
+            exception.printStackTrace();
         }
-        this.bitmap.copyPixelsFromBuffer(byteBuffer);
-        uiHandler.post(invalidateRunnable);
     }
 
     @Override
