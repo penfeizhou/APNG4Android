@@ -167,6 +167,10 @@ public abstract class FrameAnimationDrawable extends Drawable implements Animata
                     Bitmap.Config.ARGB_8888);
         }
         byteBuffer.rewind();
+
+        if (this.bitmap.isRecycled()) {
+            return;
+        }
         this.bitmap.copyPixelsFromBuffer(byteBuffer);
         uiHandler.post(invalidateRunnable);
     }
