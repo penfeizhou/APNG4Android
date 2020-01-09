@@ -106,10 +106,6 @@ public abstract class FrameAnimationDrawable extends Drawable implements Animata
             Log.d(TAG, this.toString() + ",stop");
         }
         frameSeqDecoder.stop();
-        if (bitmap != null && !bitmap.isRecycled()) {
-            bitmap.recycle();
-            bitmap = null;
-        }
     }
 
     @Override
