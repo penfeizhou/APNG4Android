@@ -163,6 +163,10 @@ public abstract class FrameAnimationDrawable extends Drawable implements Animata
                     Bitmap.Config.ARGB_8888);
         }
         byteBuffer.rewind();
+        if (byteBuffer.remaining() < this.bitmap.getByteCount()) {
+            Log.e(TAG, "onRender:Buffer not large enough for pixels");
+            return;
+        }
         this.bitmap.copyPixelsFromBuffer(byteBuffer);
         uiHandler.post(invalidateRunnable);
     }
