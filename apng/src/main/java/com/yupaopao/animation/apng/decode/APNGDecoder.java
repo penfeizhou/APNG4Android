@@ -127,7 +127,7 @@ public class APNGDecoder extends FrameSeqDecoder<APNGReader, APNGWriter> {
 
     @Override
     protected void renderFrame(Frame frame) {
-        if (frame == null) {
+        if (frame == null || fullRect == null) {
             return;
         }
         Bitmap bitmap = obtainBitmap(fullRect.width() / sampleSize, fullRect.height() / sampleSize);
