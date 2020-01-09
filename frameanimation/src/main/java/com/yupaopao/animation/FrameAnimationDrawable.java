@@ -106,10 +106,6 @@ public abstract class FrameAnimationDrawable extends Drawable implements Animata
             Log.d(TAG, this.toString() + ",stop");
         }
         frameSeqDecoder.stop();
-        if (bitmap != null && !bitmap.isRecycled()) {
-            bitmap.recycle();
-            bitmap = null;
-        }
     }
 
     @Override
@@ -167,6 +163,11 @@ public abstract class FrameAnimationDrawable extends Drawable implements Animata
                     Bitmap.Config.ARGB_8888);
         }
         byteBuffer.rewind();
+
+        if (byteBuffer.remaining() < this.bitmap.getByteCount()) {
+            Log.e(TAG, "onRender:Buffer not large enough for pixels");
+            return;
+        }
 
         try {
             this.bitmap.copyPixelsFromBuffer(byteBuffer);

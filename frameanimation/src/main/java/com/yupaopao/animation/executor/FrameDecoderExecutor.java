@@ -38,6 +38,15 @@ public class FrameDecoderExecutor {
             handlerThread.start();
             Looper looper = handlerThread.getLooper();
             mLooperGroup.add(looper);
+            if (looper != null) {
+                mLooperGroup.add(looper);
+            } else {
+                for (Looper looper1 : mLooperGroup) {
+                    if (looper1 != null) {
+                        return looper1;
+                    }
+                }
+            }
             return looper;
         } else {
             return mLooperGroup.get(idx);
