@@ -6,6 +6,12 @@
 * Support still image
 * Low memory usage
 
+## Changelog 1.3.3
+* Fix problems of small probability
+    * Avoid the posibility that render a recycled bitmap
+    * Fix Null point Exception when new thread
+    * Avoid buffer size smaller than the target bitmap
+
 ## Changelog 1.3.1
 * Fix ANR when switch visibility of animation drawable quickly.
 
