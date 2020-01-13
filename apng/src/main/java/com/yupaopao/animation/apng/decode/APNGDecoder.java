@@ -130,69 +130,73 @@ public class APNGDecoder extends FrameSeqDecoder<APNGReader, APNGWriter> {
         if (frame == null || fullRect == null) {
             return;
         }
-        Bitmap bitmap = obtainBitmap(fullRect.width() / sampleSize, fullRect.height() / sampleSize);
-        Canvas canvas = cachedCanvas.get(bitmap);
-        if (canvas == null) {
-            canvas = new Canvas(bitmap);
-            cachedCanvas.put(bitmap, canvas);
-        }
-        if (frame instanceof APNGFrame) {
-            // 从缓存中恢复当前帧
-            frameBuffer.rewind();
-            bitmap.copyPixelsFromBuffer(frameBuffer);
-            // 开始绘制前，处理快照中的设定
-            canvas.save();
-            canvas.clipRect(snapShot.dstRect);
-            switch (snapShot.dispose_op) {
-                // 从快照中恢复上一帧之前的显示内容
-                case FCTLChunk.APNG_DISPOSE_OP_PREVIOUS:
-                    snapShot.byteBuffer.rewind();
-                    bitmap.copyPixelsFromBuffer(snapShot.byteBuffer);
-                    break;
-                // 清空上一帧所画区域
-                case FCTLChunk.APNG_DISPOSE_OP_BACKGROUND:
-                    canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-                    break;
-                // 什么都不做
-                case FCTLChunk.APNG_DISPOSE_OP_NON:
-                default:
-                    break;
+        try {
+            Bitmap bitmap = obtainBitmap(fullRect.width() / sampleSize, fullRect.height() / sampleSize);
+            Canvas canvas = cachedCanvas.get(bitmap);
+            if (canvas == null) {
+                canvas = new Canvas(bitmap);
+                cachedCanvas.put(bitmap, canvas);
             }
-            canvas.restore();
-            // 然后根据dispose设定传递到快照信息中
-            if (((APNGFrame) frame).dispose_op == FCTLChunk.APNG_DISPOSE_OP_PREVIOUS) {
-                if (snapShot.dispose_op != FCTLChunk.APNG_DISPOSE_OP_PREVIOUS) {
-                    frameBuffer.rewind();
-                    snapShot.byteBuffer.rewind();
-                    snapShot.byteBuffer.put(frameBuffer);
+            if (frame instanceof APNGFrame) {
+                // 从缓存中恢复当前帧
+                frameBuffer.rewind();
+                bitmap.copyPixelsFromBuffer(frameBuffer);
+                // 开始绘制前，处理快照中的设定
+                canvas.save();
+                canvas.clipRect(snapShot.dstRect);
+                switch (snapShot.dispose_op) {
+                    // 从快照中恢复上一帧之前的显示内容
+                    case FCTLChunk.APNG_DISPOSE_OP_PREVIOUS:
+                        snapShot.byteBuffer.rewind();
+                        bitmap.copyPixelsFromBuffer(snapShot.byteBuffer);
+                        break;
+                    // 清空上一帧所画区域
+                    case FCTLChunk.APNG_DISPOSE_OP_BACKGROUND:
+                        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+                        break;
+                    // 什么都不做
+                    case FCTLChunk.APNG_DISPOSE_OP_NON:
+                    default:
+                        break;
                 }
+                canvas.restore();
+                // 然后根据dispose设定传递到快照信息中
+                if (((APNGFrame) frame).dispose_op == FCTLChunk.APNG_DISPOSE_OP_PREVIOUS) {
+                    if (snapShot.dispose_op != FCTLChunk.APNG_DISPOSE_OP_PREVIOUS) {
+                        frameBuffer.rewind();
+                        snapShot.byteBuffer.rewind();
+                        snapShot.byteBuffer.put(frameBuffer);
+                    }
+                }
+
+                snapShot.dispose_op = ((APNGFrame) frame).dispose_op;
+
+                snapShot.dstRect.set(frame.frameX / sampleSize,
+                        frame.frameY / sampleSize,
+                        (frame.frameX + frame.frameWidth) / sampleSize,
+                        (frame.frameY + frame.frameHeight) / sampleSize);
+
+                canvas.save();
+                canvas.clipRect(
+                        frame.frameX / sampleSize,
+                        frame.frameY / sampleSize,
+                        (frame.frameX + frame.frameWidth) / sampleSize,
+                        (frame.frameY + frame.frameHeight) / sampleSize);
+                if (((APNGFrame) frame).blend_op == FCTLChunk.APNG_BLEND_OP_SOURCE) {
+                    canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+                }
+                canvas.restore();
+
             }
-
-            snapShot.dispose_op = ((APNGFrame) frame).dispose_op;
-
-            snapShot.dstRect.set(frame.frameX / sampleSize,
-                    frame.frameY / sampleSize,
-                    (frame.frameX + frame.frameWidth) / sampleSize,
-                    (frame.frameY + frame.frameHeight) / sampleSize);
-
-            canvas.save();
-            canvas.clipRect(
-                    frame.frameX / sampleSize,
-                    frame.frameY / sampleSize,
-                    (frame.frameX + frame.frameWidth) / sampleSize,
-                    (frame.frameY + frame.frameHeight) / sampleSize);
-            if (((APNGFrame) frame).blend_op == FCTLChunk.APNG_BLEND_OP_SOURCE) {
-                canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-            }
-            canvas.restore();
+            //开始真正绘制当前帧的内容
+            Bitmap inBitmap = obtainBitmap(frame.frameWidth, frame.frameHeight);
+            recycleBitmap(frame.draw(canvas, paint, sampleSize, inBitmap, getWriter()));
+            recycleBitmap(inBitmap);
+            frameBuffer.rewind();
+            bitmap.copyPixelsToBuffer(frameBuffer);
+            recycleBitmap(bitmap);
+        } catch (Exception exception) {
 
         }
-        //开始真正绘制当前帧的内容
-        Bitmap inBitmap = obtainBitmap(frame.frameWidth, frame.frameHeight);
-        recycleBitmap(frame.draw(canvas, paint, sampleSize, inBitmap, getWriter()));
-        recycleBitmap(inBitmap);
-        frameBuffer.rewind();
-        bitmap.copyPixelsToBuffer(frameBuffer);
-        recycleBitmap(bitmap);
     }
 }
