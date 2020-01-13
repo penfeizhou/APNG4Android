@@ -45,9 +45,13 @@ public class FrameDecoderExecutor {
                 return Looper.getMainLooper();
             }
         } else {
-            Looper looper = mHandlerThreadGroup.get(idx).getLooper();
-            if (looper != null) {
-                return looper;
+            if (mHandlerThreadGroup.get(idx) != null) {
+                Looper looper = mHandlerThreadGroup.get(idx).getLooper();
+                if (looper != null) {
+                    return looper;
+                } else {
+                    return Looper.getMainLooper();
+                }
             } else {
                 return Looper.getMainLooper();
             }
