@@ -3,7 +3,7 @@ package com.github.penfeizhou.animation.gif.decode;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.github.penfeizhou.animation.decode.Frame;
 import com.github.penfeizhou.animation.gif.io.GifReader;

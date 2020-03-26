@@ -12,8 +12,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.support.annotation.NonNull;
-import android.support.graphics.drawable.Animatable2Compat;
+import androidx.annotation.NonNull;
+import androidx.vectordrawable.graphics.drawable.Animatable2Compat;
 import android.util.Log;
 
 import com.github.penfeizhou.animation.decode.FrameSeqDecoder;

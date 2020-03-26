@@ -6,6 +6,10 @@
 * Support still image
 * Low memory usage
 
+## Changelog 2.0.0
+* Android X Migration
+* Upgrade Glide to 4.11
+
 ## Changelog 1.3.3
 * Fix problems of small probability
     * Avoid the posibility that render a recycled bitmap
@@ -31,19 +35,19 @@ repositories {
 #### Animated WebP
 ```gradle
 dependencies {
-    implementation 'com.github.penfeizhou.android.animation:awebp:1.3.1'
+    implementation 'com.github.penfeizhou.android.animation:awebp:2.0.0'
 }
 ```
 #### APNG
 ```gradle
 dependencies {
-    implementation 'com.github.penfeizhou.android.animation:apng:1.3.1'
+    implementation 'com.github.penfeizhou.android.animation:apng:2.0.0'
 }
 ```
 #### Gif
 ```gradle
 dependencies {
-    implementation 'com.github.penfeizhou.android.animation:gif:1.3.1'
+    implementation 'com.github.penfeizhou.android.animation:gif:2.0.0'
 }
 ```
 ### Use
@@ -94,7 +98,7 @@ repositories {
     }
 }
 dependencies {
-    implementation 'com.github.penfeizhou.android.animation:glide-plugin:1.3.1'
+    implementation 'com.github.penfeizhou.android.animation:glide-plugin:2.0.0'
 }
 ```
 ### Direct use
