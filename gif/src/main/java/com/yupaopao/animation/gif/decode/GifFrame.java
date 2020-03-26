@@ -3,7 +3,7 @@ package com.yupaopao.animation.gif.decode;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.yupaopao.animation.decode.Frame;
 import com.yupaopao.animation.gif.io.GifReader;

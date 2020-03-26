@@ -2,7 +2,7 @@ package com.yupaopao.animation.awebpencoder;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.support.annotation.WorkerThread;
+import androidx.annotation.WorkerThread;
 import android.util.Log;
 
 import com.yupaopao.animation.gif.decode.ApplicationExtension;
