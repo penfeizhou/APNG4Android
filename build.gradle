@@ -5,10 +5,11 @@ buildscript {
     repositories {
         google()
         jcenter()
-
+        maven { url 'http://repo.yupaopao.com/artifactory/android-local' }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.5.3'
+        classpath 'com.yupaopao.android:gradle-plugin:1.0.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
