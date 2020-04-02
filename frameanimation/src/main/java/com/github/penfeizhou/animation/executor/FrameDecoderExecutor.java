@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class FrameDecoderExecutor {
     private static int sPoolNumber = 4;
-    private ArrayList<Looper> mLooperGroup = new ArrayList<>();
+    private ArrayList<HandlerThread> mHandlerThreadGroup = new ArrayList<>();
     private AtomicInteger counter = new AtomicInteger(0);
 
     private FrameDecoderExecutor() {
@@ -33,22 +33,28 @@ public class FrameDecoderExecutor {
 
     public Looper getLooper(int taskId) {
         int idx = taskId % sPoolNumber;
-        if (idx >= mLooperGroup.size()) {
+        if (idx >= mHandlerThreadGroup.size()) {
             HandlerThread handlerThread = new HandlerThread("FrameDecoderExecutor-" + idx);
             handlerThread.start();
+
+            mHandlerThreadGroup.add(handlerThread);
             Looper looper = handlerThread.getLooper();
             if (looper != null) {
-                mLooperGroup.add(looper);
+                return looper;
             } else {
-                for (Looper looper1 : mLooperGroup) {
-                    if (looper1 != null) {
-                        return looper1;
-                    }
-                }
+                return Looper.getMainLooper();
             }
-            return looper;
         } else {
-            return mLooperGroup.get(idx);
+            if (mHandlerThreadGroup.get(idx) != null) {
+                Looper looper = mHandlerThreadGroup.get(idx).getLooper();
+                if (looper != null) {
+                    return looper;
+                } else {
+                    return Looper.getMainLooper();
+                }
+            } else {
+                return Looper.getMainLooper();
+            }
         }
     }
 
@@ -56,3 +62,4 @@ public class FrameDecoderExecutor {
         return counter.getAndIncrement();
     }
 }
+
