@@ -179,13 +179,6 @@ public class APNGDecoder extends FrameSeqDecoder<APNGReader, APNGWriter> {
                         (frame.frameX + frame.frameWidth) / sampleSize,
                         (frame.frameY + frame.frameHeight) / sampleSize);
                 canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-            } else if (((APNGFrame) frame).blend_op == FCTLChunk.APNG_BLEND_OP_OVER) {
-//                canvas.clipRect(
-//                        snapShot.dstRect.left,
-//                        snapShot.dstRect.top,
-//                        snapShot.dstRect.right,
-//                        snapShot.dstRect.bottom);
-//                canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
             }
 
 
