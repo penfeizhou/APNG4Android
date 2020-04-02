@@ -5,7 +5,7 @@ include_directories(./)
 file(GLOB native_srcs "*.cpp")
 
 add_library(
-        gif-decoder
+        animation-decoder-gif
         SHARED
         ${native_srcs}
        )
@@ -19,5 +19,5 @@ find_library(log-lib
 
 
 target_link_libraries(
-        gif-decoder
+        animation-decoder-gif
         ${log-lib})
