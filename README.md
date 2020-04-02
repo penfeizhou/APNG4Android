@@ -6,6 +6,9 @@
 * Support still image
 * Low memory usage
 
+## Changelog 2.1.0
+* Fix handling APNG dispose to previous error.
+
 ## Changelog 2.0.0
 * Android X Migration
 * Upgrade Glide to 4.11
