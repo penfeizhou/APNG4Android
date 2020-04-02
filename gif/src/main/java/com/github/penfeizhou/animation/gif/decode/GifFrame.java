@@ -3,6 +3,7 @@ package com.github.penfeizhou.animation.gif.decode;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+
 import androidx.annotation.Nullable;
 
 import com.github.penfeizhou.animation.decode.Frame;
@@ -19,7 +20,7 @@ import java.io.IOException;
  */
 public class GifFrame extends Frame<GifReader, GifWriter> {
     static {
-        System.loadLibrary("gif-decoder");
+        System.loadLibrary("animation-decoder-gif");
     }
 
     public final int disposalMethod;
