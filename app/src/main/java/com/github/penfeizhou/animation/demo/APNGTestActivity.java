@@ -21,6 +21,7 @@ public class APNGTestActivity extends Activity {
         setContentView(R.layout.activity_apnglib);
         LinearLayout linearLayout = findViewById(R.id.layout);
         String[] urls = new String[]{
+                "file:///android_asset/apng_detail_guide.png",
                 "https://misc.aotu.io/ONE-SUNDAY/SteamEngine.png",
                 "https://isparta.github.io/compare-webp/image/gif_webp/webp/2.webp",
                 "file:///android_asset/1.gif",

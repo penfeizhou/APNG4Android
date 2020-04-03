@@ -2,7 +2,7 @@ package com.github.penfeizhou.animation.awebpencoder;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import androidx.annotation.WorkerThread;
+import android.support.annotation.WorkerThread;
 import android.util.Log;
 
 import com.github.penfeizhou.animation.gif.decode.ApplicationExtension;

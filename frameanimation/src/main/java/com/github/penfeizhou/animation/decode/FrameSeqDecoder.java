@@ -6,7 +6,7 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import androidx.annotation.WorkerThread;
+import android.support.annotation.WorkerThread;
 import android.util.Log;
 
 import com.github.penfeizhou.animation.executor.FrameDecoderExecutor;
