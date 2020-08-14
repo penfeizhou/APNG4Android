@@ -6,6 +6,8 @@
 * Support still image
 * Low memory usage
 
+## Changelog 2.3.0
+* Fix WebPEncoder's bug
 ## Changelog 2.2.0
 * Downgrade Glide to 4.8
 * Android Support Migration
