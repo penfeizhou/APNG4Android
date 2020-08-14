@@ -18,6 +18,7 @@ import com.github.penfeizhou.animation.gif.io.GifWriter;
 import com.github.penfeizhou.animation.io.ByteBufferReader;
 import com.github.penfeizhou.animation.loader.Loader;
 import com.github.penfeizhou.animation.webp.decode.BaseChunk;
+import com.github.penfeizhou.animation.webp.decode.ICCPChunk;
 import com.github.penfeizhou.animation.webp.decode.VP8XChunk;
 import com.github.penfeizhou.animation.webp.decode.WebPParser;
 import com.github.penfeizhou.animation.webp.io.WebPReader;
@@ -157,7 +158,7 @@ public class WebPEncoder {
         // 10M
         writer.reset(1000 * 1000 * 10);
         int vp8xPayloadSize = 10;
-        int size = 12;
+        int size = 4;
 
         //header
         writer.putFourCC("RIFF");
@@ -171,20 +172,19 @@ public class WebPEncoder {
         writer.putUInt24(0);
         writer.put1Based(width);
         writer.put1Based(height);
-        size += vp8xPayloadSize;
         //ANIM
         writer.putFourCC("ANIM");
         writer.putUInt32(6);
         writer.putUInt32(this.bgColor);
         writer.putUInt16(this.loopCount);
-        size += 6;
 
         //ANMF
         for (FrameInfo frameInfo : frameInfoList) {
-            size += encodeFrame(frameInfo);
+            encodeFrame(frameInfo);
         }
 
         byte[] bytes = writer.toByteArray();
+        size = writer.position() - 8;
         bytes[4] = (byte) (size & 0xff);
         bytes[5] = (byte) ((size >> 8) & 0xff);
         bytes[6] = (byte) ((size >> 16) & 0xff);
@@ -216,6 +216,9 @@ public class WebPEncoder {
                     height = ((VP8XChunk) chunk).canvasHeight;
                     continue;
                 }
+                if (chunk instanceof ICCPChunk) {
+                    continue;
+                }
                 payLoadSize += chunk.payloadSize + 8;
                 payLoadSize += payLoadSize & 1;
             }
@@ -229,7 +232,9 @@ public class WebPEncoder {
             writer.putByte((byte) ((frameInfo.blending ? 0x2 : 0) | (frameInfo.disposal ? 0x1 : 0)));
             for (BaseChunk chunk : chunks) {
                 if (chunk instanceof VP8XChunk) {
-                    //skip
+                    continue;
+                }
+                if (chunk instanceof ICCPChunk) {
                     continue;
                 }
                 writeChunk(writer, reader, chunk);
