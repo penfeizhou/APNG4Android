@@ -15,13 +15,17 @@ import com.github.penfeizhou.animation.loader.ResourceStreamLoader;
  * @Author: pengfei.zhou
  * @CreateDate: 2019-05-16
  */
-public class GifDrawable extends FrameAnimationDrawable {
+public class GifDrawable extends FrameAnimationDrawable<GifDecoder> {
     public GifDrawable(Loader provider) {
         super(provider);
     }
 
+    public GifDrawable(GifDecoder decoder) {
+        super(decoder);
+    }
+
     @Override
-    protected FrameSeqDecoder createFrameSeqDecoder(Loader loader, FrameSeqDecoder.RenderListener listener) {
+    protected GifDecoder createFrameSeqDecoder(Loader loader, FrameSeqDecoder.RenderListener listener) {
         return new GifDecoder(loader, listener);
     }
 

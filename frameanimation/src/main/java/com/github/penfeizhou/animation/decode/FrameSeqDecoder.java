@@ -6,6 +6,7 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.Nullable;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
 
@@ -41,14 +42,15 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     protected int frameIndex = -1;
     private int playCount;
     private Integer loopLimit = null;
-    private final RenderListener renderListener;
+    @Nullable
+    private RenderListener renderListener = null;
     private AtomicBoolean paused = new AtomicBoolean(true);
     private static final Rect RECT_EMPTY = new Rect();
     private Runnable renderTask = new Runnable() {
         @Override
         public void run() {
             if (DEBUG) {
-                Log.d(TAG, renderListener.toString() + ",run");
+                Log.d(TAG, renderTask.toString() + ",run");
             }
             if (paused.get()) {
                 return;
@@ -58,7 +60,9 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
                 long delay = step();
                 long cost = System.currentTimeMillis() - start;
                 workerHandler.postDelayed(this, Math.max(0, delay - cost));
-                renderListener.onRender(frameBuffer);
+                if (renderListener != null) {
+                    renderListener.onRender(frameBuffer);
+                }
             } else {
                 stop();
             }
@@ -158,11 +162,16 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
      * @param loader         webp的reader
      * @param renderListener 渲染的回调
      */
-    public FrameSeqDecoder(Loader loader, RenderListener renderListener) {
+    public FrameSeqDecoder(Loader loader, @Nullable RenderListener renderListener) {
         this.mLoader = loader;
         this.renderListener = renderListener;
         this.taskId = FrameDecoderExecutor.getInstance().generateTaskId();
         this.workerHandler = new Handler(FrameDecoderExecutor.getInstance().getLooper(taskId));
+    }
+
+
+    public void setRenderListener(@Nullable RenderListener renderListener) {
+        this.renderListener = renderListener;
     }
 
     public Rect getBounds() {
@@ -268,7 +277,9 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         if (getNumPlays() == 0 || !finished) {
             this.frameIndex = -1;
             renderTask.run();
-            renderListener.onStart();
+            if (renderListener != null) {
+                renderListener.onStart();
+            }
         } else {
             Log.i(TAG, debugInfo() + " No need to started");
         }
@@ -304,7 +315,9 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
             Log.i(TAG, debugInfo() + " release and Set state to IDLE");
         }
         mState = State.IDLE;
-        renderListener.onEnd();
+        if (renderListener != null) {
+            renderListener.onEnd();
+        }
     }
 
     public void stop() {

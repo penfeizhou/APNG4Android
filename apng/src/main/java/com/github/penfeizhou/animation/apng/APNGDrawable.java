@@ -16,13 +16,17 @@ import com.github.penfeizhou.animation.loader.ResourceStreamLoader;
  * @Author: pengfei.zhou
  * @CreateDate: 2019/3/27
  */
-public class APNGDrawable extends FrameAnimationDrawable {
+public class APNGDrawable extends FrameAnimationDrawable<APNGDecoder> {
     public APNGDrawable(Loader provider) {
         super(provider);
     }
 
+    public APNGDrawable(APNGDecoder decoder) {
+        super(decoder);
+    }
+
     @Override
-    protected FrameSeqDecoder createFrameSeqDecoder(Loader streamLoader, FrameSeqDecoder.RenderListener listener) {
+    protected APNGDecoder createFrameSeqDecoder(Loader streamLoader, FrameSeqDecoder.RenderListener listener) {
         return new APNGDecoder(streamLoader, listener);
     }
 

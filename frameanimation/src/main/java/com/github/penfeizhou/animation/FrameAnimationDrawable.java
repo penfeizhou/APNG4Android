@@ -28,10 +28,10 @@ import java.util.Set;
  * @Author: pengfei.zhou
  * @CreateDate: 2019/3/27
  */
-public abstract class FrameAnimationDrawable extends Drawable implements Animatable2Compat, FrameSeqDecoder.RenderListener {
+public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> extends Drawable implements Animatable2Compat, FrameSeqDecoder.RenderListener {
     private static final String TAG = FrameAnimationDrawable.class.getSimpleName();
     private final Paint paint = new Paint();
-    private final FrameSeqDecoder frameSeqDecoder;
+    private final Decoder frameSeqDecoder;
     private DrawFilter drawFilter = new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
     private Matrix matrix = new Matrix();
     private Set<AnimationCallback> animationCallbacks = new HashSet<>();
@@ -61,13 +61,24 @@ public abstract class FrameAnimationDrawable extends Drawable implements Animata
             invalidateSelf();
         }
     };
+    private boolean autoPlay = true;
+
+    public FrameAnimationDrawable(Decoder frameSeqDecoder) {
+        paint.setAntiAlias(true);
+        this.frameSeqDecoder = frameSeqDecoder;
+        this.frameSeqDecoder.setRenderListener(this);
+    }
 
     public FrameAnimationDrawable(Loader provider) {
         paint.setAntiAlias(true);
-        frameSeqDecoder = createFrameSeqDecoder(provider, this);
+        this.frameSeqDecoder = createFrameSeqDecoder(provider, this);
     }
 
-    protected abstract FrameSeqDecoder createFrameSeqDecoder(Loader streamLoader, FrameSeqDecoder.RenderListener listener);
+    public void setAutoPlay(boolean autoPlay) {
+        this.autoPlay = autoPlay;
+    }
+
+    protected abstract Decoder createFrameSeqDecoder(Loader streamLoader, FrameSeqDecoder.RenderListener listener);
 
     /**
      * @param loopLimit <=0为无限播放,>0为实际播放次数
@@ -184,15 +195,17 @@ public abstract class FrameAnimationDrawable extends Drawable implements Animata
 
     @Override
     public boolean setVisible(boolean visible, boolean restart) {
-        if (FrameSeqDecoder.DEBUG) {
-            Log.d(TAG, this.toString() + ",visible:" + visible + ",restart:" + restart);
-        }
-        if (visible) {
-            if (!isRunning()) {
-                start();
+        if (this.autoPlay) {
+            if (FrameSeqDecoder.DEBUG) {
+                Log.d(TAG, this.toString() + ",visible:" + visible + ",restart:" + restart);
             }
-        } else if (isRunning()) {
-            stop();
+            if (visible) {
+                if (!isRunning()) {
+                    start();
+                }
+            } else if (isRunning()) {
+                stop();
+            }
         }
         return super.setVisible(visible, restart);
     }

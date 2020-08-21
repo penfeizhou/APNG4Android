@@ -1,6 +1,5 @@
 package com.github.penfeizhou.animation.glide;
 
-import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -8,6 +7,7 @@ import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.github.penfeizhou.animation.apng.decode.APNGParser;
+import com.github.penfeizhou.animation.decode.FrameSeqDecoder;
 import com.github.penfeizhou.animation.gif.decode.GifParser;
 import com.github.penfeizhou.animation.io.StreamReader;
 import com.github.penfeizhou.animation.webp.decode.WebPParser;
@@ -22,11 +22,11 @@ import java.nio.ByteBuffer;
  * @Author: pengfei.zhou
  * @CreateDate: 2019-05-14
  */
-public class StreamAnimationDecoder implements ResourceDecoder<InputStream, Drawable> {
+public class StreamAnimationDecoder implements ResourceDecoder<InputStream, FrameSeqDecoder> {
 
-    private final ResourceDecoder<ByteBuffer, Drawable> byteBufferDecoder;
+    private final ResourceDecoder<ByteBuffer, FrameSeqDecoder> byteBufferDecoder;
 
-    public StreamAnimationDecoder(ResourceDecoder<ByteBuffer, Drawable> byteBufferDecoder) {
+    public StreamAnimationDecoder(ResourceDecoder<ByteBuffer, FrameSeqDecoder> byteBufferDecoder) {
         this.byteBufferDecoder = byteBufferDecoder;
     }
 
@@ -39,7 +39,7 @@ public class StreamAnimationDecoder implements ResourceDecoder<InputStream, Draw
 
     @Nullable
     @Override
-    public Resource<Drawable> decode(@NonNull final InputStream source, int width, int height, @NonNull Options options) throws IOException {
+    public Resource<FrameSeqDecoder> decode(@NonNull final InputStream source, int width, int height, @NonNull Options options) throws IOException {
         byte[] data = inputStreamToBytes(source);
         if (data == null) {
             return null;

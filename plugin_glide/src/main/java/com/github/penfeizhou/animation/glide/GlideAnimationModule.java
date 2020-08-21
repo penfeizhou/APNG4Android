@@ -9,6 +9,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.Registry;
 import com.bumptech.glide.annotation.GlideModule;
 import com.bumptech.glide.module.LibraryGlideModule;
+import com.github.penfeizhou.animation.decode.FrameSeqDecoder;
 
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -25,10 +26,9 @@ public class GlideAnimationModule extends LibraryGlideModule {
         super.registerComponents(context, glide, registry);
         ByteBufferAnimationDecoder byteBufferAnimationDecoder = new ByteBufferAnimationDecoder();
         StreamAnimationDecoder streamAnimationDecoder = new StreamAnimationDecoder(byteBufferAnimationDecoder);
-        registry.prepend(InputStream.class, Drawable.class, streamAnimationDecoder);
-        registry.prepend(ByteBuffer.class, Drawable.class, byteBufferAnimationDecoder);
-        AnimationFrameDecoder animationFrameDecoder = new AnimationFrameDecoder(glide.getBitmapPool());
-        registry.prepend(ByteBuffer.class, Bitmap.class, animationFrameDecoder);
-        registry.prepend(InputStream.class, Bitmap.class, new StreamFrameDecoder(animationFrameDecoder));
+        registry.prepend(InputStream.class, FrameSeqDecoder.class, streamAnimationDecoder);
+        registry.prepend(ByteBuffer.class, FrameSeqDecoder.class, byteBufferAnimationDecoder);
+        registry.register(FrameSeqDecoder.class, Drawable.class, new FrameDrawableTranscoder());
+        registry.register(FrameSeqDecoder.class, Bitmap.class, new FrameBitmapTranscoder(glide.getBitmapPool()));
     }
 }
