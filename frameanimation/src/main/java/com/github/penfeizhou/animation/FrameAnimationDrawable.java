@@ -125,10 +125,16 @@ public abstract class FrameAnimationDrawable extends Drawable implements Animata
     @Override
     public void setBounds(int left, int top, int right, int bottom) {
         super.setBounds(left, top, right, bottom);
-        frameSeqDecoder.setDesiredSize(getBounds().width(), getBounds().height());
+        boolean sampleSizeChanged = frameSeqDecoder.setDesiredSize(getBounds().width(), getBounds().height());
         matrix.setScale(
                 1.0f * getBounds().width() * frameSeqDecoder.getSampleSize() / frameSeqDecoder.getBounds().width(),
                 1.0f * getBounds().height() * frameSeqDecoder.getSampleSize() / frameSeqDecoder.getBounds().height());
+
+        if (sampleSizeChanged)
+            this.bitmap = Bitmap.createBitmap(
+                    frameSeqDecoder.getBounds().width() / frameSeqDecoder.getSampleSize(),
+                    frameSeqDecoder.getBounds().height() / frameSeqDecoder.getSampleSize(),
+                    Bitmap.Config.ARGB_8888);
     }
 
     @Override
