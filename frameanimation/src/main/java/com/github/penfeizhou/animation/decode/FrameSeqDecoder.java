@@ -18,6 +18,7 @@ import com.github.penfeizhou.animation.loader.Loader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -42,8 +43,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     protected int frameIndex = -1;
     private int playCount;
     private Integer loopLimit = null;
-    @Nullable
-    private RenderListener renderListener = null;
+    private Set<RenderListener> renderListeners = new HashSet<>();
     private AtomicBoolean paused = new AtomicBoolean(true);
     private static final Rect RECT_EMPTY = new Rect();
     private Runnable renderTask = new Runnable() {
@@ -60,7 +60,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
                 long delay = step();
                 long cost = System.currentTimeMillis() - start;
                 workerHandler.postDelayed(this, Math.max(0, delay - cost));
-                if (renderListener != null) {
+                for (RenderListener renderListener : renderListeners) {
                     renderListener.onRender(frameBuffer);
                 }
             } else {
@@ -76,7 +76,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     protected volatile Rect fullRect;
     private W mWriter = getWriter();
     private R mReader = null;
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = true;
     /**
      * If played all the needed
      */
@@ -164,20 +164,45 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
      */
     public FrameSeqDecoder(Loader loader, @Nullable RenderListener renderListener) {
         this.mLoader = loader;
-        this.renderListener = renderListener;
+        if (renderListener != null) {
+            this.renderListeners.add(renderListener);
+        }
         this.taskId = FrameDecoderExecutor.getInstance().generateTaskId();
         this.workerHandler = new Handler(FrameDecoderExecutor.getInstance().getLooper(taskId));
     }
 
 
-    public void setRenderListener(@Nullable RenderListener renderListener) {
-        this.renderListener = renderListener;
+    public void addRenderListener(final RenderListener renderListener) {
+        this.workerHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                renderListeners.add(renderListener);
+            }
+        });
+    }
+
+    public void removeRenderListener(final RenderListener renderListener) {
+        this.workerHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                renderListeners.remove(renderListener);
+            }
+        });
+    }
+
+    public void stopIfNeeded() {
+        this.workerHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (renderListeners.size() == 0) {
+                    stop();
+                }
+            }
+        });
     }
 
     public Rect getBounds() {
-        if (fullRect != null) {
-            return fullRect;
-        } else {
+        if (fullRect == null) {
             if (mState == State.FINISHING) {
                 Log.e(TAG, "In finishing,do not interrupt");
             }
@@ -203,8 +228,8 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
                 }
             });
             LockSupport.park(thread);
-            return fullRect;
         }
+        return fullRect;
     }
 
     private void initCanvasBounds(Rect rect) {
@@ -277,7 +302,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         if (getNumPlays() == 0 || !finished) {
             this.frameIndex = -1;
             renderTask.run();
-            if (renderListener != null) {
+            for (RenderListener renderListener : renderListeners) {
                 renderListener.onStart();
             }
         } else {
@@ -315,7 +340,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
             Log.i(TAG, debugInfo() + " release and Set state to IDLE");
         }
         mState = State.IDLE;
-        if (renderListener != null) {
+        for (RenderListener renderListener : renderListeners) {
             renderListener.onEnd();
         }
     }

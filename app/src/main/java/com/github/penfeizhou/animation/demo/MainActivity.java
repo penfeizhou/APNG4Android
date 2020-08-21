@@ -37,9 +37,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.tv_1: {
-                Intent intent = new Intent(this, APNGTestActivity.class);
+                Intent intent = new Intent(this, AnimationTestActivity.class);
                 intent.putExtra("files", new String[]{
-                        "world-cup.png",
+                        "apng_detail_guide.png",
                 });
                 startActivity(intent);
             }

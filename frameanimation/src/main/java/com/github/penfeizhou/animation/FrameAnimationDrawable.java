@@ -66,7 +66,6 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
     public FrameAnimationDrawable(Decoder frameSeqDecoder) {
         paint.setAntiAlias(true);
         this.frameSeqDecoder = frameSeqDecoder;
-        this.frameSeqDecoder.setRenderListener(this);
     }
 
     public FrameAnimationDrawable(Loader provider) {
@@ -108,7 +107,14 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
         if (FrameSeqDecoder.DEBUG) {
             Log.d(TAG, this.toString() + ",start");
         }
-        frameSeqDecoder.start();
+        if (autoPlay) {
+            frameSeqDecoder.start();
+        } else {
+            this.frameSeqDecoder.addRenderListener(this);
+            if (!this.frameSeqDecoder.isRunning()) {
+                this.frameSeqDecoder.start();
+            }
+        }
     }
 
     @Override
@@ -116,7 +122,12 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
         if (FrameSeqDecoder.DEBUG) {
             Log.d(TAG, this.toString() + ",stop");
         }
-        frameSeqDecoder.stop();
+        if (autoPlay) {
+            frameSeqDecoder.stop();
+        } else {
+            this.frameSeqDecoder.removeRenderListener(this);
+            this.frameSeqDecoder.stopIfNeeded();
+        }
     }
 
     @Override

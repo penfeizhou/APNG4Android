@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import com.bumptech.glide.request.RequestOptions;
 import com.github.penfeizhou.animation.glide.AnimationDecoderOption;
 
 
@@ -25,8 +26,12 @@ public class APNGTestActivity extends Activity {
                 "https://misc.aotu.io/ONE-SUNDAY/SteamEngine.png",
                 "https://isparta.github.io/compare-webp/image/gif_webp/webp/2.webp",
                 "file:///android_asset/1.gif",
+                "file:///android_asset/2.gif",
+                "file:///android_asset/3.gif",
+                "file:///android_asset/4.gif",
                 "file:///android_asset/5.gif",
-                "file:///android_asset/6.gif",
+                "file:///android_asset/1.webp",
+                "file:///android_asset/2.webp",
                 "https://misc.aotu.io/ONE-SUNDAY/world_cup_2014_42.webp",
                 "https://misc.aotu.io/ONE-SUNDAY/BladeRunner.webp",
                 "https://misc.aotu.io/ONE-SUNDAY/SteamEngine.webp",
@@ -39,6 +44,8 @@ public class APNGTestActivity extends Activity {
             layoutParams.topMargin = 50;
             linearLayout.addView(imageView, layoutParams);
             GlideApp.with(imageView)
+                    .asBitmap()
+                    .apply(RequestOptions.decodeTypeOf(Object.class))
                     .load(url)
                     .set(AnimationDecoderOption.DISABLE_ANIMATION_GIF_DECODER, false)
                     .into(imageView);
