@@ -1,6 +1,7 @@
 package com.github.penfeizhou.animation.glide;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 
@@ -26,5 +27,8 @@ public class GlideAnimationModule extends LibraryGlideModule {
         StreamAnimationDecoder streamAnimationDecoder = new StreamAnimationDecoder(byteBufferAnimationDecoder);
         registry.prepend(InputStream.class, Drawable.class, streamAnimationDecoder);
         registry.prepend(ByteBuffer.class, Drawable.class, byteBufferAnimationDecoder);
+        AnimationFrameDecoder animationFrameDecoder = new AnimationFrameDecoder(glide.getBitmapPool());
+        registry.prepend(ByteBuffer.class, Bitmap.class, animationFrameDecoder);
+        registry.prepend(InputStream.class, Bitmap.class, new StreamFrameDecoder(animationFrameDecoder));
     }
 }

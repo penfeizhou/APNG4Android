@@ -460,4 +460,45 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         }
         return frames.get(index);
     }
+
+    /**
+     * Get Indexed frame
+     *
+     * @param index <0 means reverse from last index
+     */
+    public Bitmap getFrameBitmap(int index) throws IOException {
+        if (mState != State.IDLE) {
+            Log.e(TAG, debugInfo() + ",stop first");
+            return null;
+        }
+        mState = State.RUNNING;
+        paused.compareAndSet(true, false);
+        if (frames.size() == 0) {
+            if (mReader == null) {
+                mReader = getReader(mLoader.obtain());
+            } else {
+                mReader.reset();
+            }
+            initCanvasBounds(read(mReader));
+        }
+        if (index < 0) {
+            index += this.frames.size();
+        }
+        if (index < 0) {
+            index = 0;
+        }
+        frameIndex = -1;
+        while (frameIndex < index) {
+            if (canStep()) {
+                step();
+            } else {
+                break;
+            }
+        }
+        frameBuffer.rewind();
+        Bitmap bitmap = Bitmap.createBitmap(getBounds().width() / getSampleSize(), getBounds().height() / getSampleSize(), Bitmap.Config.ARGB_8888);
+        bitmap.copyPixelsFromBuffer(frameBuffer);
+        innerStop();
+        return bitmap;
+    }
 }
