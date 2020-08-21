@@ -6,6 +6,11 @@
 * Support still image
 * Low memory usage
 
+## Changelog 2.4.1
+* Fix Glide plugin apng cannot play
+* Optimize glide plugin's use case
+
+
 ## Changelog 2.4.0
 * Add API to support get  any indexed frame as bitmap
 * Glide plugin support transform animated webp to bitmap
