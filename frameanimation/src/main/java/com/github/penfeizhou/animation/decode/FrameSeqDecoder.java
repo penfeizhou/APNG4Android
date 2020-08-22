@@ -18,7 +18,6 @@ import com.github.penfeizhou.animation.loader.Loader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -76,7 +75,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     protected volatile Rect fullRect;
     private W mWriter = getWriter();
     private R mReader = null;
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
     /**
      * If played all the needed
      */
