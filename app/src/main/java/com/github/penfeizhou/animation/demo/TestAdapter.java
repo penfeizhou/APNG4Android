@@ -1,12 +1,13 @@
 package com.github.penfeizhou.animation.demo;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
@@ -27,7 +28,7 @@ public class TestAdapter extends RecyclerView.Adapter<TestAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Glide.with(mContext)
-                .load("https://misc.aotu.io/ONE-SUNDAY/SteamEngine.png?time=" + System.nanoTime())
+                .load("https://misc.aotu.io/ONE-SUNDAY/SteamEngine.png?position=" + position)
                 .into(holder.iv);
     }
 

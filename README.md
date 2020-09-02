@@ -6,6 +6,9 @@
 * Support still image
 * Low memory usage
 
+## Changelog 2.5.0
+* Migrate to Android X & update glide to 4.11.0
+
 ## Changelog 2.4.2
 * Close debug logs
 

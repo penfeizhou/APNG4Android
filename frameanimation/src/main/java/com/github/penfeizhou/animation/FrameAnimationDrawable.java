@@ -12,8 +12,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.support.annotation.NonNull;
-import android.support.graphics.drawable.Animatable2Compat;
+import androidx.annotation.NonNull;
+import androidx.vectordrawable.graphics.drawable.Animatable2Compat;
 import android.util.Log;
 
 import com.github.penfeizhou.animation.decode.FrameSeqDecoder;
@@ -107,10 +107,11 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
         if (FrameSeqDecoder.DEBUG) {
             Log.d(TAG, this.toString() + ",start");
         }
+
+        this.frameSeqDecoder.addRenderListener(this);
         if (autoPlay) {
             frameSeqDecoder.start();
         } else {
-            this.frameSeqDecoder.addRenderListener(this);
             if (!this.frameSeqDecoder.isRunning()) {
                 this.frameSeqDecoder.start();
             }
@@ -122,10 +123,11 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
         if (FrameSeqDecoder.DEBUG) {
             Log.d(TAG, this.toString() + ",stop");
         }
+
+        this.frameSeqDecoder.removeRenderListener(this);
         if (autoPlay) {
             frameSeqDecoder.stop();
         } else {
-            this.frameSeqDecoder.removeRenderListener(this);
             this.frameSeqDecoder.stopIfNeeded();
         }
     }
