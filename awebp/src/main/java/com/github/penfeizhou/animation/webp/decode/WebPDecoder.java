@@ -104,7 +104,9 @@ public class WebPDecoder extends FrameSeqDecoder<WebPReader, WebPWriter> {
         }
         paint = new Paint();
         paint.setAntiAlias(true);
-        mTransparentFillPaint.setColor(backgroundColor);
+        if (!this.alpha) {
+            mTransparentFillPaint.setColor(backgroundColor);
+        }
         return new Rect(0, 0, canvasWidth, canvasHeight);
     }
 
