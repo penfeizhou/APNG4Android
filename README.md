@@ -6,6 +6,9 @@
 * Support still image
 * Low memory usage
 
+## Changelog 2.5.1
+* Webp decoder ignore backgroundcolor when alpha flag is set
+
 ## Changelog 2.5.0
 * Migrate to Android X & update glide to 4.11.0
 
