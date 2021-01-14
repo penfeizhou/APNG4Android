@@ -44,8 +44,8 @@ public class APNGTestActivity extends Activity {
             layoutParams.topMargin = 50;
             linearLayout.addView(imageView, layoutParams);
             GlideApp.with(imageView)
-                    .asBitmap()
-                    .apply(RequestOptions.decodeTypeOf(Object.class))
+                    //.asBitmap()
+                    //.apply(RequestOptions.decodeTypeOf(Object.class))
                     .load(url)
                     .set(AnimationDecoderOption.DISABLE_ANIMATION_GIF_DECODER, false)
                     .into(imageView);
