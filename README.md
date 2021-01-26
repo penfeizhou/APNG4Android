@@ -6,6 +6,9 @@
 * Support still image
 * Low memory usage
 
+## Changelog 2.5.2
+* Set frame duration to 100ms for any frames that specify a duration of <= 10 ms
+
 ## Changelog 2.5.1
 * Webp decoder ignore backgroundcolor when alpha flag is set
 
