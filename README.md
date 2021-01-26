@@ -6,6 +6,9 @@
 * Support still image
 * Low memory usage
 
+## Changelog 2.5.3
+* Fix Webp with transparent (alpha) is not rendered correctly.[issue](https://github.com/penfeizhou/APNG4Android/issues/86)
+
 ## Changelog 2.5.2
 * Set frame duration to 100ms for any frames that specify a duration of <= 10 ms
 
