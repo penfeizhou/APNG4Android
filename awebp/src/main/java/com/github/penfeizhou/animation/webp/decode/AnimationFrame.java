@@ -82,7 +82,7 @@ public class AnimationFrame extends Frame<WebPReader, WebPWriter> {
         Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, length, options);
         assert bitmap != null;
         if (blendingMethod) {
-            paint.setXfermode(null);
+            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
         } else {
             paint.setXfermode(PORTERDUFF_XFERMODE_SRC_OVER);
         }

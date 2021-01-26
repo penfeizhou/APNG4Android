@@ -36,6 +36,7 @@ public class APNGTestActivity extends Activity {
                 "https://misc.aotu.io/ONE-SUNDAY/BladeRunner.webp",
                 "https://misc.aotu.io/ONE-SUNDAY/SteamEngine.webp",
                 "https://misc.aotu.io/ONE-SUNDAY/SteamEngine_lossy.webp",
+                "https://ezgif.com/images/format-demo/butterfly-small.webp",
         };
         for (String url : urls) {
             ImageView imageView = new ImageView(this);
