@@ -25,6 +25,7 @@ public class AnimationFrame extends Frame<WebPReader, WebPWriter> {
     final boolean disposalMethod;
     private final boolean useAlpha;
     private static final PorterDuffXfermode PORTERDUFF_XFERMODE_SRC_OVER = new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER);
+    private static final PorterDuffXfermode PORTERDUFF_XFERMODE_SRC = new PorterDuffXfermode(PorterDuff.Mode.SRC);
 
     public AnimationFrame(WebPReader reader, ANMFChunk anmfChunk) {
         super(reader);
@@ -82,7 +83,7 @@ public class AnimationFrame extends Frame<WebPReader, WebPWriter> {
         Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, length, options);
         assert bitmap != null;
         if (blendingMethod) {
-            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
+            paint.setXfermode(PORTERDUFF_XFERMODE_SRC);
         } else {
             paint.setXfermode(PORTERDUFF_XFERMODE_SRC_OVER);
         }
