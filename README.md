@@ -6,6 +6,10 @@
 * Support still image
 * Low memory usage
 
+
+## Changelog 2.5.4
+* Apply code optimize.
+
 ## Changelog 2.5.3
 * Fix Webp with transparent (alpha) is not rendered correctly.[issue](https://github.com/penfeizhou/APNG4Android/issues/86)
 
