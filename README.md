@@ -6,6 +6,9 @@
 * Support still image
 * Low memory usage
 
+## Changelog 2.6.0
+* Fix memory leak while use glide
+
 
 ## Changelog 2.5.4
 * Apply code optimize.
