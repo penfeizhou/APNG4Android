@@ -9,11 +9,14 @@ import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+
 import androidx.annotation.NonNull;
 import androidx.vectordrawable.graphics.drawable.Animatable2Compat;
+
 import android.util.Log;
 
 import com.github.penfeizhou.animation.decode.FrameSeqDecoder;
@@ -254,5 +257,17 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
     @Override
     public void clearAnimationCallbacks() {
         this.animationCallbacks.clear();
+    }
+
+    public int getMemorySize() {
+        int size = frameSeqDecoder.getMemorySize();
+        if (!bitmap.isRecycled()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                size += bitmap.getAllocationByteCount();
+            } else {
+                size += bitmap.getByteCount();
+            }
+        }
+        return Math.max(1, size);
     }
 }

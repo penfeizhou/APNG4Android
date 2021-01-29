@@ -6,8 +6,10 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
+
 import android.util.Log;
 
 import com.github.penfeizhou.animation.executor.FrameDecoderExecutor;
@@ -540,5 +542,23 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         bitmap.copyPixelsFromBuffer(frameBuffer);
         innerStop();
         return bitmap;
+    }
+
+    public int getMemorySize() {
+        int size = 0;
+        for (Bitmap bitmap : cacheBitmaps) {
+            if (bitmap.isRecycled()) {
+                continue;
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                size += bitmap.getAllocationByteCount();
+            } else {
+                size += bitmap.getByteCount();
+            }
+        }
+        if (frameBuffer != null) {
+            size += frameBuffer.capacity();
+        }
+        return size;
     }
 }
