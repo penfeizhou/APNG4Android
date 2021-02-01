@@ -15,15 +15,20 @@ import android.os.Looper;
 import android.os.Message;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.vectordrawable.graphics.drawable.Animatable2Compat;
 
 import android.util.Log;
+import android.widget.ImageView;
 
 import com.github.penfeizhou.animation.decode.FrameSeqDecoder;
 import com.github.penfeizhou.animation.loader.Loader;
 
+import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -65,6 +70,8 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
         }
     };
     private boolean autoPlay = true;
+
+    private final Set<WeakReference<ImageView>> obtainedImageViews = new HashSet<>();
 
     public FrameAnimationDrawable(Decoder frameSeqDecoder) {
         paint.setAntiAlias(true);
@@ -211,6 +218,7 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
 
     @Override
     public boolean setVisible(boolean visible, boolean restart) {
+        hookRecordCallbacks();
         if (this.autoPlay) {
             if (FrameSeqDecoder.DEBUG) {
                 Log.d(TAG, this.toString() + ",visible:" + visible + ",restart:" + restart);
@@ -269,5 +277,46 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
             }
         }
         return Math.max(1, size);
+    }
+
+    @Nullable
+    @Override
+    public Callback getCallback() {
+        return super.getCallback();
+    }
+
+    private void hookRecordCallbacks() {
+        List<WeakReference<ImageView>> lost = new ArrayList<>();
+        Callback callback = getCallback();
+        boolean recorded = false;
+        for (WeakReference<ImageView> ref : obtainedImageViews) {
+            ImageView imageView = ref.get();
+            if (imageView == null) {
+                lost.add(ref);
+            } else {
+                if (imageView == callback) {
+                    recorded = true;
+                } else {
+                    imageView.invalidateDrawable(this);
+                }
+            }
+        }
+        for (WeakReference<ImageView> ref : lost) {
+            obtainedImageViews.remove(ref);
+        }
+        if (!recorded) {
+            obtainedImageViews.add(new WeakReference<>((ImageView) callback));
+        }
+    }
+
+    @Override
+    public void invalidateSelf() {
+        super.invalidateSelf();
+        for (WeakReference<ImageView> ref : obtainedImageViews) {
+            ImageView imageView = ref.get();
+            if (imageView != null && imageView != getCallback()) {
+                imageView.invalidateDrawable(this);
+            }
+        }
     }
 }
