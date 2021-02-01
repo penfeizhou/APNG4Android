@@ -7,7 +7,8 @@
 * Low memory usage
 
 ## Changelog 2.6.0
-* Fix memory leak while use glide
+* Fix memory leak while use glide.
+* FrameAnimationDrawable can be applied to multi image views.
 
 
 ## Changelog 2.5.4
