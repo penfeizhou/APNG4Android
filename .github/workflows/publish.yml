@@ -21,7 +21,7 @@ jobs:
           git checkout master
       - name: Echo current Version
         run: |
-          echo ${GITHUB_REF:11}>version.properties
+          echo "version=${GITHUB_REF:11}">version.properties
           echo "Current Version is "${GITHUB_REF:11}
       - name: Publish
         run: |
