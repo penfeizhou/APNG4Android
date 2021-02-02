@@ -6,6 +6,9 @@
 * Support still image
 * Low memory usage
 
+## Changelog 2.7.0
+* Clear bitmap in reset API.
+
 ## Changelog 2.6.0
 * Fix memory leak while use glide.
 * FrameAnimationDrawable can be applied to multi image views.
@@ -78,19 +81,19 @@ repositories {
 #### Animated WebP
 ```gradle
 dependencies {
-    implementation 'com.github.penfeizhou.android.animation:awebp:2.4.2'
+    implementation 'com.github.penfeizhou.android.animation:awebp:2.7.0'
 }
 ```
 #### APNG
 ```gradle
 dependencies {
-    implementation 'com.github.penfeizhou.android.animation:apng:2.4.2'
+    implementation 'com.github.penfeizhou.android.animation:apng:2.7.0'
 }
 ```
 #### Gif
 ```gradle
 dependencies {
-    implementation 'com.github.penfeizhou.android.animation:gif:2.4.2'
+    implementation 'com.github.penfeizhou.android.animation:gif:2.7.0'
 }
 ```
 ### Use
@@ -141,7 +144,7 @@ repositories {
     }
 }
 dependencies {
-    implementation 'com.github.penfeizhou.android.animation:glide-plugin:2.4.2'
+    implementation 'com.github.penfeizhou.android.animation:glide-plugin:2.7.0'
 }
 ```
 ### Direct use
