@@ -3,7 +3,27 @@ apply plugin: 'maven'
 Properties properties = new Properties()
 properties.load(project.rootProject.file('scripts/maven.properties').newDataInputStream())
 properties.load(new FileInputStream("${projectDir}/pom.properties"))
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+
+if (new File("local.properties").exists()) {
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+}
+
+def user = System.getenv("BINTARY_USER")
+def apiKey = System.getenv("BINTARY_APIKEY")
+def repo = System.getenv("BINTARY_REPO")
+
+if (user == null || user.length() == 0) {
+    user = properties.user
+}
+
+if (apiKey == null || apiKey.length() == 0) {
+    apiKey = properties.apiKey
+}
+
+if (repo == null || repo.length() == 0) {
+    repo = properties.releasesRepository
+}
 
 apply plugin: 'maven'
 
@@ -19,8 +39,8 @@ uploadArchives {
                 // 最后一次git提交的hash
             }
 
-            repository(url: properties.releasesRepository + properties.name) {
-                authentication(userName: properties.user, password: properties.apiKey)
+            repository(url: repo + properties.name) {
+                authentication(userName: user, password: apiKey)
             }
         }
     }

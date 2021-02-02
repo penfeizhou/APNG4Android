@@ -1,0 +1,32 @@
+name: Release
+on:
+  release:
+    types: [published]
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: setup JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Config Github Account
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.email "pengfeizhou@foxmail.com"
+          git config user.name "pengfei.zhou"
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
+          git checkout master
+      - name: Echo current Version
+        run: |
+          echo ${GITHUB_REF:11}>version.properties
+          echo "Current Version is "${GITHUB_REF:11}
+      - name: Publish
+        run: |
+          sh gradlew publishAll
+        env:
+          BINTARY_USER: ${{ secrets.BINTARY_USER }}
+          BINTARY_REPO: ${{ secrets.BINTARY_REPO }}
+          BINTARY_APIKEY: ${{ secrets.BINTARY_APIKEY }}
