@@ -6,68 +6,7 @@
 * Support still image
 * Low memory usage
 
-## Changelog 2.7.0
-* Clear bitmap in reset API.
-
-## Changelog 2.6.0
-* Fix memory leak while use glide.
-* FrameAnimationDrawable can be applied to multi image views.
-
-
-## Changelog 2.5.4
-* Apply code optimize.
-
-## Changelog 2.5.3
-* Fix Webp with transparent (alpha) is not rendered correctly.[issue](https://github.com/penfeizhou/APNG4Android/issues/86)
-
-## Changelog 2.5.2
-* Set frame duration to 100ms for any frames that specify a duration of <= 10 ms
-
-## Changelog 2.5.1
-* Webp decoder ignore backgroundcolor when alpha flag is set
-
-## Changelog 2.5.0
-* Migrate to Android X & update glide to 4.11.0
-
-## Changelog 2.4.2
-* Close debug logs
-
-## Changelog 2.4.1
-* Fix Glide plugin apng cannot play
-* Optimize glide plugin's use case
-
-
-## Changelog 2.4.0
-* Add API to support get  any indexed frame as bitmap
-* Glide plugin support transform animated webp to bitmap
-* Fix scale type fitXY caused buffer not enough issue
-
-## Changelog 2.3.0
-* Fix WebPEncoder's bug
-
-## Changelog 2.2.0
-* Downgrade Glide to 4.8
-* Android Support Migration
-
-## Changelog 2.1.0
-* Fix handling APNG dispose to previous error.
-
-## Changelog 2.0.0
-* Android X Migration
-* Upgrade Glide to 4.11
-
-## Changelog 1.3.3
-* Fix problems of small probability
-    * Avoid the posibility that render a recycled bitmap
-    * Fix Null point Exception when new thread
-    * Avoid buffer size smaller than the target bitmap
-
-## Changelog 1.3.1
-* Fix ANR when switch visibility of animation drawable quickly.
-
-## Changelog 1.2.0
-* Fix vp8x chunk alpha in reserve digits
-* Fix webp glitch error on display
+## [Released versions](https://github.com/penfeizhou/APNG4Android/releases)
 
 ## Usages
 
@@ -81,19 +20,19 @@ repositories {
 #### Animated WebP
 ```gradle
 dependencies {
-    implementation 'com.github.penfeizhou.android.animation:awebp:2.7.0'
+    implementation 'com.github.penfeizhou.android.animation:awebp:${VERSION}'
 }
 ```
 #### APNG
 ```gradle
 dependencies {
-    implementation 'com.github.penfeizhou.android.animation:apng:2.7.0'
+    implementation 'com.github.penfeizhou.android.animation:apng:${VERSION}'
 }
 ```
 #### Gif
 ```gradle
 dependencies {
-    implementation 'com.github.penfeizhou.android.animation:gif:2.7.0'
+    implementation 'com.github.penfeizhou.android.animation:gif:${VERSION}'
 }
 ```
 ### Use
@@ -139,12 +78,11 @@ drawable.registerAnimationCallback(new Animatable2Compat.AnimationCallback() {
 
 ```gradle
 repositories {
-    maven {
-        url "https://dl.bintray.com/osborn/Android"
-    }
+    ...
+    jcenter()
 }
 dependencies {
-    implementation 'com.github.penfeizhou.android.animation:glide-plugin:2.7.0'
+    implementation 'com.github.penfeizhou.android.animation:glide-plugin:${VERSION}'
 }
 ```
 ### Direct use
