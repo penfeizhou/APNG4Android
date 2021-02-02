@@ -2,6 +2,7 @@ package com.github.penfeizhou.animation;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.DrawFilter;
 import android.graphics.Matrix;
@@ -97,6 +98,9 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
     }
 
     public void reset() {
+        if (bitmap != null && !bitmap.isRecycled()) {
+            bitmap.eraseColor(Color.TRANSPARENT);
+        }
         frameSeqDecoder.reset();
     }
 
