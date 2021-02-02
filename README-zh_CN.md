@@ -1,18 +1,16 @@
-# Animation Android
-* Support APNG & Animated Webp & Gif in Android
-* Efficient decoder
-* Support Drawable usage and glide library module
-* Support animation play control
-* Support still image
-* Low memory usage
+# Android 动画播放库
+* 支持常用动画格式APNG、Animated WebP、Gif
+* 解码实现高效，占用内存极低
+* 支持按Resource、Assets、File等多种方式读取
+* 提供Glide插件，可使用Glide直接加载
+* 支持动画播放过程控制
+* 支持静图展示
 
-## [中文文档](https://github.com/penfeizhou/APNG4Android/blob/master/README-zh_CN.md)
+## [版本记录](https://github.com/penfeizhou/APNG4Android/releases)
 
-## [Released versions](https://github.com/penfeizhou/APNG4Android/releases)
+## 使用说明
 
-## Usages
-
-### Add dependency in build.gradle
+### 在build.gradle添加依赖
 
 ```gradle
 repositories {
@@ -37,36 +35,36 @@ dependencies {
     implementation 'com.github.penfeizhou.android.animation:gif:${VERSION}'
 }
 ```
-### Use
+### 使用
 
 ```java
-// Load from asset file
+// 从asset file中加载
 AssetStreamLoader assetLoader = new AssetStreamLoader(context, "wheel.png");
 
 
-// Load form Resource
+// 从resource中加载
 ResourceStreamLoader resourceLoader = new ResourceStreamLoader(context, R.drawable.sample);
 
 
-// Load from file
+// 从file中加载
 FileStreamLoader fileLoader = new FileStreamLoader("/sdcard/Pictures/1.webp");
 
 
-// Create APNG Drawable
+// 创建APNG Drawable
 APNGDrawable apngDrawable = new APNGDrawable(assetLoader);
 
-//Create Animated webp drawable
+//创建 Animated webp drawable
 WebPDrawable webpDrawable = new WebPDrawable(assetLoader);
 
-// Auto play
+//自动播放
 imageView.setImageDrawable(apngDrawable);
 
 
-// Not needed.default controlled by content
+//可覆盖动画中设置的播放次数
 apngDrawable.setLoopLimit(10);
 
 
-// Implement Animatable2Compat
+// 实现Animatable2Compat接口
 drawable.registerAnimationCallback(new Animatable2Compat.AnimationCallback() {
     @Override
     public void onAnimationStart(Drawable drawable) {
@@ -74,9 +72,9 @@ drawable.registerAnimationCallback(new Animatable2Compat.AnimationCallback() {
     }
 });
 ```
-## Glide support
+## Glide插件
 
-### Add dependency in build.gradle
+### build.gradle中添加依赖
 
 ```gradle
 repositories {
@@ -87,7 +85,7 @@ dependencies {
     implementation 'com.github.penfeizhou.android.animation:glide-plugin:${VERSION}'
 }
 ```
-### Direct use
+### 使用Glide加载图片
 
 ```java
 Glide.with(imageView).load("https://misc.aotu.io/ONE-SUNDAY/SteamEngine.png").into(imageView);
