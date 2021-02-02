@@ -25,7 +25,7 @@ jobs:
           echo "Current Version is "${GITHUB_REF:11}
       - name: Publish
         run: |
-          sh gradlew publishAll
+          sh gradlew publishAll -s
         env:
           BINTARY_USER: ${{ secrets.BINTARY_USER }}
           BINTARY_REPO: ${{ secrets.BINTARY_REPO }}
