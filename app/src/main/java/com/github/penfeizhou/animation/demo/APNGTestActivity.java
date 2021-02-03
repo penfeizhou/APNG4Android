@@ -45,10 +45,7 @@ public class APNGTestActivity extends Activity {
             layoutParams.topMargin = 50;
             linearLayout.addView(imageView, layoutParams);
             GlideApp.with(imageView)
-                    //.asBitmap()
-                    //.apply(RequestOptions.decodeTypeOf(Object.class))
                     .load(url)
-                    .set(AnimationDecoderOption.DISABLE_ANIMATION_GIF_DECODER, false)
                     .into(imageView);
         }
 //        FileLoader fileLoader = new FileLoader("/data/data/com.github.pengfeizhou.animation.demo/cache/image_manager_disk_cache/b6dd68d837b8d1e8f24edb0a0df5213b7accebb16c22c8202e95363f7227740e.0");
