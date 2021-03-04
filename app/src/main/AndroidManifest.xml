@@ -25,6 +25,7 @@
         <activity android:name=".APNGTestActivity" />
         <activity android:name=".EncoderTestActivity" />
         <activity android:name=".APNGRecyclerViewTestActivity" />
+        <activity android:name=".TestMemorySizeActivity"/>
     </application>
 
 </manifest>
