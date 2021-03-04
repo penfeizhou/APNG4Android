@@ -6,11 +6,10 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
-
-import android.util.Log;
 
 import com.github.penfeizhou.animation.executor.FrameDecoderExecutor;
 import com.github.penfeizhou.animation.io.Reader;
@@ -72,6 +71,8 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     protected int sampleSize = 1;
 
     private Set<Bitmap> cacheBitmaps = new HashSet<>();
+    private final Object cacheBitmapsLock = new Object();
+
     protected Map<Bitmap, Canvas> cachedCanvas = new WeakHashMap<>();
     protected ByteBuffer frameBuffer;
     protected volatile Rect fullRect;
@@ -97,44 +98,48 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     protected abstract R getReader(Reader reader);
 
     protected Bitmap obtainBitmap(int width, int height) {
-        Bitmap ret = null;
-        Iterator<Bitmap> iterator = cacheBitmaps.iterator();
-        while (iterator.hasNext()) {
-            int reuseSize = width * height * 4;
-            ret = iterator.next();
+        synchronized (cacheBitmapsLock) {
+            Bitmap ret = null;
+            Iterator<Bitmap> iterator = cacheBitmaps.iterator();
+            while (iterator.hasNext()) {
+                int reuseSize = width * height * 4;
+                ret = iterator.next();
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                if (ret != null && ret.getAllocationByteCount() >= reuseSize) {
-                    iterator.remove();
-                    if (ret.getWidth() != width || ret.getHeight() != height) {
-                        ret.reconfigure(width, height, Bitmap.Config.ARGB_8888);
-                    }
-                    ret.eraseColor(0);
-                    return ret;
-                }
-            } else {
-                if (ret != null && ret.getByteCount() >= reuseSize) {
-                    if (ret.getWidth() == width && ret.getHeight() == height) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    if (ret != null && ret.getAllocationByteCount() >= reuseSize) {
                         iterator.remove();
+                        if (ret.getWidth() != width || ret.getHeight() != height) {
+                            ret.reconfigure(width, height, Bitmap.Config.ARGB_8888);
+                        }
                         ret.eraseColor(0);
+                        return ret;
                     }
-                    return ret;
+                } else {
+                    if (ret != null && ret.getByteCount() >= reuseSize) {
+                        if (ret.getWidth() == width && ret.getHeight() == height) {
+                            iterator.remove();
+                            ret.eraseColor(0);
+                        }
+                        return ret;
+                    }
                 }
             }
-        }
 
-        try {
-            Bitmap.Config config = Bitmap.Config.ARGB_8888;
-            ret = Bitmap.createBitmap(width, height, config);
-        } catch (OutOfMemoryError e) {
-            e.printStackTrace();
+            try {
+                Bitmap.Config config = Bitmap.Config.ARGB_8888;
+                ret = Bitmap.createBitmap(width, height, config);
+            } catch (OutOfMemoryError e) {
+                e.printStackTrace();
+            }
+            return ret;
         }
-        return ret;
     }
 
     protected void recycleBitmap(Bitmap bitmap) {
-        if (bitmap != null && !cacheBitmaps.contains(bitmap)) {
-            cacheBitmaps.add(bitmap);
+        synchronized (cacheBitmapsLock) {
+            if (bitmap != null && !cacheBitmaps.contains(bitmap)) {
+                cacheBitmaps.add(bitmap);
+            }
         }
     }
 
@@ -315,12 +320,14 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     private void innerStop() {
         workerHandler.removeCallbacks(renderTask);
         frames.clear();
-        for (Bitmap bitmap : cacheBitmaps) {
-            if (bitmap != null && !bitmap.isRecycled()) {
-                bitmap.recycle();
+        synchronized (cacheBitmapsLock) {
+            for (Bitmap bitmap : cacheBitmaps) {
+                if (bitmap != null && !bitmap.isRecycled()) {
+                    bitmap.recycle();
+                }
             }
+            cacheBitmaps.clear();
         }
-        cacheBitmaps.clear();
         if (frameBuffer != null) {
             frameBuffer = null;
         }
@@ -545,20 +552,22 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     }
 
     public int getMemorySize() {
-        int size = 0;
-        for (Bitmap bitmap : cacheBitmaps) {
-            if (bitmap.isRecycled()) {
-                continue;
+        synchronized (cacheBitmapsLock) {
+            int size = 0;
+            for (Bitmap bitmap : cacheBitmaps) {
+                if (bitmap.isRecycled()) {
+                    continue;
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    size += bitmap.getAllocationByteCount();
+                } else {
+                    size += bitmap.getByteCount();
+                }
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                size += bitmap.getAllocationByteCount();
-            } else {
-                size += bitmap.getByteCount();
+            if (frameBuffer != null) {
+                size += frameBuffer.capacity();
             }
+            return size;
         }
-        if (frameBuffer != null) {
-            size += frameBuffer.capacity();
-        }
-        return size;
     }
 }
