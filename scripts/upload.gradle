@@ -39,7 +39,7 @@ uploadArchives {
                 // 最后一次git提交的hash
             }
 
-            repository(url: repo + properties.name) {
+            repository(url: repo) {
                 authentication(userName: user, password: apiKey)
             }
         }
