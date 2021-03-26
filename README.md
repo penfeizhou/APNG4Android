@@ -16,7 +16,7 @@
 
 ```gradle
 repositories {
-    jcenter()
+    mavenCentral()
 }
 ```
 #### Animated WebP
@@ -81,7 +81,7 @@ drawable.registerAnimationCallback(new Animatable2Compat.AnimationCallback() {
 ```gradle
 repositories {
     ...
-    jcenter()
+    mavenCentral()
 }
 dependencies {
     implementation 'com.github.penfeizhou.android.animation:glide-plugin:${VERSION}'
