@@ -72,7 +72,7 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
     };
     private boolean autoPlay = true;
 
-    private final Set<WeakReference<ImageView>> obtainedImageViews = new HashSet<>();
+    private final Set<WeakReference<Callback>> obtainedCallbacks = new HashSet<>();
 
     public FrameAnimationDrawable(Decoder frameSeqDecoder) {
         paint.setAntiAlias(true);
@@ -290,36 +290,36 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
     }
 
     private void hookRecordCallbacks() {
-        List<WeakReference<ImageView>> lost = new ArrayList<>();
+        List<WeakReference<Callback>> lost = new ArrayList<>();
         Callback callback = getCallback();
         boolean recorded = false;
-        for (WeakReference<ImageView> ref : obtainedImageViews) {
-            ImageView imageView = ref.get();
-            if (imageView == null) {
+        for (WeakReference<Callback> ref : obtainedCallbacks) {
+            Callback cb = ref.get();
+            if (cb == null) {
                 lost.add(ref);
             } else {
-                if (imageView == callback) {
+                if (cb == callback) {
                     recorded = true;
                 } else {
-                    imageView.invalidateDrawable(this);
+                    cb.invalidateDrawable(this);
                 }
             }
         }
-        for (WeakReference<ImageView> ref : lost) {
-            obtainedImageViews.remove(ref);
+        for (WeakReference<Callback> ref : lost) {
+            obtainedCallbacks.remove(ref);
         }
         if (!recorded) {
-            obtainedImageViews.add(new WeakReference<>((ImageView) callback));
+            obtainedCallbacks.add(new WeakReference<>(callback));
         }
     }
 
     @Override
     public void invalidateSelf() {
         super.invalidateSelf();
-        for (WeakReference<ImageView> ref : obtainedImageViews) {
-            ImageView imageView = ref.get();
-            if (imageView != null && imageView != getCallback()) {
-                imageView.invalidateDrawable(this);
+        for (WeakReference<Callback> ref : obtainedCallbacks) {
+            Callback callback = ref.get();
+            if (callback != null && callback != getCallback()) {
+                callback.invalidateDrawable(this);
             }
         }
     }
