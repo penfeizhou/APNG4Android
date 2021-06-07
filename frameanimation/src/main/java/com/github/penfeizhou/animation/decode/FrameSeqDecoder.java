@@ -235,7 +235,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
             });
             LockSupport.park(thread);
         }
-        return fullRect;
+        return fullRect == null ? RECT_EMPTY : fullRect;
     }
 
     private void initCanvasBounds(Rect rect) {
