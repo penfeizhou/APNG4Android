@@ -80,7 +80,17 @@ public class AnimationFrame extends Frame<WebPReader, WebPWriter> {
         options.inBitmap = reusedBitmap;
         int length = encode(writer);
         byte[] bytes = writer.toByteArray();
-        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, length, options);
+        Bitmap bitmap;
+        try {
+            bitmap = BitmapFactory.decodeByteArray(bytes, 0, length, options);
+        } catch (IllegalArgumentException e) {
+            // Problem decoding into existing bitmap when on Android 4.2.2 & 4.3
+            BitmapFactory.Options optionsFixed = new BitmapFactory.Options();
+            optionsFixed.inJustDecodeBounds = false;
+            optionsFixed.inSampleSize = sampleSize;
+            optionsFixed.inMutable = true;
+            bitmap = BitmapFactory.decodeByteArray(bytes, 0, length, optionsFixed);
+        }
         assert bitmap != null;
         if (blendingMethod) {
             paint.setXfermode(PORTERDUFF_XFERMODE_SRC);

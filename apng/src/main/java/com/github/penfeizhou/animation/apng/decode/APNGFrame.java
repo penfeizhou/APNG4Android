@@ -138,7 +138,19 @@ public class APNGFrame extends Frame<APNGReader, APNGWriter> {
             options.inMutable = true;
             options.inBitmap = reusedBitmap;
             byte[] bytes = writer.toByteArray();
-            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, length, options);
+
+            Bitmap bitmap;
+            try {
+                bitmap = BitmapFactory.decodeByteArray(bytes, 0, length, options);
+            } catch (IllegalArgumentException e) {
+                // Problem decoding into existing bitmap when on Android 4.2.2 & 4.3
+                BitmapFactory.Options optionsFixed = new BitmapFactory.Options();
+                optionsFixed.inJustDecodeBounds = false;
+                optionsFixed.inSampleSize = sampleSize;
+                optionsFixed.inMutable = true;
+                bitmap = BitmapFactory.decodeByteArray(bytes, 0, length, optionsFixed);
+            }
+
             assert bitmap != null;
             canvas.drawBitmap(bitmap, (float) frameX / sampleSize, (float) frameY / sampleSize, paint);
             return bitmap;
