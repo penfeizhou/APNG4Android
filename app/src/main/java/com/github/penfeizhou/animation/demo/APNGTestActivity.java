@@ -22,40 +22,17 @@ public class APNGTestActivity extends Activity {
         setContentView(R.layout.activity_apnglib);
         LinearLayout linearLayout = findViewById(R.id.layout);
         String[] urls = new String[]{
-                "file:///android_asset/apng_detail_guide.png",
-                "https://misc.aotu.io/ONE-SUNDAY/SteamEngine.png",
-                "https://isparta.github.io/compare-webp/image/gif_webp/webp/2.webp",
-                "file:///android_asset/1.gif",
-                "file:///android_asset/2.gif",
-                "file:///android_asset/3.gif",
-                "file:///android_asset/4.gif",
-                "file:///android_asset/5.gif",
-                "file:///android_asset/1.webp",
-                "file:///android_asset/2.webp",
-                "https://misc.aotu.io/ONE-SUNDAY/world_cup_2014_42.webp",
-                "https://misc.aotu.io/ONE-SUNDAY/BladeRunner.webp",
-                "https://misc.aotu.io/ONE-SUNDAY/SteamEngine.webp",
-                "https://misc.aotu.io/ONE-SUNDAY/SteamEngine_lossy.webp",
-                "https://ezgif.com/images/format-demo/butterfly-small.webp",
-        };
+                "https://misc.aotu.io/ONE-SUNDAY/SteamEngine.png"};
         for (String url : urls) {
             ImageView imageView = new ImageView(this);
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(500, 500);
             layoutParams.bottomMargin = 50;
             layoutParams.topMargin = 50;
             linearLayout.addView(imageView, layoutParams);
             GlideApp.with(imageView)
                     .load(url)
+                    .set(AnimationDecoderOption.NO_ANIMATION_BOUNDS_MEASURE, true)
                     .into(imageView);
         }
-//        FileLoader fileLoader = new FileLoader("/data/data/com.github.pengfeizhou.animation.demo/cache/image_manager_disk_cache/b6dd68d837b8d1e8f24edb0a0df5213b7accebb16c22c8202e95363f7227740e.0");
-//
-//        ImageView imageView = new ImageView(this);
-//        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-//        layoutParams.bottomMargin = 50;
-//        layoutParams.topMargin = 50;
-//        linearLayout.addView(imageView, layoutParams);
-//        imageView.setImageDrawable(new APNGDrawable(fileLoader));
-
     }
 }
