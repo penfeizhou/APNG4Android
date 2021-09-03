@@ -29,9 +29,11 @@ class FrameDrawableTranscoder implements ResourceTranscoder<FrameSeqDecoder, Dra
     @Override
     public Resource<Drawable> transcode(@NonNull Resource<FrameSeqDecoder> toTranscode, @NonNull Options options) {
         FrameSeqDecoder frameSeqDecoder = toTranscode.get();
+        boolean noMeasure = options.get(AnimationDecoderOption.NO_ANIMATION_BOUNDS_MEASURE);
         if (frameSeqDecoder instanceof APNGDecoder) {
             final APNGDrawable apngDrawable = new APNGDrawable((APNGDecoder) frameSeqDecoder);
             apngDrawable.setAutoPlay(false);
+            apngDrawable.setNoMeasure(noMeasure);
             return new DrawableResource<Drawable>(apngDrawable) {
                 @NonNull
                 @Override
@@ -57,6 +59,7 @@ class FrameDrawableTranscoder implements ResourceTranscoder<FrameSeqDecoder, Dra
         } else if (frameSeqDecoder instanceof WebPDecoder) {
             final WebPDrawable webPDrawable = new WebPDrawable((WebPDecoder) frameSeqDecoder);
             webPDrawable.setAutoPlay(false);
+            webPDrawable.setNoMeasure(noMeasure);
             return new DrawableResource<Drawable>(webPDrawable) {
                 @NonNull
                 @Override
@@ -81,6 +84,7 @@ class FrameDrawableTranscoder implements ResourceTranscoder<FrameSeqDecoder, Dra
         } else if (frameSeqDecoder instanceof GifDecoder) {
             final GifDrawable gifDrawable = new GifDrawable((GifDecoder) frameSeqDecoder);
             gifDrawable.setAutoPlay(false);
+            gifDrawable.setNoMeasure(noMeasure);
             return new DrawableResource<Drawable>(gifDrawable) {
                 @NonNull
                 @Override

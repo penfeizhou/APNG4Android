@@ -74,6 +74,8 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
 
     private final Set<WeakReference<Callback>> obtainedCallbacks = new HashSet<>();
 
+    private boolean noMeasure = false;
+
     public FrameAnimationDrawable(Decoder frameSeqDecoder) {
         paint.setAntiAlias(true);
         this.frameSeqDecoder = frameSeqDecoder;
@@ -86,6 +88,10 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
 
     public void setAutoPlay(boolean autoPlay) {
         this.autoPlay = autoPlay;
+    }
+
+    public void setNoMeasure(boolean noMeasure) {
+        this.noMeasure = noMeasure;
     }
 
     protected abstract Decoder createFrameSeqDecoder(Loader streamLoader, FrameSeqDecoder.RenderListener listener);
@@ -240,6 +246,9 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
 
     @Override
     public int getIntrinsicWidth() {
+        if (noMeasure) {
+            return -1;
+        }
         try {
             return frameSeqDecoder.getBounds().width();
         } catch (Exception exception) {
@@ -249,6 +258,9 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
 
     @Override
     public int getIntrinsicHeight() {
+        if (noMeasure) {
+            return -1;
+        }
         try {
             return frameSeqDecoder.getBounds().height();
         } catch (Exception exception) {

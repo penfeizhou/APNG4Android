@@ -28,6 +28,13 @@ public final class AnimationDecoderOption {
     public static final Option<Boolean> DISABLE_ANIMATION_APNG_DECODER = Option.memory(
             "com.github.penfeizhou.animation.glide.AnimationDecoderOption.DISABLE_ANIMATION_APNG_DECODER", false);
 
+    /**
+     * If set to {@code true},  call {@link com.github.penfeizhou.animation.FrameAnimationDrawable#setNoMeasure(boolean)}
+     * Defaults to {@code false}.
+     */
+    public static final Option<Boolean> NO_ANIMATION_BOUNDS_MEASURE = Option.memory(
+            "com.github.penfeizhou.animation.glide.AnimationDecoderOption.DISABLE_ANIMATION_BOUNDS_MEASURE", false);
+
 
     private AnimationDecoderOption() {
     }
