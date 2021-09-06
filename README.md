@@ -8,7 +8,7 @@
 
 ## [中文文档](https://github.com/penfeizhou/APNG4Android/blob/master/README-zh_CN.md)
 
-## [Released versions](https://github.com/penfeizhou/APNG4Android/releases)
+## [Released versions](https://github.com/penfeizhou/APNG4Android/releases) ![](https://img.shields.io/maven-central/v/com.github.penfeizhou.android.animation/glide-plugin)
 
 ## Usages
 
