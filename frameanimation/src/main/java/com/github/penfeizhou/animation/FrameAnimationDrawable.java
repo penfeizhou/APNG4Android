@@ -124,6 +124,14 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
 
     @Override
     public void start() {
+        if (this.frameSeqDecoder.isRunning()) {
+            this.frameSeqDecoder.reset();
+            this.frameSeqDecoder.stop();
+        }
+        innerStart();
+    }
+
+    private void innerStart() {
         if (FrameSeqDecoder.DEBUG) {
             Log.d(TAG, this.toString() + ",start");
         }
@@ -140,6 +148,10 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
 
     @Override
     public void stop() {
+        innerStop();
+    }
+
+    private void innerStop() {
         if (FrameSeqDecoder.DEBUG) {
             Log.d(TAG, this.toString() + ",stop");
         }
@@ -235,10 +247,10 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
             }
             if (visible) {
                 if (!isRunning()) {
-                    start();
+                    innerStart();
                 }
             } else if (isRunning()) {
-                stop();
+                innerStop();
             }
         }
         return super.setVisible(visible, restart);
