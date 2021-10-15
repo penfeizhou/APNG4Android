@@ -125,9 +125,9 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
     @Override
     public void start() {
         if (this.frameSeqDecoder.isRunning()) {
-            this.frameSeqDecoder.reset();
             this.frameSeqDecoder.stop();
         }
+        this.frameSeqDecoder.reset();
         innerStart();
     }
 
