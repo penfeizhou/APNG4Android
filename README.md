@@ -37,6 +37,10 @@ dependencies {
     implementation 'com.github.penfeizhou.android.animation:gif:${VERSION}'
 }
 ```
+
+### `Notice Before Use!`
+`Don't put APNG resources in your drawable or mipmap directory!` During the process of release building of an Android app, the aapt tool will zip & modify the frame info of the APNG file, which will lead to an abnormal behavior when playing it. Thus, please put the APNG resources in `raw` or `assets` folder instead.
+
 ### Use
 
 ```java

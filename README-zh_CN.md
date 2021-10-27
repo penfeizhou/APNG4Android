@@ -35,6 +35,9 @@ dependencies {
     implementation 'com.github.penfeizhou.android.animation:gif:${VERSION}'
 }
 ```
+### `使用前请注意!`
+`不要将APNG资源放置到drawable或者mipmap目录下!` 在Android app release构建过程中, aapt工具会压缩修改APNG资源的帧信息, 会导致播放不正常. 因此请将APNG资源放置到工程内的`raw`或者`assets`目录内.
+
 ### 使用
 
 ```java
