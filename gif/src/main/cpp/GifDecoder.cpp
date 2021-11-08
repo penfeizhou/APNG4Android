@@ -56,6 +56,8 @@ Java_com_github_penfeizhou_animation_gif_decode_GifFrame_uncompressLZW(
     std::vector<Slice> table_string;
 
     Slice prefix;
+    prefix.len_data = 0;
+    prefix.ptr_data = nullptr;
     int table_max_size = (1 << 12) - code_end - 1;
     while (idx_pixel < pixelsSize) {
         if (offset_data == 0) {
@@ -110,8 +112,9 @@ Java_com_github_penfeizhou_animation_gif_decode_GifFrame_uncompressLZW(
                             // update ptr so that new table item contain sufix
                             slice.ptr_data = pixelsBuffer + idx_pixel - prefix.len_data;
                             slice.len_data = prefix.len_data + 1;
-                            memcpy(pixelsBuffer + idx_pixel, current.ptr_data, current.len_data *
-                                                                               sizeof(int));
+                            memcpy(pixelsBuffer + idx_pixel, current.ptr_data,
+                                   current.len_data *
+                                   sizeof(int));
                             idx_pixel += current.len_data;
 
                             prefix.ptr_data = current.ptr_data;
