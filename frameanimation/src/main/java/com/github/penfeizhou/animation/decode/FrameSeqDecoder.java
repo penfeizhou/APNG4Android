@@ -402,9 +402,14 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     }
 
     public void reset() {
-        this.playCount = 0;
-        this.frameIndex = -1;
-        this.finished = false;
+        workerHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                playCount = 0;
+                frameIndex = -1;
+                finished = false;
+            }
+        });
     }
 
     public void pause() {
