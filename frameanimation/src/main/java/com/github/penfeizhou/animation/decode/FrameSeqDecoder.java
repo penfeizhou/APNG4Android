@@ -43,10 +43,10 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     protected int frameIndex = -1;
     private int playCount;
     private Integer loopLimit = null;
-    private Set<RenderListener> renderListeners = new HashSet<>();
-    private AtomicBoolean paused = new AtomicBoolean(true);
+    private final Set<RenderListener> renderListeners = new HashSet<>();
+    private final AtomicBoolean paused = new AtomicBoolean(true);
     private static final Rect RECT_EMPTY = new Rect();
-    private Runnable renderTask = new Runnable() {
+    private final Runnable renderTask = new Runnable() {
         @Override
         public void run() {
             if (DEBUG) {

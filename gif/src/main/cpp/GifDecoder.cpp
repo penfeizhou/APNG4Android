@@ -14,7 +14,6 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
         LOGE("Failed to load JavaReader");
         return -1;
     }
-
     return JNI_VERSION_1_6;
 }
 
@@ -52,13 +51,14 @@ Java_com_github_penfeizhou_animation_gif_decode_GifFrame_uncompressLZW(
     int code_clear = 1 << lzwMinCodeSize;
     int code_end = code_clear + 1;
     int code;
-
-    std::vector<Slice> table_string;
-
+    int table_max_size = (1 << 12) - code_end - 1;
+    Slice *tableSlices = static_cast<Slice *>(malloc(sizeof(Slice) * table_max_size));
+    int sliceIndex = 0;
     Slice prefix;
+    Slice slice;
+    int sufix;
     prefix.len_data = 0;
     prefix.ptr_data = nullptr;
-    int table_max_size = (1 << 12) - code_end - 1;
     while (idx_pixel < pixelsSize) {
         if (offset_data == 0) {
             offset_data = reader.peek() & 0xff;
@@ -78,7 +78,7 @@ Java_com_github_penfeizhou_animation_gif_decode_GifFrame_uncompressLZW(
             datum >>= code_size;
             bits -= code_size;
             if (code == code_clear) {
-                table_string.clear();
+                sliceIndex = 0;
                 code_size = lzwMinCodeSize + 1;
                 prefix.len_data = 0;
                 prefix.ptr_data = nullptr;
@@ -88,11 +88,9 @@ Java_com_github_penfeizhou_animation_gif_decode_GifFrame_uncompressLZW(
             } else {
                 if (prefix.len_data > 0 && prefix.ptr_data) {
                     //Add to String Table
-                    Slice slice;
-                    int sufix;
                     // Find suffix
                     if (code > code_end) {
-                        if (code - code_end > table_string.size()) {
+                        if (code - code_end > sliceIndex) {
                             sufix = *prefix.ptr_data;
                             //output current slice to buffer
                             memcpy(pixelsBuffer + idx_pixel, prefix.ptr_data,
@@ -106,19 +104,18 @@ Java_com_github_penfeizhou_animation_gif_decode_GifFrame_uncompressLZW(
                             prefix.len_data = slice.len_data;
                         } else {
                             // Get Prefix's first char as sufix
-                            Slice current = table_string.at(
-                                    code - code_end - 1);
+                            Slice *current = (tableSlices + code - code_end - 1);
                             // sufix = *current.ptr_data;
                             // update ptr so that new table item contain sufix
                             slice.ptr_data = pixelsBuffer + idx_pixel - prefix.len_data;
                             slice.len_data = prefix.len_data + 1;
-                            memcpy(pixelsBuffer + idx_pixel, current.ptr_data,
-                                   current.len_data *
+                            memcpy(pixelsBuffer + idx_pixel, current->ptr_data,
+                                   current->len_data *
                                    sizeof(int));
-                            idx_pixel += current.len_data;
+                            idx_pixel += current->len_data;
 
-                            prefix.ptr_data = current.ptr_data;
-                            prefix.len_data = current.len_data;
+                            prefix.ptr_data = current->ptr_data;
+                            prefix.len_data = current->len_data;
                         }
                     } else {
                         sufix = code;
@@ -131,11 +128,13 @@ Java_com_github_penfeizhou_animation_gif_decode_GifFrame_uncompressLZW(
                         prefix.ptr_data = pixelsBuffer + idx_pixel;
                         idx_pixel++;
                     }
-                    if (table_string.size() < table_max_size) {
+                    if (sliceIndex < table_max_size) {
                         //Add to string table
-                        table_string.push_back(slice);
-                        if (table_string.size() >= (1 << code_size) - code_end - 1
-                            && table_string.size() < table_max_size) {
+                        (tableSlices + sliceIndex)->ptr_data = slice.ptr_data;
+                        (tableSlices + sliceIndex)->len_data = slice.len_data;
+                        sliceIndex++;
+                        if (sliceIndex >= (1 << code_size) - code_end - 1
+                            && sliceIndex < table_max_size) {
                             code_size++;
                         }
                     }
@@ -148,7 +147,7 @@ Java_com_github_penfeizhou_animation_gif_decode_GifFrame_uncompressLZW(
             }
         }
     }
-
+    free(tableSlices);
     int *colors = env->GetIntArrayElements(colorTable, &b);
     int idx;
     for (int loop = 0; loop < idx_pixel; loop++) {
