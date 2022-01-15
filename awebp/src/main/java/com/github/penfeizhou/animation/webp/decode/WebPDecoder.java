@@ -143,7 +143,10 @@ public class WebPDecoder extends FrameSeqDecoder<WebPReader, WebPWriter> {
                 canvas.drawRect(left, top, right, bottom, mTransparentFillPaint);
             }
         }
-        Bitmap inBitmap = obtainBitmap(frame.frameWidth / sampleSize, frame.frameHeight / sampleSize);
+        Bitmap inBitmap = null;
+        if (frame.frameWidth != 0 && frame.frameHeight != 0) {
+            inBitmap = obtainBitmap(frame.frameWidth / sampleSize, frame.frameHeight / sampleSize);
+        }
         recycleBitmap(frame.draw(canvas, paint, sampleSize, inBitmap, getWriter()));
         recycleBitmap(inBitmap);
         frameBuffer.rewind();
