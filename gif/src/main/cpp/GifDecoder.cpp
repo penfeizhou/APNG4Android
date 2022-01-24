@@ -5,28 +5,12 @@
 #include "common.h"
 #include "Reader.h"
 
-jint JNI_OnLoad(JavaVM *vm, void *reserved) {
-    JNIEnv *env;
-    if (vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
-        return -1;
-    }
-    if (JavaReader_OnLoad(env)) {
-        LOGE("Failed to load JavaReader");
-        return -1;
-    }
-
-    return JNI_VERSION_1_6;
-}
-
-
-extern "C" {
 struct Slice {
     int *ptr_data;
     size_t len_data;
 };
 
-JNIEXPORT void JNICALL
-Java_com_github_penfeizhou_animation_gif_decode_GifFrame_uncompressLZW(
+void uncompressLZW(
         JNIEnv *env,
         jobject /* this */,
         jobject jReader,
@@ -206,4 +190,43 @@ Java_com_github_penfeizhou_animation_gif_decode_GifFrame_uncompressLZW(
     env->ReleaseIntArrayElements(pixels, pixelsBuffer, 0);
     env->ReleaseIntArrayElements(colorTable, colors, JNI_ABORT);
 }
+
+
+static JNINativeMethod methods[] = {
+        {"uncompressLZW", "(Lcom/github/penfeizhou/animation/gif/io/GifReader;[II[IIIIZ[B)V", (void *) &uncompressLZW},
+};
+
+int jniRegisterNativeMethods(JNIEnv *env, const char *className, const JNINativeMethod *gMethods,
+                             int numMethods) {
+    jclass clazz;
+    int tmp;
+    clazz = env->FindClass(className);
+    if (clazz == nullptr) {
+        return -1;
+    }
+    if ((tmp = env->RegisterNatives(clazz, gMethods, numMethods)) < 0) {
+        return -1;
+    }
+    return 0;
+}
+
+int registerNativeMethods(JNIEnv *env) {
+    return jniRegisterNativeMethods(env, "com/github/penfeizhou/animation/gif/decode/GifFrame",
+                                    methods,
+                                    sizeof(methods) / sizeof(methods[0]));
+}
+
+jint JNI_OnLoad(JavaVM *vm, void *reserved) {
+    JNIEnv *env;
+    if (vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        return -1;
+    }
+    if (JavaReader_OnLoad(env)) {
+        LOGE("Failed to load JavaReader");
+        return -1;
+    }
+    if (registerNativeMethods(env) != JNI_OK) {
+        return -1;
+    }
+    return JNI_VERSION_1_6;
 }
