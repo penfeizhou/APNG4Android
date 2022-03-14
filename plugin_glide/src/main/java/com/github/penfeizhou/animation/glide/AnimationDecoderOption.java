@@ -11,7 +11,7 @@ public final class AnimationDecoderOption {
 
     /**
      * If set to {@code true}, disables the Frame Animation Decoder {@link com.github.penfeizhou.animation.gif.GifDrawable}
-     * Defaults to {@code true}.
+     * Defaults to {@code false}.
      */
     public static final Option<Boolean> DISABLE_ANIMATION_GIF_DECODER = Option.memory(
             "com.github.penfeizhou.animation.glide.AnimationDecoderOption.DISABLE_ANIMATION_GIF_DECODER", false);
