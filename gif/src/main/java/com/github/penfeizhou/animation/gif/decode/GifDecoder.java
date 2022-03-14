@@ -141,6 +141,7 @@ public class GifDecoder extends FrameSeqDecoder<GifReader, GifWriter> {
                     break;
                 case 3:
                     snapShot.byteBuffer.rewind();
+                    canvas.drawColor(bgColor, PorterDuff.Mode.CLEAR);
                     Bitmap preBitmap = obtainBitmap(fullRect.width() / sampleSize, fullRect.height() / sampleSize);
                     preBitmap.copyPixelsFromBuffer(snapShot.byteBuffer);
                     canvas.drawBitmap(preBitmap, 0, 0, paint);
