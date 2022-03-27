@@ -247,7 +247,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     }
 
 
-    private int getFrameCount() {
+    public int getFrameCount() {
         return this.frames.size();
     }
 
@@ -508,7 +508,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
 
     protected abstract void renderFrame(Frame frame);
 
-    private Frame getFrame(int index) {
+    public Frame getFrame(int index) {
         if (index < 0 || index >= frames.size()) {
             return null;
         }

@@ -346,4 +346,8 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
             }
         }
     }
+
+    public Decoder getFrameSeqDecoder() {
+        return frameSeqDecoder;
+    }
 }
