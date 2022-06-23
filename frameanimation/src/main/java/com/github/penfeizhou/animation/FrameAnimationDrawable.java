@@ -50,16 +50,20 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_ANIMATION_START:
-                    for (AnimationCallback animationCallback : animationCallbacks) {
+                case MSG_ANIMATION_START: {
+                    ArrayList<AnimationCallback> callbacks = new ArrayList<>(animationCallbacks);
+                    for (AnimationCallback animationCallback : callbacks) {
                         animationCallback.onAnimationStart(FrameAnimationDrawable.this);
                     }
                     break;
-                case MSG_ANIMATION_END:
-                    for (AnimationCallback animationCallback : animationCallbacks) {
+                }
+                case MSG_ANIMATION_END: {
+                    ArrayList<AnimationCallback> callbacks = new ArrayList<>(animationCallbacks);
+                    for (AnimationCallback animationCallback : callbacks) {
                         animationCallback.onAnimationEnd(FrameAnimationDrawable.this);
                     }
                     break;
+                }
             }
         }
     };
