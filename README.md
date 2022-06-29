@@ -97,3 +97,5 @@ dependencies {
 Glide.with(imageView).load("https://misc.aotu.io/ONE-SUNDAY/SteamEngine.png").into(imageView);
 Glide.with(imageView).load("https://isparta.github.io/compare-webp/image/gif_webp/webp/2.webp").into(imageView);
 ```
+### Welcome to join the talk
+![image](https://user-images.githubusercontent.com/9526211/176335782-65f28250-b595-456b-8ee9-4b1c5139acba.png)
