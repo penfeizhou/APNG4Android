@@ -154,7 +154,7 @@ public class ImageDescriptor implements Block {
         return (this.flag & 0x40) == 0x40;
     }
 
-    public boolean sortFalg() {
+    public boolean sortFlag() {
         return (this.flag & 0x20) == 0x20;
     }
 

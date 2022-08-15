@@ -20,7 +20,6 @@ import androidx.annotation.Nullable;
 import androidx.vectordrawable.graphics.drawable.Animatable2Compat;
 
 import android.util.Log;
-import android.widget.ImageView;
 
 import com.github.penfeizhou.animation.decode.FrameSeqDecoder;
 import com.github.penfeizhou.animation.loader.Loader;
@@ -41,30 +40,34 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
     private static final String TAG = FrameAnimationDrawable.class.getSimpleName();
     private final Paint paint = new Paint();
     private final Decoder frameSeqDecoder;
-    private DrawFilter drawFilter = new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
-    private Matrix matrix = new Matrix();
-    private Set<AnimationCallback> animationCallbacks = new HashSet<>();
+    private final DrawFilter drawFilter = new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+    private final Matrix matrix = new Matrix();
+    private final Set<AnimationCallback> animationCallbacks = new HashSet<>();
     private Bitmap bitmap;
     private static final int MSG_ANIMATION_START = 1;
     private static final int MSG_ANIMATION_END = 2;
-    private Handler uiHandler = new Handler(Looper.getMainLooper()) {
+    private final Handler uiHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_ANIMATION_START:
-                    for (AnimationCallback animationCallback : animationCallbacks) {
+                case MSG_ANIMATION_START: {
+                    ArrayList<AnimationCallback> callbacks = new ArrayList<>(animationCallbacks);
+                    for (AnimationCallback animationCallback : callbacks) {
                         animationCallback.onAnimationStart(FrameAnimationDrawable.this);
                     }
                     break;
-                case MSG_ANIMATION_END:
-                    for (AnimationCallback animationCallback : animationCallbacks) {
+                }
+                case MSG_ANIMATION_END: {
+                    ArrayList<AnimationCallback> callbacks = new ArrayList<>(animationCallbacks);
+                    for (AnimationCallback animationCallback : callbacks) {
                         animationCallback.onAnimationEnd(FrameAnimationDrawable.this);
                     }
                     break;
+                }
             }
         }
     };
-    private Runnable invalidateRunnable = new Runnable() {
+    private final Runnable invalidateRunnable = new Runnable() {
         @Override
         public void run() {
             invalidateSelf();
@@ -346,5 +349,9 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
                 callback.invalidateDrawable(this);
             }
         }
+    }
+
+    public Decoder getFrameSeqDecoder() {
+        return frameSeqDecoder;
     }
 }

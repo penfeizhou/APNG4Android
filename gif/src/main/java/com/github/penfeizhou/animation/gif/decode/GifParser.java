@@ -104,23 +104,29 @@ public class GifParser {
             blocks.add(globalColorTable);
         }
         byte flag;
-        while ((flag = reader.peek()) != 0x3B) {
-            Block block = null;
-            switch (flag) {
-                case 0x21:
-                    block = ExtensionBlock.retrieve(reader);
-                    break;
-                case 0x2c:
-                    block = new ImageDescriptor();
-                    break;
+        try {
+            while ((flag = reader.peek()) != 0x3B) {
+                Block block = null;
+                switch (flag) {
+                    case 0x21:
+                        block = ExtensionBlock.retrieve(reader);
+                        break;
+                    case 0x2c:
+                        block = new ImageDescriptor();
+                        break;
+                }
+                if (block != null) {
+                    block.receive(reader);
+                    blocks.add(block);
+                } else {
+                    throw new FormatException();
+                }
             }
-            if (block != null) {
-                block.receive(reader);
-                blocks.add(block);
-            } else {
-                throw new FormatException();
-            }
+        } catch (Exception e) {
+            // https://github.com/penfeizhou/APNG4Android/issues/119 To compat with this situation.
+            e.printStackTrace();
         }
+
 
         return blocks;
     }

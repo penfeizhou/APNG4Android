@@ -91,13 +91,16 @@ public class AnimationFrame extends Frame<WebPReader, WebPWriter> {
             optionsFixed.inMutable = true;
             bitmap = BitmapFactory.decodeByteArray(bytes, 0, length, optionsFixed);
         }
-        assert bitmap != null;
-        if (blendingMethod) {
-            paint.setXfermode(PORTERDUFF_XFERMODE_SRC);
+        if (bitmap != null) {
+            if (blendingMethod) {
+                paint.setXfermode(PORTERDUFF_XFERMODE_SRC);
+            } else {
+                paint.setXfermode(PORTERDUFF_XFERMODE_SRC_OVER);
+            }
+            canvas.drawBitmap(bitmap, (float) frameX * 2 / sampleSize, (float) frameY * 2 / sampleSize, paint);
         } else {
-            paint.setXfermode(PORTERDUFF_XFERMODE_SRC_OVER);
+            bitmap = reusedBitmap;
         }
-        canvas.drawBitmap(bitmap, (float) frameX * 2 / sampleSize, (float) frameY * 2 / sampleSize, paint);
         return bitmap;
     }
 }

@@ -37,6 +37,10 @@ dependencies {
     implementation 'com.github.penfeizhou.android.animation:gif:${VERSION}'
 }
 ```
+
+### `Notice Before Use!`
+`Don't put APNG resources in your drawable or mipmap directory!` During the process of release building of an Android app, the aapt tool will zip & modify the frame info of the APNG file, which will lead to an abnormal behavior when playing it. Thus, please put the APNG resources in `raw` or `assets` folder instead.
+
 ### Use
 
 ```java
@@ -93,3 +97,5 @@ dependencies {
 Glide.with(imageView).load("https://misc.aotu.io/ONE-SUNDAY/SteamEngine.png").into(imageView);
 Glide.with(imageView).load("https://isparta.github.io/compare-webp/image/gif_webp/webp/2.webp").into(imageView);
 ```
+### Welcome to join the talk
+![image](https://user-images.githubusercontent.com/9526211/176335782-65f28250-b595-456b-8ee9-4b1c5139acba.png)

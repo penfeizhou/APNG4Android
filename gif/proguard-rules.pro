@@ -20,3 +20,5 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 -keep class com.github.penfeizhou.animation.io.Reader {*;}
+-keep class com.github.penfeizhou.animation.gif.io.GifReader {*;}
+-keep class com.github.penfeizhou.animation.gif.decode.GifFrame {*;}

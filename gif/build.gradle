@@ -14,7 +14,7 @@ android {
 
         externalNativeBuild {
             cmake {
-                cppFlags "-DDEBUG"
+                cppFlags "-fPIC"
             }
         }
     }
