@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.util.Log;
 
 import com.github.penfeizhou.animation.decode.Frame;
 import com.github.penfeizhou.animation.decode.FrameSeqDecoder;
@@ -112,10 +113,16 @@ public class WebPDecoder extends FrameSeqDecoder<WebPReader, WebPWriter> {
 
     @Override
     protected void renderFrame(Frame frame) {
-        if (frame == null) {
+        if (frame == null || fullRect == null) {
+            return;
+        }
+        if(fullRect.width() <= 0 || fullRect.height() <= 0){
             return;
         }
         Bitmap bitmap = obtainBitmap(fullRect.width() / sampleSize, fullRect.height() / sampleSize);
+        if(bitmap == null){
+            return;
+        }
         Canvas canvas = cachedCanvas.get(bitmap);
         if (canvas == null) {
             canvas = new Canvas(bitmap);

@@ -108,8 +108,10 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                     if (ret != null && ret.getAllocationByteCount() >= reuseSize) {
                         iterator.remove();
-                        if (ret.getWidth() != width || ret.getHeight() != height) {
-                            ret.reconfigure(width, height, Bitmap.Config.ARGB_8888);
+                        if ((ret.getWidth() != width || ret.getHeight() != height)) {
+                            if (width > 0 && height > 0) {
+                                ret.reconfigure(width, height, Bitmap.Config.ARGB_8888);
+                            }
                         }
                         ret.eraseColor(0);
                         return ret;
@@ -125,9 +127,14 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
                 }
             }
 
+            if (width <= 0 || height <= 0) {
+                return null;
+            }
             try {
                 Bitmap.Config config = Bitmap.Config.ARGB_8888;
                 ret = Bitmap.createBitmap(width, height, config);
+            } catch (Exception e) {
+                e.printStackTrace();
             } catch (OutOfMemoryError e) {
                 e.printStackTrace();
             }
