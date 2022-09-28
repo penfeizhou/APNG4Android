@@ -4,11 +4,11 @@ buildscript {
     ext.kotlin_version = '1.3.72'
     repositories {
         google()
-        jcenter()
+        mavenCentral()
 
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.1'
+        classpath 'com.android.tools.build:gradle:4.0.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -16,10 +16,7 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
-        maven {
-            url "https://dl.bintray.com/osborn/Android"
-        }
+        mavenCentral()
     }
     def needReplaceLocal = true
     gradle.startParameter.taskNames.each {
