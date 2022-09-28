@@ -8,6 +8,8 @@ import android.graphics.Paint;
 import com.github.penfeizhou.animation.decode.Frame;
 import com.github.penfeizhou.animation.io.Reader;
 import com.github.penfeizhou.animation.io.Writer;
+import com.github.penfeizhou.animation.webp.io.WebPReader;
+import com.github.penfeizhou.animation.webp.io.WebPWriter;
 
 import java.io.IOException;
 
@@ -16,15 +18,15 @@ import java.io.IOException;
  * @Author: pengfei.zhou
  * @CreateDate: 2019-05-13
  */
-public class StillFrame extends Frame {
-    public StillFrame(Reader reader, int width, int height) {
+public class StillFrame extends Frame<WebPReader, WebPWriter> {
+    public StillFrame(WebPReader reader, int width, int height) {
         super(reader);
         this.frameWidth = width;
         this.frameHeight = height;
     }
 
     @Override
-    public Bitmap draw(Canvas canvas, Paint paint, int sampleSize, Bitmap reusedBitmap, Writer writer) {
+    public Bitmap draw(Canvas canvas, Paint paint, int sampleSize, Bitmap reusedBitmap, WebPWriter writer) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = false;
         options.inSampleSize = sampleSize;
