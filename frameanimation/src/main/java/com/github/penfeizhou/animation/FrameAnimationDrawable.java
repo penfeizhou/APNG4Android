@@ -14,11 +14,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.vectordrawable.graphics.drawable.Animatable2Compat;
-
 import android.util.Log;
 
 import com.github.penfeizhou.animation.decode.FrameSeqDecoder;
@@ -31,12 +26,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.vectordrawable.graphics.drawable.Animatable2Compat;
+
 /**
  * @Description: Frame animation drawable
  * @Author: pengfei.zhou
  * @CreateDate: 2019/3/27
  */
-public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> extends Drawable implements Animatable2Compat, FrameSeqDecoder.RenderListener {
+public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder<?, ?>> extends Drawable implements Animatable2Compat, FrameSeqDecoder.RenderListener {
     private static final String TAG = FrameAnimationDrawable.class.getSimpleName();
     private final Paint paint = new Paint();
     private final Decoder frameSeqDecoder;
@@ -320,7 +319,8 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
         List<WeakReference<Callback>> lost = new ArrayList<>();
         Callback callback = getCallback();
         boolean recorded = false;
-        for (WeakReference<Callback> ref : obtainedCallbacks) {
+        Set<WeakReference<Callback>> temp = new HashSet<>(obtainedCallbacks);
+        for (WeakReference<Callback> ref : temp) {
             Callback cb = ref.get();
             if (cb == null) {
                 lost.add(ref);
@@ -343,7 +343,8 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
     @Override
     public void invalidateSelf() {
         super.invalidateSelf();
-        for (WeakReference<Callback> ref : obtainedCallbacks) {
+        Set<WeakReference<Callback>> temp = new HashSet<>(obtainedCallbacks);
+        for (WeakReference<Callback> ref : temp) {
             Callback callback = ref.get();
             if (callback != null && callback != getCallback()) {
                 callback.invalidateDrawable(this);
