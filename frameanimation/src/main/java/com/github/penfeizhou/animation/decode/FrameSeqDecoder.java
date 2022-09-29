@@ -61,7 +61,9 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
                 long cost = System.currentTimeMillis() - start;
                 workerHandler.postDelayed(this, Math.max(0, delay - cost));
                 for (RenderListener renderListener : renderListeners) {
-                    renderListener.onRender(frameBuffer);
+                    if (frameBuffer != null) {
+                        renderListener.onRender(frameBuffer);
+                    }
                 }
             } else {
                 stop();
@@ -247,9 +249,15 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
 
     private void initCanvasBounds(Rect rect) {
         fullRect = rect;
-        frameBuffer = ByteBuffer.allocate((rect.width() * rect.height() / (sampleSize * sampleSize) + 1) * 4);
-        if (mWriter == null) {
-            mWriter = getWriter();
+        try {
+            frameBuffer = ByteBuffer.allocate((rect.width() * rect.height() / (sampleSize * sampleSize) + 1) * 4);
+            if (mWriter == null) {
+                mWriter = getWriter();
+            }
+        } catch (OutOfMemoryError error) {
+            error.printStackTrace();
+            System.gc();
+            System.runFinalization();
         }
     }
 
@@ -528,7 +536,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
      * @param index <0 means reverse from last index
      */
     public Bitmap getFrameBitmap(int index) throws IOException {
-        if (mState != State.IDLE) {
+        if (mState != State.IDLE || frameBuffer == null) {
             Log.e(TAG, debugInfo() + ",stop first");
             return null;
         }

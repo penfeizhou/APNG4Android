@@ -19,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.vectordrawable.graphics.drawable.Animatable2Compat;
 
+import android.os.MessageQueue;
 import android.util.Log;
 
 import com.github.penfeizhou.animation.decode.FrameSeqDecoder;
@@ -67,6 +68,8 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
             }
         }
     };
+
+
     private final Runnable invalidateRunnable = new Runnable() {
         @Override
         public void run() {
@@ -222,13 +225,19 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
             return;
         }
         if (this.bitmap == null || this.bitmap.isRecycled()) {
-            this.bitmap = Bitmap.createBitmap(
-                    frameSeqDecoder.getBounds().width() / frameSeqDecoder.getSampleSize(),
-                    frameSeqDecoder.getBounds().height() / frameSeqDecoder.getSampleSize(),
-                    Bitmap.Config.ARGB_8888);
+            try {
+                this.bitmap = Bitmap.createBitmap(
+                        frameSeqDecoder.getBounds().width() / frameSeqDecoder.getSampleSize(),
+                        frameSeqDecoder.getBounds().height() / frameSeqDecoder.getSampleSize(),
+                        Bitmap.Config.ARGB_8888);
+            }catch (OutOfMemoryError o){
+                o.printStackTrace();
+                System.gc();
+                System.runFinalization();
+            }
         }
         byteBuffer.rewind();
-        if (byteBuffer.remaining() < this.bitmap.getByteCount()) {
+        if (this.bitmap == null || byteBuffer.remaining() < this.bitmap.getByteCount()) {
             Log.e(TAG, "onRender:Buffer not large enough for pixels");
             return;
         }
