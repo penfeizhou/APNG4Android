@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Rect;
 
 import com.github.penfeizhou.animation.apng.io.APNGReader;
 import com.github.penfeizhou.animation.apng.io.APNGWriter;
@@ -28,7 +29,7 @@ public class APNGFrame extends Frame<APNGReader, APNGWriter> {
     private static final byte[] sPNGSignatures = {(byte) 137, 80, 78, 71, 13, 10, 26, 10};
     private static final byte[] sPNGEndChunk = {0, 0, 0, 0, 0x49, 0x45, 0x4E, 0x44, (byte) 0xAE, 0x42, 0x60, (byte) 0x82};
 
-    private static ThreadLocal<CRC32> sCRC32 = new ThreadLocal<>();
+    private static final ThreadLocal<CRC32> sCRC32 = new ThreadLocal<>();
 
     private CRC32 getCRC32() {
         CRC32 crc32 = sCRC32.get();
@@ -152,7 +153,16 @@ public class APNGFrame extends Frame<APNGReader, APNGWriter> {
             }
 
             assert bitmap != null;
-            canvas.drawBitmap(bitmap, (float) frameX / sampleSize, (float) frameY / sampleSize, paint);
+            srcRect.left = 0;
+            srcRect.top = 0;
+            srcRect.right = bitmap.getWidth();
+            srcRect.bottom = bitmap.getHeight();
+            dstRect.left = (int) ((float) frameX / sampleSize);
+            dstRect.top = (int) ((float) frameY / sampleSize);
+            dstRect.right = (int) ((float) frameX / sampleSize + bitmap.getWidth());
+            dstRect.bottom = (int) ((float) frameY / sampleSize + bitmap.getHeight());
+
+            canvas.drawBitmap(bitmap, srcRect, dstRect, paint);
             return bitmap;
         } catch (IOException e) {
             e.printStackTrace();

@@ -3,6 +3,7 @@ package com.github.penfeizhou.animation.decode;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Rect;
 
 import com.github.penfeizhou.animation.io.Reader;
 import com.github.penfeizhou.animation.io.Writer;
@@ -20,6 +21,9 @@ public abstract class Frame<R extends Reader, W extends Writer> {
     public int frameX;
     public int frameY;
     public int frameDuration;
+
+    protected final Rect srcRect = new Rect();
+    protected final Rect dstRect = new Rect();
 
     public Frame(R reader) {
         this.reader = reader;

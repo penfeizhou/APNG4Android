@@ -28,10 +28,10 @@ public class GifDecoder extends FrameSeqDecoder<GifReader, GifWriter> {
     private GifWriter mGifWriter = new GifWriter();
     private final Paint paint = new Paint();
     private int bgColor = Color.TRANSPARENT;
-    private SnapShot snapShot = new SnapShot();
+    private final SnapShot snapShot = new SnapShot();
     private int mLoopCount = 0;
 
-    private class SnapShot {
+    private static class SnapShot {
         ByteBuffer byteBuffer;
     }
 
@@ -108,7 +108,7 @@ public class GifDecoder extends FrameSeqDecoder<GifReader, GifWriter> {
     }
 
     @Override
-    protected void renderFrame(Frame frame) {
+    protected void renderFrame(Frame<GifReader, GifWriter> frame) {
         GifFrame gifFrame = (GifFrame) frame;
         Bitmap bitmap = obtainBitmap(fullRect.width() / sampleSize, fullRect.height() / sampleSize);
         Canvas canvas = cachedCanvas.get(bitmap);

@@ -3,13 +3,14 @@ package com.github.penfeizhou.animation.gif.decode;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import androidx.annotation.Nullable;
 
 import com.github.penfeizhou.animation.decode.Frame;
 import com.github.penfeizhou.animation.gif.io.GifReader;
 import com.github.penfeizhou.animation.gif.io.GifWriter;
 
 import java.io.IOException;
+
+import androidx.annotation.Nullable;
 
 
 /**
@@ -75,7 +76,16 @@ public class GifFrame extends Frame<GifReader, GifWriter> {
             int[] pixels = writer.asIntArray();
             encode(pixels, sampleSize);
             reusedBitmap.copyPixelsFromBuffer(writer.asBuffer().rewind());
-            canvas.drawBitmap(reusedBitmap, frameX / sampleSize, frameY / sampleSize, paint);
+            srcRect.left = 0;
+            srcRect.top = 0;
+            srcRect.right = reusedBitmap.getWidth();
+            srcRect.bottom = reusedBitmap.getHeight();
+            dstRect.left = (int) ((float) frameX / sampleSize);
+            dstRect.top = (int) ((float) frameY / sampleSize);
+            dstRect.right = (int) ((float) frameX / sampleSize + reusedBitmap.getWidth());
+            dstRect.bottom = (int) ((float) frameY / sampleSize + reusedBitmap.getHeight());
+
+            canvas.drawBitmap(reusedBitmap, srcRect, dstRect, paint);
         } catch (Exception e) {
             e.printStackTrace();
         }

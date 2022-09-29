@@ -329,7 +329,8 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
         List<WeakReference<Callback>> lost = new ArrayList<>();
         Callback callback = getCallback();
         boolean recorded = false;
-        for (WeakReference<Callback> ref : obtainedCallbacks) {
+        Set<WeakReference<Callback>> temp = new HashSet<>(obtainedCallbacks);
+        for (WeakReference<Callback> ref : temp) {
             Callback cb = ref.get();
             if (cb == null) {
                 lost.add(ref);
@@ -352,7 +353,8 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder> ex
     @Override
     public void invalidateSelf() {
         super.invalidateSelf();
-        for (WeakReference<Callback> ref : obtainedCallbacks) {
+        Set<WeakReference<Callback>> temp = new HashSet<>(obtainedCallbacks);
+        for (WeakReference<Callback> ref : temp) {
             Callback callback = ref.get();
             if (callback != null && callback != getCallback()) {
                 callback.invalidateDrawable(this);

@@ -8,9 +8,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.WorkerThread;
-
 import com.github.penfeizhou.animation.executor.FrameDecoderExecutor;
 import com.github.penfeizhou.animation.io.Reader;
 import com.github.penfeizhou.animation.io.Writer;
@@ -28,6 +25,9 @@ import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.LockSupport;
 
+import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
+
 /**
  * @Description: Abstract Frame Animation Decoder
  * @Author: pengfei.zhou
@@ -39,18 +39,18 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
 
     private final Loader mLoader;
     private final Handler workerHandler;
-    protected List<Frame> frames = new ArrayList<>();
+    protected List<Frame<R, W>> frames = new ArrayList<>();
     protected int frameIndex = -1;
     private int playCount;
     private Integer loopLimit = null;
-    private Set<RenderListener> renderListeners = new HashSet<>();
-    private AtomicBoolean paused = new AtomicBoolean(true);
+    private final Set<RenderListener> renderListeners = new HashSet<>();
+    private final AtomicBoolean paused = new AtomicBoolean(true);
     private static final Rect RECT_EMPTY = new Rect();
-    private Runnable renderTask = new Runnable() {
+    private final Runnable renderTask = new Runnable() {
         @Override
         public void run() {
             if (DEBUG) {
-                Log.d(TAG, renderTask.toString() + ",run");
+                Log.d(TAG, renderTask + ",run");
             }
             if (paused.get()) {
                 return;
@@ -72,7 +72,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     };
     protected int sampleSize = 1;
 
-    private Set<Bitmap> cacheBitmaps = new HashSet<>();
+    private final Set<Bitmap> cacheBitmaps = new HashSet<>();
     private final Object cacheBitmapsLock = new Object();
 
     protected Map<Bitmap, Canvas> cachedCanvas = new WeakHashMap<>();
@@ -146,7 +146,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
 
     protected void recycleBitmap(Bitmap bitmap) {
         synchronized (cacheBitmapsLock) {
-            if (bitmap != null && !cacheBitmaps.contains(bitmap)) {
+            if (bitmap != null) {
                 cacheBitmaps.add(bitmap);
             }
         }
@@ -397,7 +397,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
 
     private String debugInfo() {
         if (DEBUG) {
-            return String.format("thread is %s, decoder is %s,state is %s", Thread.currentThread(), FrameSeqDecoder.this.toString(), mState.toString());
+            return String.format("thread is %s, decoder is %s,state is %s", Thread.currentThread(), FrameSeqDecoder.this, mState.toString());
         }
         return "";
     }
@@ -445,9 +445,8 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
 
     public boolean setDesiredSize(int width, int height) {
         boolean sampleSizeChanged = false;
-        int sample = getDesiredSample(width, height);
+        final int sample = getDesiredSample(width, height);
         if (sample != this.sampleSize) {
-            this.sampleSize = sample;
             sampleSizeChanged = true;
             final boolean tempRunning = isRunning();
             workerHandler.removeCallbacks(renderTask);
@@ -456,6 +455,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
                 public void run() {
                     innerStop();
                     try {
+                        sampleSize = sample;
                         initCanvasBounds(read(getReader(mLoader.obtain())));
                         if (tempRunning) {
                             innerStart();
@@ -513,7 +513,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
             this.frameIndex = 0;
             this.playCount++;
         }
-        Frame frame = getFrame(this.frameIndex);
+        Frame<R, W> frame = getFrame(this.frameIndex);
         if (frame == null) {
             return 0;
         }
@@ -521,9 +521,9 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         return frame.frameDuration;
     }
 
-    protected abstract void renderFrame(Frame frame);
+    protected abstract void renderFrame(Frame<R, W> frame);
 
-    public Frame getFrame(int index) {
+    public Frame<R, W> getFrame(int index) {
         if (index < 0 || index >= frames.size()) {
             return null;
         }

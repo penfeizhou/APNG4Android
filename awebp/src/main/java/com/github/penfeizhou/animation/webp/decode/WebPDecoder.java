@@ -8,7 +8,6 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.util.Log;
 
 import com.github.penfeizhou.animation.decode.Frame;
 import com.github.penfeizhou.animation.decode.FrameSeqDecoder;
@@ -112,15 +111,15 @@ public class WebPDecoder extends FrameSeqDecoder<WebPReader, WebPWriter> {
     }
 
     @Override
-    protected void renderFrame(Frame frame) {
+    protected void renderFrame(Frame<WebPReader, WebPWriter> frame) {
         if (frame == null || fullRect == null) {
             return;
         }
-        if(fullRect.width() <= 0 || fullRect.height() <= 0){
+        if (fullRect.width() <= 0 || fullRect.height() <= 0) {
             return;
         }
         Bitmap bitmap = obtainBitmap(fullRect.width() / sampleSize, fullRect.height() / sampleSize);
-        if(bitmap == null){
+        if (bitmap == null) {
             return;
         }
         Canvas canvas = cachedCanvas.get(bitmap);
@@ -139,7 +138,7 @@ public class WebPDecoder extends FrameSeqDecoder<WebPReader, WebPWriter> {
                 canvas.drawColor(backgroundColor, PorterDuff.Mode.SRC);
             }
         } else {
-            Frame preFrame = frames.get(this.frameIndex - 1);
+            Frame<WebPReader, WebPWriter> preFrame = frames.get(this.frameIndex - 1);
             //Dispose to background color. Fill the rectangle on the canvas covered by the current frame with background color specified in the ANIM chunk.
             if (preFrame instanceof AnimationFrame
                     && ((AnimationFrame) preFrame).disposalMethod) {

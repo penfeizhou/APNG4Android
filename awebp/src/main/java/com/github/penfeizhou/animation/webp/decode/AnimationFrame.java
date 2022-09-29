@@ -97,7 +97,16 @@ public class AnimationFrame extends Frame<WebPReader, WebPWriter> {
             } else {
                 paint.setXfermode(PORTERDUFF_XFERMODE_SRC_OVER);
             }
-            canvas.drawBitmap(bitmap, (float) frameX * 2 / sampleSize, (float) frameY * 2 / sampleSize, paint);
+            srcRect.left = 0;
+            srcRect.top = 0;
+            srcRect.right = bitmap.getWidth();
+            srcRect.bottom = bitmap.getHeight();
+            dstRect.left = (int) ((float) frameX * 2 / sampleSize);
+            dstRect.top = (int) ((float) frameY * 2 / sampleSize);
+            dstRect.right = (int) ((float) frameX * 2 / sampleSize + bitmap.getWidth());
+            dstRect.bottom = (int) ((float) frameY * 2 / sampleSize + bitmap.getHeight());
+
+            canvas.drawBitmap(bitmap, srcRect, dstRect, paint);
         } else {
             bitmap = reusedBitmap;
         }
