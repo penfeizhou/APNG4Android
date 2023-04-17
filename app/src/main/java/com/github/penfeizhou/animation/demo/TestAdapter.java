@@ -28,7 +28,7 @@ public class TestAdapter extends RecyclerView.Adapter<TestAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Glide.with(mContext)
-                .load("https://misc.aotu.io/ONE-SUNDAY/SteamEngine.png")
+                .load("https://raw.githubusercontent.com/penfeizhou/APNG4Android/master/app/src/main/assets/test2.png")
                 .into(holder.iv);
     }
 
