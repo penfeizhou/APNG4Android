@@ -22,7 +22,7 @@ public class APNGTestActivity extends Activity {
         setContentView(R.layout.activity_apnglib);
         LinearLayout linearLayout = findViewById(R.id.layout);
         String[] urls = new String[]{
-                "https://misc.aotu.io/ONE-SUNDAY/SteamEngine.png"};
+                "https://raw.githubusercontent.com/penfeizhou/APNG4Android/master/app/src/main/assets/test2.png"};
         for (String url : urls) {
             ImageView imageView = new ImageView(this);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(500, 500);
