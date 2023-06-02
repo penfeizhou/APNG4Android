@@ -42,9 +42,28 @@ public class StreamReader extends FilterInputStream implements Reader {
 
     @Override
     public long skip(long n) throws IOException {
-        long ret = super.skip(n);
-        position += ret;
-        return ret;
+        long toSkip = n;
+
+        while (toSkip > 0) {
+            long skipped = super.skip(toSkip);
+            if (skipped > 0) {
+                toSkip -= skipped;
+            } else {
+                // Skip has no specific contract as to what happens when you reach the end of
+                // the stream. To differentiate between temporarily not having more data and
+                // having finished the stream, we read a single byte when we fail to skip any
+                // amount of data.
+                int testEofByte = super.read();
+                if (testEofByte == -1) {
+                    break;
+                } else {
+                    toSkip--;
+                }
+            }
+        }
+
+        position += n - toSkip;
+        return n - toSkip;
     }
 
     @Override
