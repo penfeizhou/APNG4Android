@@ -35,8 +35,21 @@ uploadArchives {
             pom.version = rootProject.ext.Version
 
             pom.project {
-                description 'git rev-parse HEAD'.execute([], projectDir).text.trim()
-                // 最后一次git提交的hash
+                name 'APNG4Android'
+                description 'Android animation support for APNG & Animated WebP & Gif'
+                url 'https://github.com/penfeizhou/APNG4Android'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'penfeizhou'
+                        name = 'osborn'
+                    }
+                }                
             }
 
             repository(url: repo) {
