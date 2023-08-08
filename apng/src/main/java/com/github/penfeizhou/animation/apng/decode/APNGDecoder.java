@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.util.Log;
 
 import com.github.penfeizhou.animation.apng.io.APNGReader;
 import com.github.penfeizhou.animation.apng.io.APNGWriter;
@@ -25,6 +26,7 @@ import java.util.List;
  * @CreateDate: 2019-05-13
  */
 public class APNGDecoder extends FrameSeqDecoder<APNGReader, APNGWriter> {
+    private static final String TAG = APNGDecoder.class.getSimpleName();
 
     private APNGWriter apngWriter;
     private int mLoopCount;
@@ -83,6 +85,11 @@ public class APNGDecoder extends FrameSeqDecoder<APNGReader, APNGWriter> {
         byte[] ihdrData = new byte[0];
         int canvasWidth = 0, canvasHeight = 0;
         for (Chunk chunk : chunks) {
+            if (chunk instanceof IENDChunk) {
+                Log.e(TAG, "chunk read reach to end");
+                break;
+            }
+            
             if (chunk instanceof ACTLChunk) {
                 mLoopCount = ((ACTLChunk) chunk).num_plays;
                 actl = true;
