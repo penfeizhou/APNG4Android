@@ -2,11 +2,9 @@ package com.github.penfeizhou.animation.demo;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import com.bumptech.glide.request.RequestOptions;
 import com.github.penfeizhou.animation.glide.AnimationDecoderOption;
 
 

@@ -1,9 +1,8 @@
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
 Properties properties = new Properties()
 properties.load(project.rootProject.file('scripts/maven.properties').newDataInputStream())
 properties.load(new FileInputStream("${projectDir}/pom.properties"))
-
 
 if (new File("local.properties").exists()) {
     properties.load(project.rootProject.file('local.properties').newDataInputStream())
@@ -25,19 +24,17 @@ if (repo == null || repo.length() == 0) {
     repo = properties.releasesRepository
 }
 
-apply plugin: 'maven'
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = properties.groupId
+            artifactId = properties.artifactId
+            version = rootProject.ext.Version
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            pom.groupId = properties.groupId
-            pom.artifactId = properties.artifactId
-            pom.version = rootProject.ext.Version
-
-            pom.project {
-                name 'APNG4Android'
+            pom {
+                name = 'APNG4Android'
                 description 'Android animation support for APNG & Animated WebP & Gif'
-                url 'https://github.com/penfeizhou/APNG4Android'
+                url = 'https://github.com/penfeizhou/APNG4Android'
                 licenses {
                     license {
                         name = 'The Apache License, Version 2.0'
@@ -49,23 +46,29 @@ uploadArchives {
                         id = 'penfeizhou'
                         name = 'osborn'
                     }
-                }                
+                }
             }
+        }
+    }
 
-            repository(url: repo) {
-                authentication(userName: user, password: apiKey)
+    repositories {
+        maven {
+            url = repo
+            credentials {
+                username = user
+                password = apiKey
             }
         }
     }
 }
 
-task uploadAar {
-    dependsOn clean, uploadArchives
+tasks.register('uploadAar') {
+    dependsOn clean, publish
 }
 
 // 打包时上传源码，可选
-task androidSourcesJar(type: Jar) {
-    classifier = "sources"
+tasks.register('androidSourcesJar', Jar) {
+    archiveClassifier = "sources"
     from android.sourceSets.main.java.sourceFiles
 }
 
