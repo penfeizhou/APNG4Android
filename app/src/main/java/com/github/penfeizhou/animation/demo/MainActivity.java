@@ -3,10 +3,11 @@ package com.github.penfeizhou.animation.demo;
 import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     @Override
@@ -35,68 +36,52 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.tv_1: {
-                Intent intent = new Intent(this, AnimationTestActivity.class);
-                intent.putExtra("files", new String[]{
-                        "apng_detail_guide.png",
-                });
-                startActivity(intent);
-            }
-            break;
-            case R.id.tv_2: {
-                Intent intent = new Intent(this, AnimationTestActivity.class);
-                intent.putExtra("files", new String[]{
-                        "test.png",
-                });
-                startActivity(intent);
-            }
-            break;
-            case R.id.tv_3: {
-                Intent intent = new Intent(this, AnimationTestActivity.class);
-                intent.putExtra("files", new String[]{
-                        "world-cup.webp",
-                });
-                startActivity(intent);
-            }
-            break;
-            case R.id.tv_4: {
-                Intent intent = new Intent(this, AnimationTestActivity.class);
-                intent.putExtra("files", new String[]{
-                        "lossless.webp",
-                });
-                startActivity(intent);
-            }
-            break;
-            case R.id.tv_5: {
-                Intent intent = new Intent(this, APNGTestActivity.class);
-                startActivity(intent);
-            }
-            break;
-            case R.id.tv_6: {
-                Intent intent = new Intent(this, AnimationTestActivity.class);
-                intent.putExtra("files", new String[]{
-                        "world-cup.gif",
-                        "1.gif",
-                        "2.gif",
-                        "3.gif",
-                        "4.gif",
-                        "5.gif",
-                        "6.gif",
-                });
-                startActivity(intent);
-            }
-            break;
-            case R.id.tv_7: {
-                Intent intent = new Intent(this, EncoderTestActivity.class);
-                startActivity(intent);
-            }
-            break;
-            case R.id.tv_8: {
-                Intent intent = new Intent(this, APNGRecyclerViewTestActivity.class);
-                startActivity(intent);
-            }
-            break;
+        int id = v.getId();
+        if (id == R.id.tv_1) {
+            Intent intent = new Intent(this, AnimationTestActivity.class);
+            intent.putExtra("files", new String[]{
+                    "apng_detail_guide.png",
+            });
+            startActivity(intent);
+        } else if (id == R.id.tv_2) {
+            Intent intent = new Intent(this, AnimationTestActivity.class);
+            intent.putExtra("files", new String[]{
+                    "test.png",
+            });
+            startActivity(intent);
+        } else if (id == R.id.tv_3) {
+            Intent intent = new Intent(this, AnimationTestActivity.class);
+            intent.putExtra("files", new String[]{
+                    "world-cup.webp",
+            });
+            startActivity(intent);
+        } else if (id == R.id.tv_4) {
+            Intent intent = new Intent(this, AnimationTestActivity.class);
+            intent.putExtra("files", new String[]{
+                    "lossless.webp",
+            });
+            startActivity(intent);
+        } else if (id == R.id.tv_5) {
+            Intent intent = new Intent(this, APNGTestActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.tv_6) {
+            Intent intent = new Intent(this, AnimationTestActivity.class);
+            intent.putExtra("files", new String[]{
+                    "world-cup.gif",
+                    "1.gif",
+                    "2.gif",
+                    "3.gif",
+                    "4.gif",
+                    "5.gif",
+                    "6.gif",
+            });
+            startActivity(intent);
+        } else if (id == R.id.tv_7) {
+            Intent intent = new Intent(this, EncoderTestActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.tv_8) {
+            Intent intent = new Intent(this, APNGRecyclerViewTestActivity.class);
+            startActivity(intent);
         }
     }
 }

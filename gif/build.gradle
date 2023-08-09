@@ -1,12 +1,12 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 28
-
+    compileSdk 33
+    namespace 'com.github.penfeizhou.animation.gif'
 
     defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion 28
+        minSdk 16
+        targetSdk 33
         versionCode 1
         versionName "1.0"
 
@@ -37,11 +37,11 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
     api("com.github.penfeizhou.android.animation:frameanimation:${rootProject.ext.Version}")
 
-    testImplementation 'junit:junit:4.13'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }
 apply from: rootProject.file('scripts/upload.gradle')

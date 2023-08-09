@@ -1,7 +1,6 @@
 package com.github.penfeizhou.animation.demo;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -9,14 +8,7 @@ import android.widget.LinearLayout;
 
 import com.bumptech.glide.Glide;
 import com.github.penfeizhou.animation.apng.APNGDrawable;
-import com.github.penfeizhou.animation.apng.decode.APNGDecoder;
 import com.github.penfeizhou.animation.awebpencoder.WebPEncoder;
-import com.github.penfeizhou.animation.decode.FrameSeqDecoder;
-import com.github.penfeizhou.animation.gif.GifDrawable;
-import com.github.penfeizhou.animation.loader.AssetStreamLoader;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
 
 /**
  * @Description: 作用描述

@@ -1,7 +1,6 @@
 package com.github.penfeizhou.animation.demo;
 
 import android.app.Activity;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.ViewGroup;
