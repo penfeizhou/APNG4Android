@@ -1,2 +1,3 @@
-include ':app', ':apng', ':awebp', ':frameanimation', ':plugin_glide', ':gif', ':awebpencoder'
+rootProject.name = 'com.github.penfeizhou.android.animation'
 
+include ':app', ':apng', ':awebp', ':frameanimation', ':plugin_glide', ':gif', ':awebpencoder'
