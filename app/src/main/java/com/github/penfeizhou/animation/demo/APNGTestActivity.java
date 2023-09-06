@@ -5,8 +5,8 @@ import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import com.bumptech.glide.Glide;
 import com.github.penfeizhou.animation.glide.AnimationDecoderOption;
-
 
 /**
  * @Description: 作用描述
@@ -20,14 +20,22 @@ public class APNGTestActivity extends Activity {
         setContentView(R.layout.activity_apnglib);
         LinearLayout linearLayout = findViewById(R.id.layout);
         String[] urls = new String[]{
-                "https://raw.githubusercontent.com/penfeizhou/APNG4Android/master/app/src/main/assets/test2.png"};
+                "file:///android_asset/apng_detail_guide.png",
+                "file:///android_asset/1.gif",
+                "file:///android_asset/2.gif",
+                "file:///android_asset/3.gif",
+                "file:///android_asset/4.gif",
+                "file:///android_asset/5.gif",
+                "file:///android_asset/1.webp",
+                "file:///android_asset/2.webp",
+        };
         for (String url : urls) {
             ImageView imageView = new ImageView(this);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(500, 500);
             layoutParams.bottomMargin = 50;
             layoutParams.topMargin = 50;
             linearLayout.addView(imageView, layoutParams);
-            GlideApp.with(imageView)
+            Glide.with(imageView)
                     .load(url)
                     .set(AnimationDecoderOption.NO_ANIMATION_BOUNDS_MEASURE, true)
                     .into(imageView);
