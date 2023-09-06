@@ -1,2 +1,21 @@
-include ':app', ':apng', ':awebp', ':frameanimation', ':plugin_glide', ':gif', ':awebpencoder'
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url = uri("https://plugins.gradle.org/m2/")
+        }
+    }
+}
 
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "APNG4Android"
+
+include ':app'//, ':apng', ':awebp', ':frameanimation', ':plugin_glide', ':gif', ':awebpencoder'
