@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:tools="http://schemas.android.com/tools"
-    xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.github.penfeizhou.animation.demo">
 
     <application
         android:allowBackup="true"
@@ -13,9 +9,9 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        tools:targetApi="n">
-        <activity android:name=".MainActivity"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,10 +19,23 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".AnimationTestActivity" />
-        <activity android:name=".APNGTestActivity" />
-        <activity android:name=".EncoderTestActivity" />
-        <activity android:name=".APNGRecyclerViewTestActivity" />
+        <activity
+            android:name=".AnimationTestActivity"
+            android:exported="false" />
+        <activity
+            android:name=".APNGTestActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EncoderTestActivity"
+            android:exported="false" />
+        <activity
+            android:name=".APNGRecyclerViewTestActivity"
+            android:exported="false" />
     </application>
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
 </manifest>
