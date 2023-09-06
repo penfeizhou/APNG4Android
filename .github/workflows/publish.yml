@@ -7,10 +7,10 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v1
-      - name: setup JDK 1.8
-        uses: actions/setup-java@v1
+      - name: setup JDK 1.17.0
+        uses: actions/setup-java@v3
         with:
-          java-version: 1.8
+          java-version: '17'
       - name: Config Github Account
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
