@@ -48,4 +48,5 @@ dependencies {
     implementation("com.github.penfeizhou.android.animation:gif:${rootProject.ext.Version}")
     implementation("com.github.penfeizhou.android.animation:glide-plugin:${rootProject.ext.Version}")
     implementation("com.github.penfeizhou.android.animation:awebpencoder:${rootProject.ext.Version}")
+//    implementation project(":awebpencoder")
 }
