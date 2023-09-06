@@ -10,6 +10,7 @@ jobs:
       - name: setup JDK 1.17.0
         uses: actions/setup-java@v3
         with:
+          distribution: 'temurin'
           java-version: '17'
       - name: Config Github Account
         env:
