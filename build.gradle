@@ -5,8 +5,8 @@ plugins {
     id 'com.google.devtools.ksp' version '1.9.10-1.0.13' apply false
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+tasks.register('clean', Delete) {
+    delete rootProject.buildFile
 }
 
 def needReplaceLocal = true
@@ -34,31 +34,31 @@ ext {
     Version = properties.version
 }
 
-//
-//task publishFrameAnimation dependsOn(":frameanimation:uploadArchives") {
-//    println "FrameAnimation published"
-//}
-//
-//task publishAPNG dependsOn(publishFrameAnimation, ":apng:uploadArchives") {
-//    println "APNG published"
-//}
-//
-//task publishAWebP dependsOn(publishFrameAnimation, ":awebp:uploadArchives") {
-//    println "AWebP published"
-//}
-//
-//task publishGif dependsOn(publishFrameAnimation, ":gif:uploadArchives") {
-//    println "Gif published"
-//}
-//
-//task publishAWebPEncoder dependsOn(publishAWebP, publishGif, ":awebpencoder:uploadArchives") {
-//    println "AwebP Encoder published"
-//}
-//
-//task publishGlidePlugin dependsOn(publishAPNG, publishAWebP, publishGif, ":plugin_glide:uploadArchives") {
-//    println "GlidePlugin published"
-//}
-//
-//task PublishAll dependsOn(publishGlidePlugin, publishAWebPEncoder) {
-//    println "All published"
-//}
+
+task publishFrameAnimation dependsOn(":frameanimation:publish") {
+    println "FrameAnimation published"
+}
+
+task publishAPNG dependsOn(publishFrameAnimation, ":apng:publish") {
+    println "APNG published"
+}
+
+task publishAWebP dependsOn(publishFrameAnimation, ":awebp:publish") {
+    println "AWebP published"
+}
+
+task publishGif dependsOn(publishFrameAnimation, ":gif:publish") {
+    println "Gif published"
+}
+
+task publishAWebPEncoder dependsOn(publishAWebP, publishGif, ":awebpencoder:publish") {
+    println "AwebP Encoder published"
+}
+
+task publishGlidePlugin dependsOn(publishAPNG, publishAWebP, publishGif, ":plugin_glide:publish") {
+    println "GlidePlugin published"
+}
+
+task PublishAll dependsOn(publishGlidePlugin, publishAWebPEncoder) {
+    println "All published"
+}
