@@ -11,6 +11,15 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/tv_0"
+            android:layout_width="wrap_content"
+            android:layout_height="80dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="Compose UI"
+            android:textSize="20dp" />
+
+        <TextView
             android:id="@+id/tv_1"
             android:layout_width="wrap_content"
             android:layout_height="80dp"

@@ -31,6 +31,9 @@
         <activity
             android:name=".APNGRecyclerViewTestActivity"
             android:exported="false" />
+        <activity
+            android:name=".ComposeActivity"
+            android:exported="false" />
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />
