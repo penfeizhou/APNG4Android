@@ -1,14 +1,14 @@
-apply plugin: 'com.android.library'
+plugins {
+    id 'com.android.library'
+}
 
 android {
-    compileSdkVersion 28
-
-
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
+        compileSdk 28
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
 
@@ -31,7 +31,7 @@ android {
             path "src/main/cpp/CMakeLists.txt"
         }
     }
-
+    namespace = "com.github.penfeizhou.animation.gif"
 }
 
 dependencies {

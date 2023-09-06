@@ -1,74 +1,74 @@
-apply plugin: 'maven'
-
-Properties properties = new Properties()
-properties.load(project.rootProject.file('scripts/maven.properties').newDataInputStream())
-properties.load(new FileInputStream("${projectDir}/pom.properties"))
-
-
-if (new File("local.properties").exists()) {
-    properties.load(project.rootProject.file('local.properties').newDataInputStream())
-}
-
-def user = System.getenv("BINTARY_USER")
-def apiKey = System.getenv("BINTARY_APIKEY")
-def repo = System.getenv("BINTARY_REPO")
-
-if (user == null || user.length() == 0) {
-    user = properties.user
-}
-
-if (apiKey == null || apiKey.length() == 0) {
-    apiKey = properties.apiKey
-}
-
-if (repo == null || repo.length() == 0) {
-    repo = properties.releasesRepository
-}
-
-apply plugin: 'maven'
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            pom.groupId = properties.groupId
-            pom.artifactId = properties.artifactId
-            pom.version = rootProject.ext.Version
-
-            pom.project {
-                name 'APNG4Android'
-                description 'Android animation support for APNG & Animated WebP & Gif'
-                url 'https://github.com/penfeizhou/APNG4Android'
-                licenses {
-                    license {
-                        name = 'The Apache License, Version 2.0'
-                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'penfeizhou'
-                        name = 'osborn'
-                    }
-                }                
-            }
-
-            repository(url: repo) {
-                authentication(userName: user, password: apiKey)
-            }
-        }
-    }
-}
-
-task uploadAar {
-    dependsOn clean, uploadArchives
-}
-
-// 打包时上传源码，可选
-task androidSourcesJar(type: Jar) {
-    classifier = "sources"
-    from android.sourceSets.main.java.sourceFiles
-}
-
-artifacts {
-    archives androidSourcesJar
-}
+//apply plugin: 'maven'
+//
+//Properties properties = new Properties()
+//properties.load(project.rootProject.file('scripts/maven.properties').newDataInputStream())
+//properties.load(new FileInputStream("${projectDir}/pom.properties"))
+//
+//
+//if (new File("local.properties").exists()) {
+//    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+//}
+//
+//def user = System.getenv("BINTARY_USER")
+//def apiKey = System.getenv("BINTARY_APIKEY")
+//def repo = System.getenv("BINTARY_REPO")
+//
+//if (user == null || user.length() == 0) {
+//    user = properties.user
+//}
+//
+//if (apiKey == null || apiKey.length() == 0) {
+//    apiKey = properties.apiKey
+//}
+//
+//if (repo == null || repo.length() == 0) {
+//    repo = properties.releasesRepository
+//}
+//
+//apply plugin: 'maven'
+//
+//uploadArchives {
+//    repositories {
+//        mavenDeployer {
+//            pom.groupId = properties.groupId
+//            pom.artifactId = properties.artifactId
+//            pom.version = rootProject.ext.Version
+//
+//            pom.project {
+//                name 'APNG4Android'
+//                description 'Android animation support for APNG & Animated WebP & Gif'
+//                url 'https://github.com/penfeizhou/APNG4Android'
+//                licenses {
+//                    license {
+//                        name = 'The Apache License, Version 2.0'
+//                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+//                    }
+//                }
+//                developers {
+//                    developer {
+//                        id = 'penfeizhou'
+//                        name = 'osborn'
+//                    }
+//                }
+//            }
+//
+//            repository(url: repo) {
+//                authentication(userName: user, password: apiKey)
+//            }
+//        }
+//    }
+//}
+//
+//task uploadAar {
+//    dependsOn clean, uploadArchives
+//}
+//
+//// 打包时上传源码，可选
+//task androidSourcesJar(type: Jar) {
+//    classifier = "sources"
+//    from android.sourceSets.main.java.sourceFiles
+//}
+//
+//artifacts {
+//    archives androidSourcesJar
+//}
