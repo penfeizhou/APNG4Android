@@ -9,31 +9,23 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
-//allprojects {
-//    repositories {
-//        google()
-//        mavenCentral()
-//    }
-//    def needReplaceLocal = true
-//    gradle.startParameter.taskNames.each {
-//        if (it.contains('uploadArchives')) {
-//            needReplaceLocal = false
-//        }
-//    }
-//    if (needReplaceLocal) {
-//        configurations.all {
-//            resolutionStrategy {
-//                dependencySubstitution {
-//                    substitute module('com.github.penfeizhou.android.animation:frameanimation') with project(":frameanimation")
-//                    substitute module('com.github.penfeizhou.android.animation:apng') with project(":apng")
-//                    substitute module('com.github.penfeizhou.android.animation:awebp') with project(":awebp")
-//                    substitute module('com.github.penfeizhou.android.animation:gif') with project(":gif")
-//                    substitute module('com.github.penfeizhou.android.animation:glide-plugin') with project(":plugin_glide")
-//                }
-//            }
-//        }
-//    }
-//}
+def needReplaceLocal = true
+if (needReplaceLocal) {
+    allprojects {
+        configurations.configureEach {
+            resolutionStrategy {
+                dependencySubstitution {
+                    substitute module('com.github.penfeizhou.android.animation:frameanimation') using project(":frameanimation")
+                    substitute module('com.github.penfeizhou.android.animation:apng') using project(":apng")
+                    substitute module('com.github.penfeizhou.android.animation:awebp') using project(":awebp")
+                    substitute module('com.github.penfeizhou.android.animation:gif') using project(":gif")
+                    substitute module('com.github.penfeizhou.android.animation:glide-plugin') using project(":plugin_glide")
+                    substitute module('com.github.penfeizhou.android.animation:awebpencoder') using project(":awebpencoder")
+                }
+            }
+        }
+    }
+}
 
 Properties properties = new Properties()
 properties.load(project.rootProject.file('version.properties').newDataInputStream())

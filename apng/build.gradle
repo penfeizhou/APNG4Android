@@ -1,14 +1,13 @@
-apply plugin: 'com.android.library'
-
+plugins {
+    id 'com.android.library'
+}
 android {
-    compileSdk 33
-    namespace 'com.github.penfeizhou.animation.apng'
-
     defaultConfig {
-        minSdk 16
-        targetSdk 33
+        minSdkVersion 16
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
+        compileSdk 28
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
 
@@ -20,7 +19,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-
+    namespace = "com.github.penfeizhou.animation.apng"
 }
 
 dependencies {
