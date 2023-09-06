@@ -7,9 +7,9 @@ plugins {
 android {
     defaultConfig {
         applicationId "com.github.penfeizhou.animation.demo"
-        minSdkVersion 16
-        compileSdk 33
-        targetSdkVersion 33
+        minSdkVersion 21
+        compileSdk 34
+        targetSdkVersion 34
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
@@ -26,6 +26,14 @@ android {
     }
     kotlinOptions {
         jvmTarget = '17'
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.3"
+    }
+
+    buildFeatures {
+        viewBinding true
+        compose true
     }
     namespace = "com.github.penfeizhou.animation.demo"
 }
@@ -48,5 +56,16 @@ dependencies {
     implementation("com.github.penfeizhou.android.animation:gif:${rootProject.ext.Version}")
     implementation("com.github.penfeizhou.android.animation:glide-plugin:${rootProject.ext.Version}")
     implementation("com.github.penfeizhou.android.animation:awebpencoder:${rootProject.ext.Version}")
-//    implementation project(":awebpencoder")
+
+    implementation 'androidx.compose.ui:ui:1.5.0'
+    implementation 'androidx.compose.ui:ui-tooling:1.5.0'
+    implementation 'androidx.compose.foundation:foundation:1.5.0'
+    implementation 'androidx.compose.material:material:1.5.0'
+    implementation 'androidx.compose.material:material-icons-core:1.5.0'
+    implementation 'androidx.compose.material:material-icons-extended:1.5.0'
+    implementation 'androidx.compose.runtime:runtime-livedata:1.5.0'
+    implementation 'androidx.compose.runtime:runtime-rxjava2:1.5.0'
+    implementation 'androidx.activity:activity-compose:1.7.2'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0-alpha01'
+    implementation "com.github.bumptech.glide:compose:1.0.0-alpha.6"
 }
