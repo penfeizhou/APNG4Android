@@ -24,7 +24,6 @@ if (apiKey == null || apiKey.length() == 0) {
 if (repo == null || repo.length() == 0) {
     repo = properties.releasesRepository
 }
-println("User:${user}")
 
 afterEvaluate {
     publishing {
