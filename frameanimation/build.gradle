@@ -19,6 +19,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+        }
+    }
     namespace = "com.github.penfeizhou.animation.frameanimation"
 }
 
