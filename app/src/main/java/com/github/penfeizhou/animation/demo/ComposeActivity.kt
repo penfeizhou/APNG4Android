@@ -42,6 +42,10 @@ fun AnimationDemo() {
             .padding(20.dp)
     ) {
         GlideImage(
+            model = "file:///android_asset/test.avif",
+            contentDescription = "Test",
+        )
+        GlideImage(
             model = "file:///android_asset/1.webp",
             contentDescription = "Test",
         )
