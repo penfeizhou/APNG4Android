@@ -3,9 +3,11 @@ package com.github.penfeizhou.animation.demo
 import android.Manifest
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.github.penfeizhou.animation.avif.decode.AVIFParser
 import com.github.penfeizhou.animation.demo.databinding.ActivityMainBinding
 
 /**
@@ -34,6 +36,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         binding.tv6.setOnClickListener(this)
         binding.tv7.setOnClickListener(this)
         binding.tv8.setOnClickListener(this)
+        val ret = AVIFParser.isAVIF(this, "test.avif")
+        Log.d("MainActivity", "isAVIF:${ret}")
     }
 
     override fun onRequestPermissionsResult(
