@@ -8,7 +8,9 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.github.penfeizhou.animation.avif.decode.AVIFParser
+import com.github.penfeizhou.animation.avif.io.AVIFReader
 import com.github.penfeizhou.animation.demo.databinding.ActivityMainBinding
+import com.github.penfeizhou.animation.loader.AssetStreamLoader
 
 /**
  *
@@ -36,7 +38,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         binding.tv6.setOnClickListener(this)
         binding.tv7.setOnClickListener(this)
         binding.tv8.setOnClickListener(this)
-        val ret = AVIFParser.isAVIF(this, "test.avif")
+        val ret = AVIFParser.parse(AVIFReader(AssetStreamLoader(this, "test.avif").obtain()))
         Log.d("MainActivity", "isAVIF:${ret}")
     }
 
