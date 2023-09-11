@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.github.penfeizhou.animation.apng.APNGDrawable;
+import com.github.penfeizhou.animation.avif.AVIFDrawable;
 import com.github.penfeizhou.animation.gif.GifDrawable;
 import com.github.penfeizhou.animation.webp.WebPDrawable;
 
@@ -35,6 +36,9 @@ public class AnimationTestActivity extends Activity {
             }
             if (assetFile.endsWith("gif")) {
                 drawable = GifDrawable.fromAsset(this, assetFile);
+            }
+            if (assetFile.endsWith("avif")) {
+                drawable = AVIFDrawable.fromAsset(this, assetFile);
             }
             imageView.setImageDrawable(drawable);
             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);

@@ -12,7 +12,7 @@ import java.nio.ByteBuffer;
  */
 public class ByteBufferReader implements Reader {
 
-    private final ByteBuffer byteBuffer;
+    protected final ByteBuffer byteBuffer;
 
     public ByteBufferReader(ByteBuffer byteBuffer) {
         this.byteBuffer = byteBuffer;

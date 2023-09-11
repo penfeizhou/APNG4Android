@@ -30,6 +30,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.tv0.setOnClickListener(this)
+        binding.tvAvif.setOnClickListener(this)
         binding.tv1.setOnClickListener(this)
         binding.tv2.setOnClickListener(this)
         binding.tv3.setOnClickListener(this)
@@ -38,8 +39,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         binding.tv6.setOnClickListener(this)
         binding.tv7.setOnClickListener(this)
         binding.tv8.setOnClickListener(this)
-        val ret = AVIFParser.parse(AVIFReader(AssetStreamLoader(this, "test.avif").obtain()))
-        Log.d("MainActivity", "isAVIF:${ret}")
     }
 
     override fun onRequestPermissionsResult(
@@ -54,6 +53,17 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         when (v.id) {
             R.id.tv_0 -> {
                 val intent = Intent(this, ComposeActivity::class.java)
+                startActivity(intent)
+            }
+
+            R.id.tv_avif -> {
+                val intent = Intent(this, AnimationTestActivity::class.java)
+                intent.putExtra(
+                    "files", arrayOf(
+                        "test.avif",
+                        "world-cup.avif",
+                    )
+                )
                 startActivity(intent)
             }
 
