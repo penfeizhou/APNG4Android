@@ -1,6 +1,7 @@
 package com.github.penfeizhou.animation.avif.decode;
 
 
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 
 import com.github.penfeizhou.animation.avif.io.AVIFReader;
@@ -10,7 +11,10 @@ import com.github.penfeizhou.animation.decode.FrameSeqDecoder;
 import com.github.penfeizhou.animation.io.Reader;
 import com.github.penfeizhou.animation.loader.Loader;
 
+import org.aomedia.avif.android.AvifDecoder;
+
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import androidx.annotation.Nullable;
 
@@ -28,6 +32,8 @@ public class AVIFDecoder extends FrameSeqDecoder<AVIFReader, AVIFWriter> {
         super(loader, renderListener);
     }
 
+    private AvifDecoder avifDecoder = null;
+
     @Override
     protected AVIFWriter getWriter() {
         return null;
@@ -35,26 +41,69 @@ public class AVIFDecoder extends FrameSeqDecoder<AVIFReader, AVIFWriter> {
 
     @Override
     protected AVIFReader getReader(Reader reader) {
-        return null;
+        return new AVIFReader(reader);
     }
 
     @Override
     protected int getLoopCount() {
-        return 0;
+        if (avifDecoder == null) {
+            return 0;
+        }
+        if (avifDecoder.getFrameCount() == 1) {
+            return 1;
+        }
+        return avifDecoder.getRepetitionCount();
     }
 
     @Override
     protected void release() {
-
+        if (avifDecoder != null) {
+            avifDecoder.release();
+        }
     }
 
     @Override
     protected Rect read(AVIFReader reader) throws IOException {
-        return null;
+        ByteBuffer source = reader.toDirectByteBuffer();
+        avifDecoder = AvifDecoder.create(source);
+        return new Rect(0, 0, avifDecoder.getWidth(), avifDecoder.getHeight());
+    }
+
+    @Override
+    public int getFrameCount() {
+        return avifDecoder.getFrameCount();
+    }
+
+    @Override
+    public Bitmap getFrameBitmap(int index) throws IOException {
+        return super.getFrameBitmap(index);
+    }
+
+    @Override
+    public Frame<AVIFReader, AVIFWriter> getFrame(int index) {
+        AVIFFrame avifFrame = new AVIFFrame(null);
+        avifFrame.index = index;
+        avifFrame.frameDuration = (int) (avifDecoder.getFrameDurations()[index] * 1000);
+        return avifFrame;
     }
 
     @Override
     protected void renderFrame(Frame<AVIFReader, AVIFWriter> frame) {
-
+        Bitmap bitmap = obtainBitmap(avifDecoder.getWidth(), avifDecoder.getHeight());
+        if (avifDecoder == null) {
+            return;
+        }
+        if (frameIndex != ((AVIFFrame) frame).index) {
+            avifDecoder.nthFrame(((AVIFFrame) frame).index, bitmap);
+        } else {
+            if (frameIndex == 0) {
+                avifDecoder.nthFrame(0, bitmap);
+            } else {
+                avifDecoder.nextFrame(bitmap);
+            }
+        }
+        frameBuffer.rewind();
+        bitmap.copyPixelsToBuffer(frameBuffer);
+        recycleBitmap(bitmap);
     }
 }

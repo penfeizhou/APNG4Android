@@ -296,7 +296,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
 
         final long start = System.currentTimeMillis();
         try {
-            if (frames.size() == 0) {
+            if (getFrameCount() == 0) {
                 try {
                     if (mReader == null) {
                         mReader = getReader(mLoader.obtain());
@@ -483,7 +483,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         if (!isRunning()) {
             return false;
         }
-        if (frames.size() == 0) {
+        if (getFrameCount() == 0) {
             return false;
         }
         if (getNumPlays() <= 0) {

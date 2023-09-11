@@ -18,6 +18,14 @@
             android:gravity="center"
             android:text="Compose UI"
             android:textSize="20dp" />
+        <TextView
+            android:id="@+id/tv_avif"
+            android:layout_width="wrap_content"
+            android:layout_height="80dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="AVIF"
+            android:textSize="20dp" />
 
         <TextView
             android:id="@+id/tv_1"
