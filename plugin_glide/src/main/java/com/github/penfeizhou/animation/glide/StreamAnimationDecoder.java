@@ -7,8 +7,10 @@ import com.bumptech.glide.load.Options;
 import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.github.penfeizhou.animation.apng.decode.APNGParser;
+import com.github.penfeizhou.animation.avif.decode.AVIFParser;
 import com.github.penfeizhou.animation.decode.FrameSeqDecoder;
 import com.github.penfeizhou.animation.gif.decode.GifParser;
+import com.github.penfeizhou.animation.io.ByteBufferReader;
 import com.github.penfeizhou.animation.io.StreamReader;
 import com.github.penfeizhou.animation.webp.decode.WebPParser;
 
@@ -34,7 +36,8 @@ public class StreamAnimationDecoder implements ResourceDecoder<InputStream, Fram
     public boolean handles(@NonNull InputStream source, @NonNull Options options) {
         return (!options.get(AnimationDecoderOption.DISABLE_ANIMATION_WEBP_DECODER) && WebPParser.isAWebP(new StreamReader(source)))
                 || (!options.get(AnimationDecoderOption.DISABLE_ANIMATION_APNG_DECODER) && APNGParser.isAPNG(new StreamReader(source)))
-                || (!options.get(AnimationDecoderOption.DISABLE_ANIMATION_GIF_DECODER) && GifParser.isGif(new StreamReader(source)));
+                || (!options.get(AnimationDecoderOption.DISABLE_ANIMATION_GIF_DECODER) && GifParser.isGif(new StreamReader(source)))
+                || (!options.get(AnimationDecoderOption.DISABLE_ANIMATION_AVIF_DECODER) && AVIFParser.isAVIF(new StreamReader(source)));
     }
 
     @Nullable

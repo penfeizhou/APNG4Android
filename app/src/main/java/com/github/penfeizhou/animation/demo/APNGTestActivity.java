@@ -2,6 +2,7 @@ package com.github.penfeizhou.animation.demo;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -20,6 +21,9 @@ public class APNGTestActivity extends Activity {
         setContentView(R.layout.activity_apnglib);
         LinearLayout linearLayout = findViewById(R.id.layout);
         String[] urls = new String[]{
+                "file:///android_asset/test.avif",
+                "file:///android_asset/wheel.avif",
+                "file:///android_asset/world-cup.avif",
                 "file:///android_asset/apng_detail_guide.png",
                 "file:///android_asset/1.gif",
                 "file:///android_asset/2.gif",
@@ -31,13 +35,13 @@ public class APNGTestActivity extends Activity {
         };
         for (String url : urls) {
             ImageView imageView = new ImageView(this);
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(500, 500);
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             layoutParams.bottomMargin = 50;
             layoutParams.topMargin = 50;
             linearLayout.addView(imageView, layoutParams);
             Glide.with(imageView)
                     .load(url)
-                    .set(AnimationDecoderOption.NO_ANIMATION_BOUNDS_MEASURE, true)
+//                    .set(AnimationDecoderOption.NO_ANIMATION_BOUNDS_MEASURE, true)
                     .into(imageView);
         }
     }

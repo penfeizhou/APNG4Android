@@ -36,6 +36,7 @@ dependencies {
     api("com.github.penfeizhou.android.animation:awebp:${rootProject.ext.Version}")
     api("com.github.penfeizhou.android.animation:apng:${rootProject.ext.Version}")
     api("com.github.penfeizhou.android.animation:gif:${rootProject.ext.Version}")
+    api("com.github.penfeizhou.android.animation:avif:${rootProject.ext.Version}")
 
     testImplementation 'junit:junit:4.13'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'

@@ -21,6 +21,7 @@ if (needReplaceLocal) {
                     substitute module('com.github.penfeizhou.android.animation:gif') using project(":gif")
                     substitute module('com.github.penfeizhou.android.animation:glide-plugin') using project(":plugin_glide")
                     substitute module('com.github.penfeizhou.android.animation:awebpencoder') using project(":awebpencoder")
+                    substitute module('com.github.penfeizhou.android.animation:avif') using project(":avif")
                 }
             }
         }

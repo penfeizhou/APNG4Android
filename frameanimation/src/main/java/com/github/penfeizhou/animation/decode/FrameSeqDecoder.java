@@ -247,7 +247,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
 
     private void initCanvasBounds(Rect rect) {
         fullRect = rect;
-        frameBuffer = ByteBuffer.allocate((rect.width() * rect.height() / (sampleSize * sampleSize) + 1) * 4);
+        frameBuffer = ByteBuffer.allocate((rect.width() * rect.height() / (getSampleSize() * getSampleSize()) + 1) * 4);
         if (mWriter == null) {
             mWriter = getWriter();
         }
@@ -438,7 +438,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
     public boolean setDesiredSize(int width, int height) {
         boolean sampleSizeChanged = false;
         final int sample = getDesiredSample(width, height);
-        if (sample != this.sampleSize) {
+        if (sample != getSampleSize()) {
             sampleSizeChanged = true;
             final boolean tempRunning = isRunning();
             workerHandler.removeCallbacks(renderTask);

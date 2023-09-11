@@ -36,6 +36,13 @@ public final class AnimationDecoderOption {
             "com.github.penfeizhou.animation.glide.AnimationDecoderOption.DISABLE_ANIMATION_BOUNDS_MEASURE", false);
 
 
+    /**
+     * If set to {@code true}, disables the Frame Animation Decoder {@link com.github.penfeizhou.animation.avif.AVIFDrawable}
+     * Defaults to {@code false}.
+     */
+    public static final Option<Boolean> DISABLE_ANIMATION_AVIF_DECODER = Option.memory(
+            "com.github.penfeizhou.animation.glide.AnimationDecoderOption.DISABLE_AVIF_DECODER", false);
+
     private AnimationDecoderOption() {
     }
 }
