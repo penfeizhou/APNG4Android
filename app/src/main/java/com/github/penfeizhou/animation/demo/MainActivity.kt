@@ -62,6 +62,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     "files", arrayOf(
                         "test.avif",
                         "world-cup.avif",
+                        "wheel.avif",
                     )
                 )
                 startActivity(intent)
