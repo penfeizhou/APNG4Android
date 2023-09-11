@@ -12,6 +12,8 @@ import com.bumptech.glide.load.resource.transcode.ResourceTranscoder;
 import com.bumptech.glide.util.Util;
 import com.github.penfeizhou.animation.apng.APNGDrawable;
 import com.github.penfeizhou.animation.apng.decode.APNGDecoder;
+import com.github.penfeizhou.animation.avif.AVIFDrawable;
+import com.github.penfeizhou.animation.avif.decode.AVIFDecoder;
 import com.github.penfeizhou.animation.decode.FrameSeqDecoder;
 import com.github.penfeizhou.animation.gif.GifDrawable;
 import com.github.penfeizhou.animation.gif.decode.GifDecoder;
@@ -101,6 +103,32 @@ class FrameDrawableTranscoder implements ResourceTranscoder<FrameSeqDecoder, Dra
                 @Override
                 public void recycle() {
                     gifDrawable.stop();
+                }
+
+                @Override
+                public void initialize() {
+                    super.initialize();
+                }
+            };
+        } else if (frameSeqDecoder instanceof AVIFDecoder) {
+            final AVIFDrawable avifDrawable = new AVIFDrawable((AVIFDecoder) frameSeqDecoder);
+            avifDrawable.setAutoPlay(false);
+            avifDrawable.setNoMeasure(noMeasure);
+            return new DrawableResource<Drawable>(avifDrawable) {
+                @NonNull
+                @Override
+                public Class<Drawable> getResourceClass() {
+                    return Drawable.class;
+                }
+
+                @Override
+                public int getSize() {
+                    return avifDrawable.getMemorySize();
+                }
+
+                @Override
+                public void recycle() {
+                    avifDrawable.stop();
                 }
 
                 @Override

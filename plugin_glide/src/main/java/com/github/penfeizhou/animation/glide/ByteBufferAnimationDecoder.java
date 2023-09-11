@@ -8,6 +8,8 @@ import com.bumptech.glide.load.ResourceDecoder;
 import com.bumptech.glide.load.engine.Resource;
 import com.github.penfeizhou.animation.apng.decode.APNGDecoder;
 import com.github.penfeizhou.animation.apng.decode.APNGParser;
+import com.github.penfeizhou.animation.avif.decode.AVIFDecoder;
+import com.github.penfeizhou.animation.avif.decode.AVIFParser;
 import com.github.penfeizhou.animation.decode.FrameSeqDecoder;
 import com.github.penfeizhou.animation.gif.decode.GifDecoder;
 import com.github.penfeizhou.animation.gif.decode.GifParser;
@@ -31,7 +33,8 @@ public class ByteBufferAnimationDecoder implements ResourceDecoder<ByteBuffer, F
     public boolean handles(@NonNull ByteBuffer source, @NonNull Options options) {
         return (!options.get(AnimationDecoderOption.DISABLE_ANIMATION_WEBP_DECODER) && WebPParser.isAWebP(new ByteBufferReader(source)))
                 || (!options.get(AnimationDecoderOption.DISABLE_ANIMATION_APNG_DECODER) && APNGParser.isAPNG(new ByteBufferReader(source)))
-                || (!options.get(AnimationDecoderOption.DISABLE_ANIMATION_GIF_DECODER) && GifParser.isGif(new ByteBufferReader(source)));
+                || (!options.get(AnimationDecoderOption.DISABLE_ANIMATION_GIF_DECODER) && GifParser.isGif(new ByteBufferReader(source)))
+                || (!options.get(AnimationDecoderOption.DISABLE_ANIMATION_AVIF_DECODER) && AVIFParser.isAVIF(new ByteBufferReader(source)));
     }
 
     @Nullable
@@ -51,6 +54,8 @@ public class ByteBufferAnimationDecoder implements ResourceDecoder<ByteBuffer, F
             decoder = new APNGDecoder(loader, null);
         } else if (GifParser.isGif(new ByteBufferReader(source))) {
             decoder = new GifDecoder(loader, null);
+        } else if (AVIFParser.isAVIF(new ByteBufferReader(source))) {
+            decoder = new AVIFDecoder(loader, null);
         } else {
             return null;
         }

@@ -59,6 +59,7 @@ public class AVIFDecoder extends FrameSeqDecoder<AVIFReader, AVIFWriter> {
     protected void release() {
         if (avifDecoder != null) {
             avifDecoder.release();
+            avifDecoder = null;
         }
     }
 
@@ -71,12 +72,20 @@ public class AVIFDecoder extends FrameSeqDecoder<AVIFReader, AVIFWriter> {
 
     @Override
     public int getFrameCount() {
+        if (avifDecoder == null) {
+            return 0;
+        }
         return avifDecoder.getFrameCount();
     }
 
     @Override
     public Bitmap getFrameBitmap(int index) throws IOException {
-        return super.getFrameBitmap(index);
+        if (avifDecoder == null) {
+            return null;
+        }
+        Bitmap bitmap = Bitmap.createBitmap(getBounds().width() / getSampleSize(), getBounds().height() / getSampleSize(), Bitmap.Config.ARGB_8888);
+        avifDecoder.nthFrame(index, bitmap);
+        return bitmap;
     }
 
     @Override
@@ -103,7 +112,16 @@ public class AVIFDecoder extends FrameSeqDecoder<AVIFReader, AVIFWriter> {
             }
         }
         frameBuffer.rewind();
-        bitmap.copyPixelsToBuffer(frameBuffer);
+        try {
+            bitmap.copyPixelsToBuffer(frameBuffer);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         recycleBitmap(bitmap);
+    }
+
+    @Override
+    public int getSampleSize() {
+        return 1;
     }
 }
