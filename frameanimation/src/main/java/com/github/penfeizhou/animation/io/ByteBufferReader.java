@@ -59,4 +59,8 @@ public class ByteBufferReader implements Reader {
     public InputStream toInputStream() throws IOException {
         return new ByteArrayInputStream(byteBuffer.array());
     }
+
+    public ByteBuffer getByteBuffer() {
+        return byteBuffer;
+    }
 }
