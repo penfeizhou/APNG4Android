@@ -1,5 +1,5 @@
 # Android 动画播放库
-* 支持常用动画格式APNG、Animated WebP、Gif
+* 支持常用动画格式APNG、Animated WebP、Gif、AVIF
 * 解码实现高效，占用内存极低
 * 支持按Resource、Assets、File等多种方式读取
 * 提供Glide插件，可使用Glide直接加载
@@ -33,6 +33,12 @@ dependencies {
 ```gradle
 dependencies {
     implementation 'com.github.penfeizhou.android.animation:gif:${VERSION}'
+}
+```
+#### AVIF
+```gradle
+dependencies {
+    implementation 'com.github.penfeizhou.android.animation:avif:${VERSION}'
 }
 ```
 ### `使用前请注意!`

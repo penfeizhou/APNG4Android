@@ -3,14 +3,10 @@ package com.github.penfeizhou.animation.demo
 import android.Manifest
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import com.github.penfeizhou.animation.avif.decode.AVIFParser
-import com.github.penfeizhou.animation.avif.io.AVIFReader
 import com.github.penfeizhou.animation.demo.databinding.ActivityMainBinding
-import com.github.penfeizhou.animation.loader.AssetStreamLoader
 
 /**
  *

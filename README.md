@@ -1,5 +1,5 @@
 # Animation Android
-* Support APNG & Animated Webp & Gif in Android
+* Support APNG & Animated Webp & Gif & AVIF in Android
 * Efficient decoder
 * Support Drawable usage and glide library module
 * Support animation play control
@@ -37,7 +37,12 @@ dependencies {
     implementation 'com.github.penfeizhou.android.animation:gif:${VERSION}'
 }
 ```
-
+#### AVIF
+```gradle
+dependencies {
+    implementation 'com.github.penfeizhou.android.animation:avif:${VERSION}'
+}
+```
 ### `Notice Before Use!`
 `Don't put APNG resources in your drawable or mipmap directory!` During the process of release building of an Android app, the aapt tool will zip & modify the frame info of the APNG file, which will lead to an abnormal behavior when playing it. Thus, please put the APNG resources in `raw` or `assets` folder instead.
 
@@ -61,6 +66,9 @@ APNGDrawable apngDrawable = new APNGDrawable(assetLoader);
 
 //Create Animated webp drawable
 WebPDrawable webpDrawable = new WebPDrawable(assetLoader);
+
+//Create Animated avif drawable
+AVIFDrawable avifDrawable = new AVIFDrawable(assetLoader);
 
 // Auto play
 imageView.setImageDrawable(apngDrawable);
