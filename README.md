@@ -107,3 +107,6 @@ Glide.with(imageView).load("https://isparta.github.io/compare-webp/image/gif_web
 ```
 ### Welcome to join the talk
 ![image](https://user-images.githubusercontent.com/9526211/176335782-65f28250-b595-456b-8ee9-4b1c5139acba.png)
+
+### Star History
+[![Star History Chart](https://api.star-history.com/svg?repos=penfeizhou/APNG4Android&type=Date)](https://star-history.com/#penfeizhou/APNG4Android&Date)
