@@ -183,15 +183,15 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder<?, 
     @Override
     public void setBounds(int left, int top, int right, int bottom) {
         super.setBounds(left, top, right, bottom);
-        boolean sampleSizeChanged = frameSeqDecoder.setDesiredSize(getBounds().width(), getBounds().height());
+        int oldSampleSize = frameSeqDecoder.getSampleSize();
+        int sampleSize = frameSeqDecoder.setDesiredSize(getBounds().width(), getBounds().height());
         matrix.setScale(
-                1.0f * getBounds().width() * frameSeqDecoder.getSampleSize() / frameSeqDecoder.getBounds().width(),
-                1.0f * getBounds().height() * frameSeqDecoder.getSampleSize() / frameSeqDecoder.getBounds().height());
-
-        if (sampleSizeChanged)
+                1.0f * getBounds().width() * sampleSize / frameSeqDecoder.getBounds().width(),
+                1.0f * getBounds().height() * sampleSize / frameSeqDecoder.getBounds().height());
+        if (sampleSize != oldSampleSize)
             this.bitmap = Bitmap.createBitmap(
-                    frameSeqDecoder.getBounds().width() / frameSeqDecoder.getSampleSize(),
-                    frameSeqDecoder.getBounds().height() / frameSeqDecoder.getSampleSize(),
+                    frameSeqDecoder.getBounds().width() / sampleSize,
+                    frameSeqDecoder.getBounds().height() / sampleSize,
                     Bitmap.Config.ARGB_8888);
     }
 
