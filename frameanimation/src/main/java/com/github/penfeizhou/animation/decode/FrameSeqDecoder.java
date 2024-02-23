@@ -247,7 +247,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
 
     private void initCanvasBounds(Rect rect) {
         fullRect = rect;
-        frameBuffer = ByteBuffer.allocate((rect.width() * rect.height() / (sampleSize * sampleSize) + 1) * 4);
+        frameBuffer = ByteBuffer.allocate((rect.width() * rect.height() / (getSampleSize() * getSampleSize()) + 1) * 4);
         if (mWriter == null) {
             mWriter = getWriter();
         }
@@ -296,7 +296,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
 
         final long start = System.currentTimeMillis();
         try {
-            if (frames.size() == 0) {
+            if (getFrameCount() == 0) {
                 try {
                     if (mReader == null) {
                         mReader = getReader(mLoader.obtain());
@@ -435,11 +435,9 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         return sampleSize;
     }
 
-    public boolean setDesiredSize(int width, int height) {
-        boolean sampleSizeChanged = false;
+    public int setDesiredSize(int width, int height) {
         final int sample = getDesiredSample(width, height);
-        if (sample != this.sampleSize) {
-            sampleSizeChanged = true;
+        if (sample != getSampleSize()) {
             final boolean tempRunning = isRunning();
             workerHandler.removeCallbacks(renderTask);
             workerHandler.post(new Runnable() {
@@ -458,7 +456,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
                 }
             });
         }
-        return sampleSizeChanged;
+        return sample;
     }
 
     protected int getDesiredSample(int desiredWidth, int desiredHeight) {
@@ -483,7 +481,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         if (!isRunning()) {
             return false;
         }
-        if (frames.size() == 0) {
+        if (getFrameCount() == 0) {
             return false;
         }
         if (getNumPlays() <= 0) {
