@@ -59,6 +59,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
                 long start = System.currentTimeMillis();
                 long delay = step();
                 long cost = System.currentTimeMillis() - start;
+                workerHandler.removeCallbacks(renderTask);
                 workerHandler.postDelayed(this, Math.max(0, delay - cost));
                 for (RenderListener renderListener : renderListeners) {
                     renderListener.onRender(frameBuffer);
@@ -314,6 +315,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         }
         if (getNumPlays() == 0 || !finished) {
             this.frameIndex = -1;
+            workerHandler.removeCallbacks(renderTask);
             renderTask.run();
             for (RenderListener renderListener : renderListeners) {
                 renderListener.onStart();
