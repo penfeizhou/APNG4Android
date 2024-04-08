@@ -60,7 +60,7 @@ task publishAWebPEncoder dependsOn(publishAWebP, publishGif, ":awebpencoder:publ
     println "AWebP Encoder published"
 }
 
-task publishGlidePlugin dependsOn(publishAPNG, publishAWebP, publishGif, ":plugin_glide:publish") {
+task publishGlidePlugin dependsOn(publishAPNG, publishAWebP, publishGif, publishAvif, ":plugin_glide:publish") {
     println "GlidePlugin published"
 }
 
