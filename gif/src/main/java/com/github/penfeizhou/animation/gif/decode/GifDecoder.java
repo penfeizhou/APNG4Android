@@ -29,7 +29,9 @@ public class GifDecoder extends FrameSeqDecoder<GifReader, GifWriter> {
     private final Paint paint = new Paint();
     private int bgColor = Color.TRANSPARENT;
     private final SnapShot snapShot = new SnapShot();
-    private int mLoopCount = 0;
+    // If the `NETSCAPE` block is absent, the default loop count is 1,
+    // meaning the GIF will play only once
+    private int mLoopCount = 1;
 
     private static class SnapShot {
         ByteBuffer byteBuffer;
@@ -90,7 +92,17 @@ public class GifDecoder extends FrameSeqDecoder<GifReader, GifWriter> {
                 GifFrame gifFrame = new GifFrame(reader, globalColorTable, graphicControlExtension, (ImageDescriptor) block);
                 frames.add(gifFrame);
             } else if (block instanceof ApplicationExtension && "NETSCAPE2.0".equals(((ApplicationExtension) block).identifier)) {
-                mLoopCount = ((ApplicationExtension) block).loopCount;
+                int loopCount = ((ApplicationExtension) block).loopCount;
+                if (loopCount == 0) {
+                    // According to the `NETSCAPE2.0` block specyfication,
+                    // the loop count is 0, which means that the GIF will play indefinitely.
+                    mLoopCount = 0;
+                } else if (loopCount > 0) {
+                    // The loop count in the block is greater than 0,
+                    // indicating that the GIF should repeat loopCount times.
+                    // Therefore, it should play a total of loopCount + 1 times.
+                    mLoopCount = loopCount + 1;
+                }
             }
         }
         frameBuffer = ByteBuffer.allocate((canvasWidth * canvasHeight / (sampleSize * sampleSize) + 1) * 4);
