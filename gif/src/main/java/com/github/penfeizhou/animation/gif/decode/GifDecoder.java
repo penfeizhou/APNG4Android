@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.util.Log;
 
 import com.github.penfeizhou.animation.decode.Frame;
 import com.github.penfeizhou.animation.decode.FrameSeqDecoder;
@@ -24,6 +25,7 @@ import java.util.List;
  * @CreateDate: 2019-05-16
  */
 public class GifDecoder extends FrameSeqDecoder<GifReader, GifWriter> {
+    private static final String TAG = "GifDecoder";
 
     private GifWriter mGifWriter = new GifWriter();
     private final Paint paint = new Paint();
@@ -105,8 +107,36 @@ public class GifDecoder extends FrameSeqDecoder<GifReader, GifWriter> {
                 }
             }
         }
-        frameBuffer = ByteBuffer.allocate((canvasWidth * canvasHeight / (sampleSize * sampleSize) + 1) * 4);
-        snapShot.byteBuffer = ByteBuffer.allocate((canvasWidth * canvasHeight / (sampleSize * sampleSize) + 1) * 4);
+
+        try {
+            long bufferSize = ((long) canvasWidth * canvasHeight /  ((long) sampleSize * sampleSize) + 1) * 4;
+            // we need two buffers: frameBuffer & snapShot.byteBuffer
+            long totalBufferNeeded = bufferSize * 2;
+            
+            Runtime runtime = Runtime.getRuntime();
+            long freeMemory = runtime.freeMemory();
+
+            if (totalBufferNeeded > freeMemory) {
+                Log.e(TAG, String.format(
+                                "Memory status:" +
+                                        "\n  Buffer needed: %.2fMB (%,d bytes)" +
+                                        "\n  Free memory: %.2fMB (%,d bytes)",
+                                totalBufferNeeded / MB, totalBufferNeeded,
+                                freeMemory / MB, freeMemory
+                        )
+                );
+                throw new OutOfMemoryError("Required buffer size too large: " + totalBufferNeeded);
+            }
+
+            frameBuffer = ByteBuffer.allocate((int)bufferSize);
+            snapShot.byteBuffer = ByteBuffer.allocate((int)bufferSize);
+        } catch (OutOfMemoryError e) {
+            frameBuffer = null;
+            snapShot.byteBuffer = null;
+            
+            throw e;
+        }
+
         if (globalColorTable != null && bgColorIndex >= 0 && bgColorIndex < globalColorTable.getColorTable().length) {
             int abgr = globalColorTable.getColorTable()[bgColorIndex];
             this.bgColor = Color.rgb(abgr & 0xff, (abgr >> 8) & 0xff, (abgr >> 16) & 0xff);
