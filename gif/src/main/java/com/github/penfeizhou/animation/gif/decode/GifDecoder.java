@@ -118,12 +118,12 @@ public class GifDecoder extends FrameSeqDecoder<GifReader, GifWriter> {
 
             if (totalBufferNeeded > freeMemory) {
                 Log.e(TAG, String.format(
-                                "Memory status:" +
-                                        "\n  Buffer needed: %.2fMB (%,d bytes)" +
-                                        "\n  Free memory: %.2fMB (%,d bytes)",
-                                totalBufferNeeded / MB, totalBufferNeeded,
-                                freeMemory / MB, freeMemory
-                        )
+                        "Memory status:" +
+                            "\n  Buffer needed: %.2fMB (%,d bytes)" +
+                            "\n  Free memory: %.2fMB (%,d bytes)",
+                        totalBufferNeeded / MB, totalBufferNeeded,
+                        freeMemory / MB, freeMemory
+                    )
                 );
                 throw new OutOfMemoryError("Required buffer size too large: " + totalBufferNeeded);
             }

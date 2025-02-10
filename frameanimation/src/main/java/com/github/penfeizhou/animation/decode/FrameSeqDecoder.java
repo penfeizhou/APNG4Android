@@ -103,7 +103,7 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
 
     protected Bitmap obtainBitmap(int width, int height) {
         synchronized (cacheBitmapsLock) {
-                        Bitmap ret = null;
+            Bitmap ret = null;
             Iterator<Bitmap> iterator = cacheBitmaps.iterator();
             while (iterator.hasNext()) {
                 int reuseSize = width * height * 4;
