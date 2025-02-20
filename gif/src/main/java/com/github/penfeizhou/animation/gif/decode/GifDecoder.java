@@ -107,33 +107,20 @@ public class GifDecoder extends FrameSeqDecoder<GifReader, GifWriter> {
                 }
             }
         }
+            
+        long bufferSize = ((long) canvasWidth * canvasHeight /  ((long) sampleSize * sampleSize) + 1) * 4;
 
         try {
-            long bufferSize = ((long) canvasWidth * canvasHeight /  ((long) sampleSize * sampleSize) + 1) * 4;
-            // we need two buffers: frameBuffer & snapShot.byteBuffer
-            long totalBufferNeeded = bufferSize * 2;
-            
-            Runtime runtime = Runtime.getRuntime();
-            long freeMemory = runtime.freeMemory();
-
-            if (totalBufferNeeded > freeMemory) {
-                Log.e(TAG, String.format(
-                        "Memory status:" +
-                            "\n  Buffer needed: %.2fMB (%,d bytes)" +
-                            "\n  Free memory: %.2fMB (%,d bytes)",
-                        totalBufferNeeded / MB, totalBufferNeeded,
-                        freeMemory / MB, freeMemory
-                    )
-                );
-                throw new OutOfMemoryError("Required buffer size too large: " + totalBufferNeeded);
-            }
-
             frameBuffer = ByteBuffer.allocate((int)bufferSize);
             snapShot.byteBuffer = ByteBuffer.allocate((int)bufferSize);
         } catch (OutOfMemoryError e) {
+            Log.e(TAG, String.format(
+                    "OutOfMemoryError in GifDecoder: Buffer needed: %.2fMB (%,d bytes)",
+                    bufferSize / MB, bufferSize
+                )
+            );
             frameBuffer = null;
             snapShot.byteBuffer = null;
-            
             throw e;
         }
 
