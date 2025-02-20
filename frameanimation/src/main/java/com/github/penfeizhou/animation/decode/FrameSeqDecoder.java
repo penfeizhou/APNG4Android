@@ -251,29 +251,19 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
 
     private void initCanvasBounds(Rect rect) {
         fullRect = rect;
-        Runtime runtime = Runtime.getRuntime();
-        long freeMemory = runtime.freeMemory();
+        long bufferSize = ((long) rect.width() * rect.height() / ((long) sampleSize * sampleSize) + 1) * 4;
 
-        try {
-            long bufferSize = ((long) rect.width() * rect.height() / ((long) sampleSize * sampleSize) + 1) * 4;
-            
-            if (bufferSize > freeMemory) {
-                Log.e(TAG, String.format(
-                        "Memory status:" +
-                        "\n  Buffer needed: %.2fMB (%,d bytes)" +
-                        "\n  Free memory: %.2fMB (%,d bytes)",
-                        bufferSize / MB, bufferSize,
-                        freeMemory / MB, freeMemory
-                    )
-                );
-                throw new OutOfMemoryError("Required buffer size too large: " + bufferSize);
-            }
-                
+        try {                
             frameBuffer = ByteBuffer.allocate((int)bufferSize);
             if (mWriter == null) {
                 mWriter = getWriter();
             }
         } catch (OutOfMemoryError error) {
+            Log.e(TAG, String.format(
+                    "OutOfMemoryError in FrameSeqDecoder: Buffer needed: %.2fMB (%,d bytes)",
+                    bufferSize / MB, bufferSize
+                )
+            );
             frameBuffer = null;
             fullRect = RECT_EMPTY;
             throw error;
