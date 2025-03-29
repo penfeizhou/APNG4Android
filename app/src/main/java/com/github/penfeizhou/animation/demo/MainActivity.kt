@@ -37,14 +37,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         binding.tv8.setOnClickListener(this)
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String?>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    }
-
     override fun onClick(v: View) {
         when (v.id) {
             R.id.tv_0 -> {

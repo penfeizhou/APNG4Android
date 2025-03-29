@@ -3,11 +3,9 @@ plugins {
 }
 android {
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
-        compileSdk 28
+        compileSdk 36
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
 
@@ -31,9 +29,9 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     api("com.github.penfeizhou.android.animation:frameanimation:${rootProject.ext.Version}")
     implementation "org.aomedia.avif.android:avif:1.0.1.262e11d"
-    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 }
 apply from: rootProject.file('scripts/upload.gradle')
