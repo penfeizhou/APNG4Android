@@ -275,6 +275,10 @@ public abstract class FrameSeqDecoder<R extends Reader, W extends Writer> {
         return this.frames.size();
     }
 
+    public int getFrameIndex() {
+        return frameIndex;
+    }
+
     /**
      * @return Loop Count defined in file
      */
