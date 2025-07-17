@@ -26,10 +26,11 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'androidx.annotation:annotation:1.9.1'
+    implementation 'androidx.vectordrawable:vectordrawable-animated:1.2.0'
     api("com.github.penfeizhou.android.animation:frameanimation:${rootProject.ext.Version}")
     implementation "org.aomedia.avif.android:avif:1.1.1.14d8e3c4"
-    implementation 'androidx.appcompat:appcompat:1.6.1'
+
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'

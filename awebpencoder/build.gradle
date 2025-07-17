@@ -26,9 +26,7 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-
-    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.annotation:annotation:1.9.1'
     api("com.github.penfeizhou.android.animation:awebp:${rootProject.ext.Version}")
     api("com.github.penfeizhou.android.animation:gif:${rootProject.ext.Version}")
 
