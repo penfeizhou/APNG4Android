@@ -130,7 +130,9 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder<?, 
             this.frameSeqDecoder.stop();
         }
         this.frameSeqDecoder.reset();
-        innerStart();
+        if (isVisible()) {
+            innerStart();
+        }
     }
 
     private void innerStart() {
@@ -172,7 +174,7 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder<?, 
     }
 
     @Override
-    public void draw(Canvas canvas) {
+    public void draw(@NonNull Canvas canvas) {
         if (bitmap == null || bitmap.isRecycled()) {
             return;
         }
@@ -354,5 +356,13 @@ public abstract class FrameAnimationDrawable<Decoder extends FrameSeqDecoder<?, 
 
     public Decoder getFrameSeqDecoder() {
         return frameSeqDecoder;
+    }
+
+    protected Bitmap getBitmap() {
+        return bitmap;
+    }
+
+    protected DrawFilter getDrawFilter() {
+        return drawFilter;
     }
 }
